@@ -33,59 +33,38 @@
     <!-- Results Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       
-      <!-- Mockup Card 1 -->
-      <div class="bg-white rounded-3xl p-6 shadow-sm border border-cerulean-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-        <div class="flex items-start justify-between mb-4">
-          <div class="flex items-center gap-4">
-            <div class="w-14 h-14 bg-cerulean-100 rounded-full flex items-center justify-center text-xl font-bold text-cerulean-700">
-              M
+      @for (profesor of profesores(); track profesor.id) {
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-{{profesor.colorTheme}}-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+          <div class="flex items-start justify-between mb-4">
+            <div class="flex items-center gap-4">
+              <div class="w-14 h-14 bg-{{profesor.colorTheme}}-100 rounded-full flex items-center justify-center text-xl font-bold text-{{profesor.colorTheme}}-700">
+                {{profesor.inicial}}
+              </div>
+              <div>
+                <h3 class="font-bold text-oxford-navy-900 text-lg">{{profesor.titulo}} {{profesor.nombre.split(' ').pop()}}</h3>
+                <p class="text-sm text-oxford-navy-500">{{profesor.materiaPrincipal}}</p>
+              </div>
             </div>
-            <div>
-              <h3 class="font-bold text-oxford-navy-900 text-lg">Mtro. Martinez</h3>
-              <p class="text-sm text-oxford-navy-500">Álgebra Lineal</p>
-            </div>
-          </div>
-          <div class="bg-honeydew-100 text-honeydew-700 font-bold px-3 py-1 rounded-full text-sm">
-            4.8 ★
-          </div>
-        </div>
-        <p class="text-oxford-navy-600 text-sm mb-4 line-clamp-3">
-          "Explica muy bien y los exámenes vienen exactamente de lo que se ve en clase. Es muy accesible para resolver dudas."
-        </p>
-        <div class="flex justify-between items-center pt-4 border-t border-cerulean-50">
-          <span class="text-xs text-oxford-navy-400">12 reseñas</span>
-          <a routerLink="/profesores/1" class="text-punch-red-500 font-semibold text-sm hover:text-punch-red-600 transition-colors cursor-pointer inline-block">
-            Ver perfil →
-          </a>
-        </div>
-      </div>
-
-      <!-- Mockup Card 2 -->
-      <div class="bg-white rounded-3xl p-6 shadow-sm border border-cerulean-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-        <div class="flex items-start justify-between mb-4">
-          <div class="flex items-center gap-4">
-            <div class="w-14 h-14 bg-punch-red-100 rounded-full flex items-center justify-center text-xl font-bold text-punch-red-700">
-              S
-            </div>
-            <div>
-              <h3 class="font-bold text-oxford-navy-900 text-lg">Dra. Sánchez</h3>
-              <p class="text-sm text-oxford-navy-500">Programación I</p>
+            <div class="bg-honeydew-100 text-honeydew-700 font-bold px-3 py-1 rounded-full text-sm">
+              {{profesor.calificacion}} ★
             </div>
           </div>
-          <div class="bg-honeydew-100 text-honeydew-700 font-bold px-3 py-1 rounded-full text-sm">
-            4.2 ★
+          <p class="text-oxford-navy-600 text-sm mb-4 line-clamp-3">
+            {{profesor.descripcionAbreviada}}
+          </p>
+          <div class="flex justify-between items-center pt-4 border-t border-cerulean-50">
+            <span class="text-xs text-oxford-navy-400">{{profesor.numResenas}} reseñas</span>
+            <a [routerLink]="['/profesores', profesor.id]" class="text-punch-red-500 font-semibold text-sm hover:text-punch-red-600 transition-colors cursor-pointer inline-block">
+              Ver perfil →
+            </a>
           </div>
         </div>
-        <p class="text-oxford-navy-600 text-sm mb-4 line-clamp-3">
-          "Deja muchos proyectos, pero si haces las prácticas pasas sin problema. Califica rudo pero justo."
-        </p>
-        <div class="flex justify-between items-center pt-4 border-t border-cerulean-50">
-          <span class="text-xs text-oxford-navy-400">8 reseñas</span>
-          <a routerLink="/profesores/2" class="text-punch-red-500 font-semibold text-sm hover:text-punch-red-600 transition-colors cursor-pointer inline-block">
-            Ver perfil →
-          </a>
+      }
+      @empty {
+        <div class="col-span-full text-center py-12">
+          <p class="text-oxford-navy-500 text-lg">No se encontraron profesores.</p>
         </div>
-      </div>
+      }
 
     </div>
 

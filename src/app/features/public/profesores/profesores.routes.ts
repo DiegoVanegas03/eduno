@@ -10,4 +10,11 @@ export const profesoresRoutes: Routes = [
     loadComponent: () =>
       import('./profesor-perfil/profesor-perfil.component').then((m) => m.ProfesorPerfilComponent),
   },
+  {
+    path: ':id/opiniones',
+    loadComponent: () =>
+      import('./profesor-opiniones/profesor-opiniones.component').then(
+        (m) => m.ProfesorOpinionesComponent,
+      ),
+  },
 ];
