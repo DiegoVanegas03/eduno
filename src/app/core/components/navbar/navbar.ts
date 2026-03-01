@@ -1,9 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
-import { ButtonComponent } from '../../../shared/components/button/button.component';
-import { LogoComponent } from '../../../shared/components/logo/logo.component';
+import { ButtonComponent } from '@shared/components/button/button.component';
+import { LogoComponent } from '@shared/components/logo/logo.component';
 import { AuthService, Roles } from '../../services/auth/auth';
-import { UserCardComponent } from '../../../shared/components/user-card/user-card';
+import { UserCardComponent } from '@shared/components/user-card/user-card';
 
 @Component({
   selector: 'app-navbar',

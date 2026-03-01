@@ -1,8 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ButtonComponent } from '../../../shared/components/button/button.component';
-import { AuthService } from '../../../core/services/auth/auth';
+import { ButtonComponent } from '@shared/components/button/button.component';
+import { AuthService } from '@core/services/auth/auth';
 
 @Component({
   selector: 'app-login',

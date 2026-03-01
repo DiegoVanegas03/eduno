@@ -1,7 +1,7 @@
 import { Component, inject, signal, ElementRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { AuthService, Roles } from '../../../core/services/auth/auth';
+import { AuthService, Roles } from '@core/services/auth/auth';
 
 @Component({
   selector: 'app-user-card',

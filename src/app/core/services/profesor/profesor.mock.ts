@@ -11,18 +11,15 @@ export const PROFESORES_MOCK: ProfesorDetalle[] = [
     numResenas: 12,
     descripcionAbreviada:
       '"Explica muy bien y los exámenes vienen exactamente de lo que se ve en clase. Es muy accesible para resolver dudas."',
-    colorTheme: 'cerulean',
     materias: [
       {
         id: 1,
         nombre: 'Álgebra Lineal',
         gruposCount: 2,
-        colorTheme: 'cerulean',
         grupos: [
           {
             id: 1,
             nombre: '01',
-            colorBadge: 'punch-red-400',
             horario: 'Lunes, Miércoles y Viernes',
             recursos: [
               {
@@ -78,7 +75,6 @@ export const PROFESORES_MOCK: ProfesorDetalle[] = [
           {
             id: 2,
             nombre: '04',
-            colorBadge: 'honeydew-500',
             horario: 'Martes y Jueves',
             recursos: [], // Empty to show empty state
           },
@@ -88,12 +84,10 @@ export const PROFESORES_MOCK: ProfesorDetalle[] = [
         id: 2,
         nombre: 'Geometría Analítica',
         gruposCount: 1,
-        colorTheme: 'punch-red',
         grupos: [
           {
             id: 3,
             nombre: '02',
-            colorBadge: 'cerulean-400',
             horario: 'Lunes a Jueves',
             recursos: [],
           },
@@ -109,7 +103,6 @@ export const PROFESORES_MOCK: ProfesorDetalle[] = [
         comentario:
           'Excelente profesor, explica muy claro y sus ejemplos en clase son justos los que vienen en el examen. Muy recomendado subir sus apuntes, siempre sirven.',
         materia: 'Álgebra Lineal',
-        colorTheme: 'cerulean',
       },
       {
         id: 2,
@@ -119,7 +112,6 @@ export const PROFESORES_MOCK: ProfesorDetalle[] = [
         comentario:
           'A veces asume que ya sabemos ciertas cosas y va un poco rápido. Pero si le preguntas en hora de asesorías, tiene mucha paciencia.',
         materia: 'Geometría Analítica',
-        colorTheme: 'punch-red',
       },
     ],
   },
@@ -133,18 +125,15 @@ export const PROFESORES_MOCK: ProfesorDetalle[] = [
     numResenas: 8,
     descripcionAbreviada:
       '"Deja muchos proyectos, pero si haces las prácticas pasas sin problema. Califica rudo pero justo."',
-    colorTheme: 'punch-red',
     materias: [
       {
         id: 3,
         nombre: 'Programación I',
         gruposCount: 1,
-        colorTheme: 'punch-red',
         grupos: [
           {
             id: 4,
             nombre: '03',
-            colorBadge: 'oxford-navy-400',
             horario: 'Martes y Jueves',
             recursos: [
               {
@@ -169,7 +158,6 @@ export const PROFESORES_MOCK: ProfesorDetalle[] = [
         comentario:
           'La clase está interesante, aprendes mucho de fundamentos, pero prepárate para desvelarte programando.',
         materia: 'Programación I',
-        colorTheme: 'oxford-navy',
       },
     ],
   },

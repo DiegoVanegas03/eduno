@@ -95,14 +95,14 @@
       <!-- Lista de Opiniones (Grid) -->
       @if (filteredResenas().length > 0) {
         <div class="grid grid-cols-1 gap-6">
-          @for (resena of filteredResenas(); track resena.id) {
+          @for (resena of filteredResenas(); track resena.id; let i = $index) {
             <app-review-card 
               [author]="resena.autor"
               [timeAgo]="resena.tiempoAgo"
               [rating]="resena.rating"
               [comment]="resena.comentario"
               [subject]="resena.materia"
-              [colorTheme]="resena.colorTheme">
+              [colorTheme]="getTheme(i)">
             </app-review-card>
           }
         </div>
