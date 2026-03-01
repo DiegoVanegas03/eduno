@@ -19,7 +19,7 @@
         <div class="absolute top-0 left-0 w-full h-2 bg-linear-to-r from-cerulean-400 to-punch-red-400"></div>
         
         <!-- Avatar -->
-        <div class="w-32 h-32 shrink-0 bg-linear-to-br from-{{p.colorTheme}}-100 to-{{p.colorTheme}}-200 rounded-full flex items-center justify-center text-5xl font-extrabold text-{{p.colorTheme}}-700 shadow-inner border-4 border-white mb-2 md:mb-0 relative z-10">
+        <div class="w-32 h-32 shrink-0 bg-linear-to-br from-{{getTheme(p.id)}}-100 to-{{getTheme(p.id)}}-200 rounded-full flex items-center justify-center text-5xl font-extrabold text-{{getTheme(p.id)}}-700 shadow-inner border-4 border-white mb-2 md:mb-0 relative z-10">
           {{ p.inicial }}
         </div>
         
@@ -101,11 +101,11 @@
       <!-- Accordion de Materias -->
       <div class="space-y-6">
 
-        @for (materia of p.materias; track materia.id) {
+        @for (materia of p.materias; track materia.id; let mI = $index) {
           <app-materia-accordion 
             [title]="materia.nombre"
             [subtitle]="materia.gruposCount + ' grupo' + (materia.gruposCount !== 1 ? 's impartidos' : ' impartido')"
-            [colorTheme]="materia.colorTheme"
+            [colorTheme]="getTheme(mI)"
             [expanded]="expandedMateriaId() === materia.id"
             (toggleMenu)="toggleMateria(materia.id)"
           >
@@ -113,11 +113,11 @@
             
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               
-              @for (grupo of materia.grupos; track grupo.id) {
-                <div class="border border-{{materia.colorTheme}}-200 rounded-xl p-5 bg-white">
-                  <div class="flex justify-between items-center mb-4 border-b border-{{materia.colorTheme}}-50 pb-3">
+              @for (grupo of materia.grupos; track grupo.id; let gI = $index) {
+                <div class="border border-{{getTheme(mI)}}-200 rounded-xl p-5 bg-white">
+                  <div class="flex justify-between items-center mb-4 border-b border-{{getTheme(mI)}}-50 pb-3">
                     <h4 class="font-bold text-oxford-navy-900 flex items-center gap-2">
-                      <span class="w-2 h-2 rounded-full bg-{{grupo.colorBadge}}"></span> Grupo {{ grupo.nombre }}
+                       <span class="w-2 h-2 rounded-full bg-{{getTheme(gI)}}-500"></span> Grupo {{ grupo.nombre }}
                     </h4>
                     <span class="text-xs text-oxford-navy-500">{{ grupo.horario }}</span>
                   </div>
@@ -216,14 +216,14 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          @for (resena of p.resenas; track resena.id) {
+          @for (resena of p.resenas; track resena.id; let rI = $index) {
             <app-review-card 
               [author]="resena.autor"
               [timeAgo]="resena.tiempoAgo"
               [rating]="resena.rating"
               [comment]="resena.comentario"
               [subject]="resena.materia"
-              [colorTheme]="resena.colorTheme">
+              [colorTheme]="getTheme(rI)">
             </app-review-card>
           }
         </div>

@@ -1,14 +1,14 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
-import { ReviewCard } from '../../../../core/components/review-card/review-card';
-import { MateriaAccordion } from '../../../../core/components/materia-accordion/materia-accordion';
-import { ButtonComponent } from '../../../../shared/components/button/button.component';
-import { AuthService } from '../../../../core/services/auth/auth';
-import { ProfesorService } from '../../../../core/services/profesor/profesor.service';
+import { ReviewCard } from '@core/components/review-card/review-card';
+import { MateriaAccordion } from '@core/components/materia-accordion/materia-accordion';
+import { ButtonComponent } from '@shared/components/button/button.component';
+import { AuthService } from '@core/services/auth/auth';
+import { ProfesorService } from '@core/services/profesor/profesor.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs/operators';
-import { BreadcrumbComponent } from '../../../../shared/components/breadcrumb/breadcrumb.component';
+import { BreadcrumbComponent } from '@shared/components/breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-profesor-perfil',
@@ -99,5 +99,9 @@ export class ProfesorPerfilComponent {
   getGrupoTotalPages(recursos: any[]): number {
     if (!recursos) return 1;
     return Math.max(1, Math.ceil(recursos.length / this.ITEMS_PER_PAGE));
+  }
+
+  getTheme(index: number = 0): 'cerulean' | 'punch-red' {
+    return index % 2 === 0 ? 'cerulean' : 'punch-red';
   }
 }

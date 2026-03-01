@@ -7,7 +7,6 @@ export interface Profesor {
   calificacion: number;
   numResenas: number;
   descripcionAbreviada: string;
-  colorTheme: 'cerulean' | 'punch-red' | 'honeydew' | 'oxford-navy';
 }
 
 export interface Recurso {
@@ -22,7 +21,6 @@ export interface Recurso {
 export interface Grupo {
   id: number;
   nombre: string; // Ej: "01", "04"
-  colorBadge: string; // Ej: "punch-red-400", "honeydew-500"
   horario: string; // Ej: "Lunes, Miércoles y Viernes"
   recursos: Recurso[];
 }
@@ -31,7 +29,6 @@ export interface Materia {
   id: number;
   nombre: string;
   gruposCount: number;
-  colorTheme: 'cerulean' | 'punch-red' | 'honeydew' | 'oxford-navy';
   grupos: Grupo[];
 }
 
@@ -42,7 +39,6 @@ export interface Resena {
   rating: number; // Ej: 4, 5
   comentario: string;
   materia: string;
-  colorTheme: 'cerulean' | 'punch-red' | 'honeydew' | 'oxford-navy';
 }
 
 export interface ProfesorDetalle extends Profesor {

@@ -1,14 +1,14 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink, ActivatedRoute } from '@angular/router';
-import { ReviewCard } from '../../../../core/components/review-card/review-card';
-import { ProfesorService } from '../../../../core/services/profesor/profesor.service';
+import { ReviewCard } from '@core/components/review-card/review-card';
+import { ProfesorService } from '@core/services/profesor/profesor.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs/operators';
 import { FormsModule } from '@angular/forms';
 import {
   BreadcrumbComponent,
   BreadcrumbItem,
-} from '../../../../shared/components/breadcrumb/breadcrumb.component';
+} from '@shared/components/breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-profesor-opiniones',
@@ -67,4 +67,8 @@ export class ProfesorOpinionesComponent {
 
     return resenas;
   });
+
+  getTheme(index: number = 0): 'cerulean' | 'punch-red' {
+    return index % 2 === 0 ? 'cerulean' : 'punch-red';
+  }
 }

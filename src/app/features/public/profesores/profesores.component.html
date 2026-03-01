@@ -11,33 +11,104 @@
       </p>
     </div>
 
-    <!-- Search & Filters -->
-    <div class="bg-white rounded-3xl p-6 shadow-sm border border-cerulean-100 mb-12 flex flex-col md:flex-row gap-4">
-      <div class="flex-1">
-        <input 
-          type="text" 
-          placeholder="Busca por nombre o materia..." 
-          class="w-full bg-cerulean-50 border border-cerulean-100 rounded-xl px-4 py-3 text-oxford-navy-900 focus:outline-none focus:ring-2 focus:ring-punch-red-400 focus:border-transparent transition-all"
-        />
+    <!-- Search Menu & Toggle -->
+    <div class="bg-white rounded-3xl p-6 shadow-sm border border-cerulean-100 mb-8 transition-all duration-300">
+      <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex-1 relative">
+          <input 
+            type="text" 
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="updateUrl()"
+            placeholder="Busca por nombre o materia..." 
+            class="w-full bg-cerulean-50 border border-cerulean-100 rounded-xl px-4 py-3 pl-11 text-oxford-navy-900 focus:outline-none focus:ring-2 focus:ring-punch-red-400 focus:border-transparent transition-all"
+          />
+          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <svg class="w-5 h-5 text-oxford-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button 
+            (click)="toggleFilters()"
+            [class.bg-cerulean-50]="showFilters()"
+            class="bg-white border border-cerulean-200 text-oxford-navy-700 px-6 py-3 rounded-xl hover:bg-cerulean-50 font-medium transition-colors cursor-pointer flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+            Filtros
+          </button>
+        </div>
       </div>
-      <div class="flex gap-2">
-        <button class="bg-white border border-cerulean-200 text-oxford-navy-700 px-6 py-3 rounded-xl hover:bg-cerulean-50 font-medium transition-colors cursor-pointer">
-          Filtrar
-        </button>
-        <button class="bg-oxford-navy-900 text-white px-6 py-3 rounded-xl hover:bg-oxford-navy-800 font-medium transition-colors cursor-pointer">
-          Buscar
-        </button>
-      </div>
+
+      <!-- Advanced Filters Dropdown Menu -->
+      @if (showFilters()) {
+        <div class="mt-6 pt-6 border-t border-cerulean-100 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Materia Filter -->
+          <div>
+            <label class="block text-xs font-bold text-oxford-navy-500 uppercase tracking-wider mb-2">Materia Principal</label>
+            <div class="relative">
+              <select 
+                [(ngModel)]="selectedMateria"
+                (ngModelChange)="applyFilters()"
+                class="appearance-none w-full bg-cerulean-50 border border-cerulean-100 text-oxford-navy-900 rounded-xl pl-4 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cerulean-400 cursor-pointer transition-shadow"
+              >
+                <option value="todas">Todas las materias</option>
+                @for (materia of availableMaterias(); track materia) {
+                  <option [value]="materia">{{ materia }}</option>
+                }
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-oxford-navy-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Rating Filter -->
+          <div>
+            <label class="block text-xs font-bold text-oxford-navy-500 uppercase tracking-wider mb-2">Calificación Mínima</label>
+            <div class="relative">
+              <select 
+                [(ngModel)]="minRating"
+                (ngModelChange)="applyFilters()"
+                class="appearance-none w-full bg-cerulean-50 border border-cerulean-100 text-oxford-navy-900 rounded-xl pl-4 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cerulean-400 cursor-pointer transition-shadow"
+              >
+                <option value="0">Cualquier estrella</option>
+                <option value="4">4+ Estrellas (Bueno o Excelente)</option>
+                <option value="3">3+ Estrellas (Regular a Excelente)</option>
+                <option value="2">2+ Estrellas (Malo a Excelente)</option>
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-oxford-navy-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
     </div>
+
+    <!-- Active Filters Chips -->
+    @if (activeFilters().length > 0) {
+      <div class="flex flex-wrap items-center gap-2 mb-8 animate-fade-in-down">
+        <span class="text-sm font-semibold text-oxford-navy-500 mr-2">Filtros activos:</span>
+        @for (filter of activeFilters(); track filter.type) {
+          <span class="inline-flex items-center gap-1.5 bg-punch-red-50 text-punch-red-700 px-3 py-1.5 rounded-full text-sm font-medium border border-punch-red-100">
+            {{ filter.label }}
+            <button (click)="removeFilter(filter.type)" class="hover:bg-punch-red-200 rounded-full p-0.5 focus:outline-none transition-colors cursor-pointer">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+          </span>
+        }
+        <button (click)="clearAllFilters()" class="text-sm text-oxford-navy-500 hover:text-punch-red-500 underline decoration-dotted transition-colors ml-2 cursor-pointer">
+          Limpiar todos
+        </button>
+      </div>
+    }
 
     <!-- Results Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       
-      @for (profesor of profesores(); track profesor.id) {
-        <div class="bg-white rounded-3xl p-6 shadow-sm border border-{{profesor.colorTheme}}-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+      @for (profesor of filteredProfesores(); track profesor.id; let i = $index) {
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-{{getTheme(i)}}-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
           <div class="flex items-start justify-between mb-4">
             <div class="flex items-center gap-4">
-              <div class="w-14 h-14 bg-{{profesor.colorTheme}}-100 rounded-full flex items-center justify-center text-xl font-bold text-{{profesor.colorTheme}}-700">
+              <div class="w-14 h-14 bg-{{getTheme(i)}}-100 rounded-full flex items-center justify-center text-xl font-bold text-{{getTheme(i)}}-700">
                 {{profesor.inicial}}
               </div>
               <div>
