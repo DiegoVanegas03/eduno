@@ -1,0 +1,29 @@
+<div class="bg-white rounded-2xl shadow-sm border border-cerulean-100 overflow-hidden transition-all duration-300">
+  <!-- Header (Clickable) -->
+  <button 
+    (click)="toggleMenu.emit()"
+    class="w-full flex items-center justify-between p-6 hover:bg-cerulean-50/50 transition-colors focus:outline-none cursor-pointer"
+  >
+    <div class="flex items-center gap-4">
+      <div [ngClass]="['w-12 h-12 rounded-xl flex items-center justify-center', themeClasses.iconBg, themeClasses.iconText]">
+        <ng-content select="[materiaIcon]"></ng-content>
+      </div>
+      <div class="text-left">
+        <h3 class="text-xl font-bold text-oxford-navy-900">{{ title }}</h3>
+        <p class="text-sm text-oxford-navy-500 font-medium">{{ subtitle }}</p>
+      </div>
+    </div>
+    <div class="text-oxford-navy-400 transition-transform duration-300" [class.rotate-180]="expanded">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+      </svg>
+    </div>
+  </button>
+
+  <!-- Body / Grupos -->
+  @if (expanded) {
+    <div class="p-6 border-t border-cerulean-100 bg-cerulean-50/20">
+      <ng-content></ng-content>
+    </div>
+  }
+</div>

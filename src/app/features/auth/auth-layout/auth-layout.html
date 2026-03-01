@@ -1,0 +1,26 @@
+<div class="min-h-screen bg-cerulean-50 flex items-center justify-center p-4 selection:bg-punch-red-200 selection:text-punch-red-900 font-sans text-oxford-navy-900">
+  <div class="max-w-md w-full">
+    <!-- Branding / Logo -->
+    <div class="flex justify-center mb-8">
+      <a routerLink="/" class="flex flex-col items-center group cursor-pointer">
+        <div class="w-16 h-16 bg-white rounded-2xl shadow-md border border-cerulean-100 flex items-center justify-center mb-3 group-hover:shadow-lg transition-all duration-300 group-hover:-translate-y-1">
+          <app-logo></app-logo>
+        </div>
+        <span class="font-extrabold text-2xl tracking-tight text-oxford-navy-900 group-hover:text-punch-red-600 transition-colors">Eduno</span>
+      </a>
+    </div>
+
+    <!-- Auth Card -->
+    <div class="bg-white rounded-2xl shadow-xl border border-cerulean-100/50 backdrop-blur-sm p-8 sm:p-10 relative overflow-hidden">
+      <!-- Decorative top gradient -->
+      <div class="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-punch-red-400 to-punch-red-600"></div>
+      
+      <router-outlet></router-outlet>
+    </div>
+
+    <!-- Footer Links -->
+    <div class="mt-8 text-center text-sm text-oxford-navy-500">
+      <a routerLink="/" class="hover:text-punch-red-500 transition-colors font-medium">← Volver al inicio</a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,65 @@
+/* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+
+@theme {
+  /* Colors */
+  --color-punch-red-50: #fce8ea;
+  --color-punch-red-100: #f9d2d5;
+  --color-punch-red-200: #f4a4ab;
+  --color-punch-red-300: #ee7781;
+  --color-punch-red-400: #e94957;
+  --color-punch-red-500: #e31c2d;
+  --color-punch-red-600: #b61624;
+  --color-punch-red-700: #88111b;
+  --color-punch-red-800: #5b0b12;
+  --color-punch-red-900: #2d0609;
+  --color-punch-red-950: #200406;
+
+  --color-honeydew-50: #eff9eb;
+  --color-honeydew-100: #def4d7;
+  --color-honeydew-200: #bee8b0;
+  --color-honeydew-300: #9ddd88;
+  --color-honeydew-400: #7dd161;
+  --color-honeydew-500: #5cc639;
+  --color-honeydew-600: #4a9e2e;
+  --color-honeydew-700: #377722;
+  --color-honeydew-800: #254f17;
+  --color-honeydew-900: #12280b;
+  --color-honeydew-950: #0d1c08;
+
+  --color-frosted-blue-50: #edf7f8;
+  --color-frosted-blue-100: #dbf0f0;
+  --color-frosted-blue-200: #b6e0e2;
+  --color-frosted-blue-300: #92d1d3;
+  --color-frosted-blue-400: #6dc2c5;
+  --color-frosted-blue-500: #49b3b6;
+  --color-frosted-blue-600: #3a8f92;
+  --color-frosted-blue-700: #2c6b6d;
+  --color-frosted-blue-800: #1d4749;
+  --color-frosted-blue-900: #0f2424;
+  --color-frosted-blue-950: #0a191a;
+
+  --color-cerulean-50: #edf3f7;
+  --color-cerulean-100: #dce8ef;
+  --color-cerulean-200: #b8d1e0;
+  --color-cerulean-300: #95b9d0;
+  --color-cerulean-400: #71a2c1;
+  --color-cerulean-500: #4e8bb1;
+  --color-cerulean-600: #3e6f8e;
+  --color-cerulean-700: #2f536a;
+  --color-cerulean-800: #1f3847;
+  --color-cerulean-900: #101c23;
+  --color-cerulean-950: #0b1319;
+
+  --color-oxford-navy-50: #ecf1f9;
+  --color-oxford-navy-100: #d9e3f2;
+  --color-oxford-navy-200: #b3c8e6;
+  --color-oxford-navy-300: #8cacd9;
+  --color-oxford-navy-400: #6690cc;
+  --color-oxford-navy-500: #4075bf;
+  --color-oxford-navy-600: #335d99;
+  --color-oxford-navy-700: #264673;
+  --color-oxford-navy-800: #192f4d;
+  --color-oxford-navy-900: #0d1726;
+  --color-oxford-navy-950: #09101b;
+}

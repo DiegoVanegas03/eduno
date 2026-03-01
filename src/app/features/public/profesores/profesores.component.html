@@ -1,0 +1,93 @@
+<div class="min-h-screen bg-cerulean-50 pt-32 pb-16">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <!-- Header -->
+    <div class="mb-12 text-center">
+      <h1 class="text-4xl md:text-5xl font-extrabold text-oxford-navy-900 mb-4 tracking-tight">
+        Explora <span class="text-punch-red-500">Profesores</span>
+      </h1>
+      <p class="text-lg text-oxford-navy-600 max-w-2xl mx-auto">
+        Encuentra opiniones honestas, calificaciones detalladas y consejos para armar el mejor horario con los docentes de tu facultad.
+      </p>
+    </div>
+
+    <!-- Search & Filters -->
+    <div class="bg-white rounded-3xl p-6 shadow-sm border border-cerulean-100 mb-12 flex flex-col md:flex-row gap-4">
+      <div class="flex-1">
+        <input 
+          type="text" 
+          placeholder="Busca por nombre o materia..." 
+          class="w-full bg-cerulean-50 border border-cerulean-100 rounded-xl px-4 py-3 text-oxford-navy-900 focus:outline-none focus:ring-2 focus:ring-punch-red-400 focus:border-transparent transition-all"
+        />
+      </div>
+      <div class="flex gap-2">
+        <button class="bg-white border border-cerulean-200 text-oxford-navy-700 px-6 py-3 rounded-xl hover:bg-cerulean-50 font-medium transition-colors cursor-pointer">
+          Filtrar
+        </button>
+        <button class="bg-oxford-navy-900 text-white px-6 py-3 rounded-xl hover:bg-oxford-navy-800 font-medium transition-colors cursor-pointer">
+          Buscar
+        </button>
+      </div>
+    </div>
+
+    <!-- Results Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      
+      <!-- Mockup Card 1 -->
+      <div class="bg-white rounded-3xl p-6 shadow-sm border border-cerulean-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+        <div class="flex items-start justify-between mb-4">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 bg-cerulean-100 rounded-full flex items-center justify-center text-xl font-bold text-cerulean-700">
+              M
+            </div>
+            <div>
+              <h3 class="font-bold text-oxford-navy-900 text-lg">Mtro. Martinez</h3>
+              <p class="text-sm text-oxford-navy-500">Álgebra Lineal</p>
+            </div>
+          </div>
+          <div class="bg-honeydew-100 text-honeydew-700 font-bold px-3 py-1 rounded-full text-sm">
+            4.8 ★
+          </div>
+        </div>
+        <p class="text-oxford-navy-600 text-sm mb-4 line-clamp-3">
+          "Explica muy bien y los exámenes vienen exactamente de lo que se ve en clase. Es muy accesible para resolver dudas."
+        </p>
+        <div class="flex justify-between items-center pt-4 border-t border-cerulean-50">
+          <span class="text-xs text-oxford-navy-400">12 reseñas</span>
+          <a routerLink="/profesores/1" class="text-punch-red-500 font-semibold text-sm hover:text-punch-red-600 transition-colors cursor-pointer inline-block">
+            Ver perfil →
+          </a>
+        </div>
+      </div>
+
+      <!-- Mockup Card 2 -->
+      <div class="bg-white rounded-3xl p-6 shadow-sm border border-cerulean-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+        <div class="flex items-start justify-between mb-4">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 bg-punch-red-100 rounded-full flex items-center justify-center text-xl font-bold text-punch-red-700">
+              S
+            </div>
+            <div>
+              <h3 class="font-bold text-oxford-navy-900 text-lg">Dra. Sánchez</h3>
+              <p class="text-sm text-oxford-navy-500">Programación I</p>
+            </div>
+          </div>
+          <div class="bg-honeydew-100 text-honeydew-700 font-bold px-3 py-1 rounded-full text-sm">
+            4.2 ★
+          </div>
+        </div>
+        <p class="text-oxford-navy-600 text-sm mb-4 line-clamp-3">
+          "Deja muchos proyectos, pero si haces las prácticas pasas sin problema. Califica rudo pero justo."
+        </p>
+        <div class="flex justify-between items-center pt-4 border-t border-cerulean-50">
+          <span class="text-xs text-oxford-navy-400">8 reseñas</span>
+          <a routerLink="/profesores/2" class="text-punch-red-500 font-semibold text-sm hover:text-punch-red-600 transition-colors cursor-pointer inline-block">
+            Ver perfil →
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>

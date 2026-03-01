@@ -1,0 +1,226 @@
+<div class="min-h-screen bg-cerulean-50 pt-24 pb-16">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <!-- Breadcrumb -->
+    <nav class="mb-6 flex text-sm text-oxford-navy-500 font-medium">  
+      <a routerLink="/profesores" class="hover:text-punch-red-500 transition-colors">Profesores</a>
+      <span class="mx-2">/</span>
+      <span class="text-oxford-navy-800">Mtro. Martinez</span>
+    </nav>
+
+    <!-- Header / Hero Card -->
+    <div class="bg-white rounded-b-4xl p-8 md:p-10 shadow-md border border-cerulean-100 flex flex-col md:flex-row items-center gap-3 relative overflow-hidden mb-12">
+      <!-- Decoración sutil superior -->
+      <div class="absolute top-0 left-0 w-full h-2 bg-linear-to-r from-cerulean-400 to-punch-red-400"></div>
+      
+      <!-- Avatar -->
+      <div class="w-32 h-32 shrink-0 bg-linear-to-br from-cerulean-100 to-cerulean-200 rounded-full flex items-center justify-center text-5xl font-extrabold text-cerulean-700 shadow-inner border-4 border-white mb-2 md:mb-0 relative z-10">
+        M
+      </div>
+      
+      <div class="flex-1 text-center md:text-left relative z-10">
+        <h1 class="text-3xl md:text-5xl font-extrabold text-oxford-navy-900 mb-2 tracking-tight">Roberto Martinez</h1>
+        <p class="text-lg text-oxford-navy-600">Doctor</p>
+      </div>
+      <div class="flex flex-wrap items-center justify-center md:justify-start gap-6">
+          <div class="flex items-center gap-2 bg-cerulean-50 px-4 py-2 rounded-xl border border-cerulean-100">
+            <span class="text-2xl font-black text-oxford-navy-900">4.8</span>
+            <div class="text-punch-red-500 flex">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+            </div>
+            <span class="text-sm text-oxford-navy-500 font-medium">(12 reseñas)</span>
+          </div>
+        </div>
+    </div>
+
+    <!-- Sección para Calificar -->
+    <h2 class="text-2xl font-bold text-oxford-navy-900 mb-6">Califica y comparte tu opinión</h2>
+    <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-cerulean-100 mb-12">
+      
+      @if (!isAuthenticated()) {
+        <!-- Estado No Autenticado -->
+        <div 
+          routerLink="/auth/login"
+          [queryParams]="{ returnUrl: router.url }"
+          class="bg-cerulean-50/50 border-2 border-dashed border-cerulean-200 rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-cerulean-50 hover:border-cerulean-300 transition-all group"
+        >
+          <div class="w-14 h-14 bg-white rounded-full shadow-sm flex items-center justify-center text-cerulean-500 mb-4 group-hover:scale-110 group-hover:text-punch-red-500 transition-transform">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+          </div>
+          <h3 class="text-lg font-bold text-oxford-navy-900 mb-2">Inicia sesión para opinar</h3>
+          <p class="text-sm text-oxford-navy-500 max-w-sm mb-4">
+            Únete a la comunidad de Eduno para calificar y compartir tu experiencia con este profesor.
+          </p>
+          <app-button variant="primary" size="sm">Iniciar Sesión</app-button>
+        </div>
+      } @else {
+        <!-- Estado Autenticado -->
+        <div class="flex flex-col md:flex-row gap-6">
+          <div class="w-12 h-12 bg-oxford-navy-100 rounded-full flex items-center justify-center text-oxford-navy-600 font-bold shrink-0">
+            T
+          </div>
+          <div class="flex-1 w-full relative">
+            <div class="mb-4">
+              <span class="text-sm font-bold text-oxford-navy-700 block mb-2">¿Cómo calificarías al profesor?</span>
+              <div class="flex gap-2 text-oxford-navy-200 cursor-pointer">
+                <!-- Estrellas Interactivas (Visual Mock) -->
+                <svg class="w-8 h-8 hover:text-honeydew-500 fill-current transition-colors" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                <svg class="w-8 h-8 hover:text-honeydew-500 fill-current transition-colors" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                <svg class="w-8 h-8 hover:text-honeydew-500 fill-current transition-colors" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                <svg class="w-8 h-8 hover:text-honeydew-500 fill-current transition-colors" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                <svg class="w-8 h-8 hover:text-honeydew-500 fill-current transition-colors" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+              </div>
+            </div>
+            
+            <textarea 
+              rows="3" 
+              class="w-full bg-cerulean-50/50 border border-cerulean-100 rounded-2xl p-4 text-oxford-navy-900 placeholder-oxford-navy-400 focus:outline-none focus:ring-2 focus:ring-cerulean-400 focus:bg-white transition-all resize-none shadow-inner"
+              placeholder="Escribe tu opinión sobre la clase, su método de enseñanza, etc..."></textarea>
+            
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 gap-4">
+              <select class="bg-cerulean-50 border border-cerulean-100 text-oxford-navy-600 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cerulean-400 cursor-pointer w-full sm:w-auto">
+                <option value="" disabled selected>Selecciona una Materia</option>
+                <option value="1">Álgebra Lineal</option>
+                <option value="2">Geometría Analítica</option>
+              </select>
+              <app-button variant="primary" size="md" class="w-full sm:w-auto">Publicar Opinión</app-button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <h2 class="text-2xl font-bold text-oxford-navy-900 mb-6">Materias y Grupos</h2>
+
+    <!-- Accordion de Materias -->
+    <div class="space-y-6">
+
+      <!-- Materia 1 (Álgebra Lineal) -->
+      <app-materia-accordion 
+        title="Álgebra Lineal"
+        subtitle="2 grupos impartidos"
+        colorTheme="cerulean"
+        [expanded]="expandedMateriaId() === 1"
+        (toggleMenu)="toggleMateria(1)"
+      >
+        <svg materiaIcon class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- Grupo 01 -->
+          <div class="border border-cerulean-200 rounded-xl p-5 bg-white">
+            <div class="flex justify-between items-center mb-4 border-b border-cerulean-50 pb-3">
+              <h4 class="font-bold text-oxford-navy-900 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-punch-red-400"></span> Grupo 01
+              </h4>
+              <span class="text-xs text-oxford-navy-500">Lunes, Miércoles y Viernes</span>
+            </div>
+            
+            <!-- Repositorio del Grupo 01 -->
+            <div class="space-y-3">
+              <h5 class="text-xs font-bold uppercase tracking-wider text-cerulean-600 mb-2">Recursos Compartidos</h5>
+              
+              <div class="flex items-center justify-between p-3 rounded-lg hover:bg-cerulean-50 transition-colors group cursor-pointer border border-transparent hover:border-cerulean-200">
+                <div class="flex items-center gap-3">
+                  <svg class="w-8 h-8 text-punch-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z M13 9V3.5L18.5 9H13z"></path></svg>
+                  <div>
+                    <p class="text-sm font-semibold text-oxford-navy-900 group-hover:text-punch-red-600 transition-colors">Guia_Parcial_1.pdf</p>
+                    <p class="text-xs text-oxford-navy-500">Subido por Anon_Ing • 2.4 MB</p>
+                  </div>
+                </div>
+                <button class="text-cerulean-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                </button>
+              </div>
+              
+              <div class="flex items-center justify-between p-3 rounded-lg hover:bg-cerulean-50 transition-colors group cursor-pointer border border-transparent hover:border-cerulean-200">
+                <div class="flex items-center gap-3">
+                  <svg class="w-8 h-8 text-cerulean-500" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z M13 9V3.5L18.5 9H13z"></path></svg>
+                  <div>
+                    <p class="text-sm font-semibold text-oxford-navy-900 group-hover:text-cerulean-600 transition-colors">Probl_M1_resueltos.zip</p>
+                    <p class="text-xs text-oxford-navy-500">Subido por Admin • 5.1 MB</p>
+                  </div>
+                </div>
+                <button class="text-cerulean-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                </button>
+              </div>
+
+            </div>
+            <!-- Botón Apoyar -->
+            <app-button variant="secondary" size="sm" class="mt-4 w-full">
+              + Subir Apunte
+            </app-button>
+          </div>
+
+          <!-- Grupo 04 -->
+          <div class="border border-cerulean-200 rounded-xl p-5 bg-white">
+            <div class="flex justify-between items-center mb-4 border-b border-cerulean-50 pb-3">
+              <h4 class="font-bold text-oxford-navy-900 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-honeydew-500"></span> Grupo 04
+              </h4>
+              <span class="text-xs text-oxford-navy-500">Martes y Jueves</span>
+            </div>
+            
+            <div class="flex flex-col items-center justify-center py-8 opacity-60">
+              <svg class="w-10 h-10 text-oxford-navy-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+              <p class="text-xs text-oxford-navy-500 font-medium">Aún no hay archivos en este repositorio</p>
+            </div>
+            
+            <app-button variant="secondary" size="sm" class="mt-4 w-full border-dashed">
+              Sé el primero en aportar
+            </app-button>
+          </div>
+
+        </div>
+      </app-materia-accordion>
+
+      <!-- Materia 2 (Geometría Analítica) -->
+      <app-materia-accordion 
+        title="Geometría Analítica"
+        subtitle="1 grupo impartido"
+        colorTheme="punch-red"
+        [expanded]="expandedMateriaId() === 2"
+        (toggleMenu)="toggleMateria(2)"
+      >
+        <svg materiaIcon class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>
+      </app-materia-accordion>
+
+    </div>
+
+    <!-- Sección de Opiniones -->
+    <div class="mt-16">
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="text-2xl font-bold text-oxford-navy-900">Opiniones de Estudiantes</h2>
+        <app-button variant="ghost" size="sm" class="text-punch-red-500 hover:text-punch-red-600">
+          Ver todas (12)
+        </app-button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Tarjeta de Reseña 1 -->
+        <app-review-card 
+          author="Anon_Ing"
+          timeAgo="Hace 2 meses"
+          [rating]="5"
+          comment="Excelente profesor, explica muy claro y sus ejemplos en clase son justos los que vienen en el examen. Muy recomendado subir sus apuntes, siempre sirven."
+          subject="Álgebra Lineal"
+          colorTheme="cerulean">
+        </app-review-card>
+
+        <!-- Tarjeta de Reseña 2 -->
+        <app-review-card 
+          author="JuanPerez99"
+          timeAgo="Hace 5 meses"
+          [rating]="4"
+          comment="A veces asume que ya sabemos ciertas cosas y va un poco rápido. Pero si le preguntas en hora de asesorías, tiene mucha paciencia."
+          subject="Geometría Analítica"
+          colorTheme="punch-red">
+        </app-review-card>
+
+      </div>
+    </div>
+
+  </div>
+</div>

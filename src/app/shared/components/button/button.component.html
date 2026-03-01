@@ -1,0 +1,17 @@
+<button
+  [type]="type()"
+  [class]="buttonClasses"
+  [disabled]="disabled()"
+  (click)="handleClick($event)"
+>
+  <!-- Icon projection slot (optional) -->
+  <ng-content select="[icon-left]"></ng-content>
+  
+  <!-- Text slot -->
+  <span class="mx-2">
+    <ng-content></ng-content>
+  </span>
+
+  <!-- Right icon projection slot (optional) -->
+  <ng-content select="[icon-right]"></ng-content>
+</button>
