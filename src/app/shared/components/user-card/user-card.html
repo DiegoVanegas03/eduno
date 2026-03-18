@@ -10,7 +10,7 @@
       </div>
       <div class="flex flex-col text-left">
         <span class="text-sm font-bold text-oxford-navy-900 leading-tight select-none">{{ authService.currentUser()?.name }}</span>
-        <span class="text-xs text-oxford-navy-500 font-medium uppercase select-none">{{ authService.userRole }}</span>
+        <span class="text-xs text-oxford-navy-500 font-medium uppercase select-none">{{ authService.userRole() }}</span>
       </div>
     </div>
     <svg class="w-4 h-4 text-oxford-navy-400 ml-1 transition-transform" [class.rotate-180]="isDropdownOpen()" fill="none" stroke="currentColor" viewBox="0 0 24 24">

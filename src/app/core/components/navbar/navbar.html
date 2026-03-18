@@ -62,7 +62,7 @@
 
       <!-- Right Desktop Call To Actions -->
       <div class="hidden lg:flex lg:items-center lg:space-x-4">
-        @if (!authService.isLoggedIn) {
+        @if (!authService.isLoggedIn()) {
           <app-button variant="ghost" routerLink="/auth/login" [queryParams]="{ returnUrl: router.url }">
             Iniciar Sesión
           </app-button>
@@ -159,7 +159,7 @@
 
     <!-- Actions -->
     <div class="flex flex-col space-y-3 pt-6 border-t border-cerulean-100 mt-auto">
-      @if (!authService.isLoggedIn) {
+      @if (!authService.isLoggedIn()) {
         <app-button variant="ghost" class="w-full justify-center" routerLink="/auth/login" [queryParams]="{ returnUrl: router.url }" (click)="toggleMobileMenu()">Iniciar Sesión</app-button>
         <app-button variant="primary" class="w-full justify-center shadow-md" routerLink="/auth/register" (click)="toggleMobileMenu()">Únete a Eduno</app-button>
       } @else {
@@ -170,7 +170,7 @@
           </div>
           <div class="flex flex-col">
             <span class="text-base font-bold text-oxford-navy-900 leading-tight">{{ authService.currentUser()?.name }}</span>
-            <span class="text-xs text-oxford-navy-500 font-medium uppercase mt-1">{{ authService.userRole }}</span>
+            <span class="text-xs text-oxford-navy-500 font-medium uppercase mt-1">{{ authService.userRole() }}</span>
           </div>
         </div>
 
