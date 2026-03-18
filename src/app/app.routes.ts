@@ -19,4 +19,9 @@ export const routes: Routes = [
       import('./features/public/public.component').then((m) => m.PublicComponent),
     loadChildren: () => import('./features/public/public.routes').then((m) => m.publicRoutes),
   },
+  {
+    path: '**',
+    loadComponent: () =>
+      import('./features/public/not-found/not-found.component').then((m) => m.NotFoundComponent),
+  },
 ];
