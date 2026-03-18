@@ -13,6 +13,7 @@ export type Role = (typeof Roles)[keyof typeof Roles];
 
 export interface User {
   id: string;
+  initialLetter: string;
   name: string;
   email: string;
   role: Role;

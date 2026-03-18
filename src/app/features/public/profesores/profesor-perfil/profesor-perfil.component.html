@@ -24,8 +24,23 @@
         </div>
         
         <div class="flex-1 text-center md:text-left relative z-10">
-          <h1 class="text-3xl md:text-5xl font-extrabold text-oxford-navy-900 mb-2 tracking-tight">{{ p.nombre }}</h1>
-          <p class="text-lg text-oxford-navy-600">{{ p.titulo }}</p>
+          <div class="flex items-center justify-center md:justify-start gap-2 mb-2">
+            <h1 class="text-3xl md:text-5xl font-extrabold text-oxford-navy-900 tracking-tight">{{ p.nombre }}</h1>
+            @if (p.isVerificado) {
+              <div class="bg-cerulean-500 text-white rounded-full p-1 shadow-sm flex items-center justify-center" title="Perfil Verificado">
+                <svg class="w-4 h-4 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+              </div>
+            }
+          </div>
+          <p class="text-lg text-oxford-navy-600 mb-4">{{ p.titulo }}</p>
+          
+          @if (p.isVerificado && p.descripcionPerfil) {
+            <div class="max-w-2xl">
+              <p class="text-oxford-navy-500 text-sm md:text-base leading-relaxed italic">
+                "{{ p.descripcionPerfil }}"
+              </p>
+            </div>
+          }
         </div>
         <div class="flex flex-wrap items-center justify-center md:justify-start gap-6">
             <div class="flex items-center gap-2 bg-cerulean-50 px-4 py-2 rounded-xl border border-cerulean-100">
@@ -61,8 +76,8 @@
         } @else {
           <!-- Estado Autenticado -->
           <div class="flex flex-col md:flex-row gap-6">
-            <div class="w-12 h-12 bg-oxford-navy-100 rounded-full flex items-center justify-center text-oxford-navy-600 font-bold shrink-0">
-              T
+            <div class="w-12 h-12 bg-oxford-navy-100 uppercase rounded-full flex items-center justify-center text-oxford-navy-600 font-bold shrink-0">
+              {{ initialLetter() }}
             </div>
             <div class="flex-1 w-full relative">
               <div class="mb-4">
@@ -89,63 +104,110 @@
                     <option [value]="materia.id">{{ materia.nombre }}</option>
                   }
                 </select>
-                <app-button variant="primary" size="md" class="w-full sm:w-auto">Publicar Opinión</app-button>
+                <app-button [disabled]="!isAlumno()" variant="primary" size="md" class="w-full sm:w-auto">Publicar Opinión</app-button>
               </div>
             </div>
           </div>
         }
       </div>
 
-      <h2 class="text-2xl font-bold text-oxford-navy-900 mb-6">Materias y Grupos</h2>
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-oxford-navy-900">Materias y Grupos</h2>
+        <app-button 
+          variant="ghost" 
+          size="sm" 
+          (click)="viewMode.set(viewMode() === 'active' ? 'history' : 'active')"
+          class="text-cerulean-600 hover:text-cerulean-700"
+        >
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            {{ viewMode() === 'active' ? 'Ver materias impartidas' : 'Ver materias activas' }}
+          </span>
+        </app-button>
+      </div>
 
-      <!-- Accordion de Materias -->
-      <div class="space-y-6">
-
-        @for (materia of p.materias; track materia.id; let mI = $index) {
-          <app-materia-accordion 
-            [title]="materia.nombre"
-            [subtitle]="materia.gruposCount + ' grupo' + (materia.gruposCount !== 1 ? 's impartidos' : ' impartido')"
-            [colorTheme]="getTheme(mI)"
-            [expanded]="expandedMateriaId() === materia.id"
-            (toggleMenu)="toggleMateria(materia.id)"
-          >
-            <svg materiaIcon class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      @if (viewMode() === 'active') {
+        <!-- Accordion de Materias Activas -->
+        <div class="space-y-6">
+          @for (materia of p.materias; track materia.id; let mI = $index) {
+            <app-materia-accordion 
+              [title]="materia.nombre"
+              [subtitle]="materia.clave + ' • ' + materia.gruposCount + ' grupo' + (materia.gruposCount !== 1 ? 's' : '')"
+              [colorTheme]="getTheme(mI)"
+              [expanded]="expandedMateriaId() === materia.id"
+              (toggleMenu)="toggleMateria(materia.id)"
+            >
+              <svg materiaIcon class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
               
-              @for (grupo of materia.grupos; track grupo.id; let gI = $index) {
-                <div class="border border-{{getTheme(mI)}}-200 rounded-xl p-5 bg-white">
-                  <div class="flex justify-between items-center mb-4 border-b border-{{getTheme(mI)}}-50 pb-3">
-                    <h4 class="font-bold text-oxford-navy-900 flex items-center gap-2">
-                       <span class="w-2 h-2 rounded-full bg-{{getTheme(gI)}}-500"></span> Grupo {{ grupo.nombre }}
-                    </h4>
-                    <span class="text-xs text-oxford-navy-500">{{ grupo.horario }}</span>
-                  </div>
-                  
-                  @if (grupo.recursos.length > 0) {
-                    <!-- Repositorio -->
-                    <div class="space-y-3">
-                      <div class="flex items-center justify-between mb-2 pb-2 border-b border-cerulean-50">
-                        <h5 class="text-xs font-bold uppercase tracking-wider text-cerulean-600">Recursos Compartidos ({{ grupo.recursos.length }})</h5>
-                        
-                        <button (click)="toggleGrupoSortOrder(grupo.id)" class="flex items-center gap-1 text-xs text-oxford-navy-500 hover:text-cerulean-600 transition-colors bg-cerulean-50 px-2 py-1 rounded-md">
-                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path></svg>
-                          {{ getGrupoSortOrder(grupo.id) === 'desc' ? 'Más recientes' : 'Más antiguos' }}
-                        </button>
+              <div class="space-y-8">
+                <!-- Información de Grupos -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  @for (grupo of materia.grupos; track grupo.id) {
+                    <div class="bg-{{getTheme(mI)}}-50/30 border border-{{getTheme(mI)}}-100 rounded-2xl p-4">
+                      <div class="flex items-center justify-between mb-3 pb-2 border-b border-{{getTheme(mI)}}-100/50">
+                        <span class="font-bold text-oxford-navy-900">Grupo {{ materia.clave }} {{ grupo.nombre }}</span>
+                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-{{getTheme(mI)}}-100 text-{{getTheme(mI)}}-700 border border-{{getTheme(mI)}}-200">
+                          {{ grupo.tipoDocencia }}
+                        </span>
                       </div>
                       
-                      @for (recurso of getProcessedRecursos(grupo.id, grupo.recursos); track recurso.id) {
-                        <div class="flex items-center justify-between p-3 rounded-lg hover:bg-cerulean-50 transition-colors group cursor-pointer border border-transparent hover:border-cerulean-200">
+                      <div class="space-y-2 text-sm">
+                        <div class="flex items-center gap-2 text-oxford-navy-600">
+                          <svg class="w-4 h-4 text-{{getTheme(mI)}}-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                          <span class="text-xs">{{ grupo.dias | daysFormatter }}</span>
+                        </div>  
+                        <div class="flex items-center gap-2 text-oxford-navy-600">
+                          <svg class="w-4 h-4 text-{{getTheme(mI)}}-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                          <span class="text-xs">{{ grupo.horario }}</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-oxford-navy-600">
+                          <svg class="w-4 h-4 text-{{getTheme(mI)}}-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                          <span>Salón: {{ grupo.salon }}</span>
+                        </div>
+                        <div class="mt-3">
+                          <div class="flex justify-between text-xs mb-1">
+                            <span class="text-oxford-navy-500">Ocupación</span>
+                            <span class="font-bold text-oxford-navy-900">{{ grupo.ocupacion }}%</span>
+                          </div>
+                          <div class="w-full h-1.5 bg-{{getTheme(mI)}}-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-linear-to-r from-{{getTheme(mI)}}-400 to-{{getTheme(mI)}}-600 rounded-full" [style.width.%]="grupo.ocupacion"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                <!-- Recursos Compartidos de la Materia -->
+                <div class="bg-white border border-{{getTheme(mI)}}-200 rounded-2xl p-6 shadow-xs">
+                  <div class="flex items-center justify-between mb-6 pb-4 border-b border-cerulean-50">
+                    <div class="flex items-center gap-2">
+                       <h5 class="text-sm font-bold uppercase tracking-wider text-cerulean-600">Recursos Compartidos ({{ materia.recursos.length }})</h5>
+                       <span class="text-[10px] bg-cerulean-50 text-cerulean-600 px-2 py-0.5 rounded-full font-bold">Materia: {{ materia.nombre }}</span>
+                    </div>
+                    
+                    <button (click)="toggleMateriaSortOrder(materia.id)" class="flex items-center gap-1 text-xs text-oxford-navy-500 hover:text-cerulean-600 transition-colors bg-cerulean-50 px-3 py-1.5 rounded-lg border border-cerulean-100">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path></svg>
+                      {{ getMateriaSortOrder(materia.id) === 'desc' ? 'Más recientes' : 'Más antiguos' }}
+                    </button>
+                  </div>
+
+                  @if (materia.recursos.length > 0) {
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      @for (recurso of getProcessedRecursos(materia.id, materia.recursos); track recurso.id) {
+                        <div class="flex items-center justify-between p-4 rounded-xl hover:bg-cerulean-50/50 transition-all group border border-cerulean-50 hover:border-cerulean-200">
                           <div class="flex items-center gap-3">
-                            @if (recurso.isPdf) {
-                              <svg class="w-8 h-8 text-punch-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z M13 9V3.5L18.5 9H13z"></path></svg>
-                            } @else {
-                              <svg class="w-8 h-8 text-cerulean-500" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z M13 9V3.5L18.5 9H13z"></path></svg>
-                            }
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-white shadow-xs border border-cerulean-100">
+                              @if (recurso.isPdf) {
+                                <svg class="w-6 h-6 text-punch-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z M13 9V3.5L18.5 9H13z"></path></svg>
+                              } @else {
+                                <svg class="w-6 h-6 text-cerulean-500" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z M13 9V3.5L18.5 9H13z"></path></svg>
+                              }
+                            </div>
                             <div>
                               <p class="text-sm font-semibold text-oxford-navy-900 group-hover:text-cerulean-600 transition-colors">{{ recurso.nombre }}</p>
-                              <div class="flex items-center text-xs text-oxford-navy-500 gap-1 mt-0.5">
-                                <span>Por {{ recurso.subidoPor }}</span>
+                              <div class="flex items-center text-[10px] text-oxford-navy-400 gap-1.5 mt-0.5">
+                                <span class="font-medium text-oxford-navy-500">{{ recurso.subidoPor }}</span>
                                 <span>•</span>
                                 <span>{{ recurso.tamano }}</span>
                                 <span>•</span>
@@ -153,58 +215,111 @@
                               </div>
                             </div>
                           </div>
-                          <button class="text-cerulean-500 opacity-0 group-hover:opacity-100 transition-opacity" title="Descargar">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                          <button class="w-8 h-8 rounded-full flex items-center justify-center text-cerulean-500 hover:bg-cerulean-100 opacity-0 group-hover:opacity-100 transition-all shadow-xs bg-white border border-cerulean-100" title="Descargar">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                           </button>
                         </div>
                       }
-                      
-                      <!-- Controles de Paginación -->
-                      @if (getGrupoTotalPages(grupo.recursos) > 1) {
-                        <div class="flex items-center justify-between pt-2 mt-2 border-t border-cerulean-50">
-                          <button 
-                            [disabled]="getGrupoPage(grupo.id) === 1"
-                            (click)="setGrupoPage(grupo.id, getGrupoPage(grupo.id) - 1)"
-                            class="text-xs font-semibold px-3 py-1.5 rounded-md transition-colors w-24 text-center disabled:opacity-40 disabled:cursor-not-allowed bg-white border border-cerulean-200 text-oxford-navy-600 hover:bg-cerulean-50 hover:text-cerulean-700">
-                            Anterior
-                          </button>
-                          
-                          <span class="text-xs text-oxford-navy-500">
-                            Página <span class="font-bold text-oxford-navy-700">{{ getGrupoPage(grupo.id) }}</span> de {{ getGrupoTotalPages(grupo.recursos) }}
-                          </span>
-                          
-                          <button 
-                            [disabled]="getGrupoPage(grupo.id) === getGrupoTotalPages(grupo.recursos)"
-                            (click)="setGrupoPage(grupo.id, getGrupoPage(grupo.id) + 1)"
-                            class="text-xs font-semibold px-3 py-1.5 rounded-md transition-colors w-24 text-center disabled:opacity-40 disabled:cursor-not-allowed bg-white border border-cerulean-200 text-oxford-navy-600 hover:bg-cerulean-50 hover:text-cerulean-700">
-                            Siguiente
-                          </button>
-                        </div>
-                      }
-
                     </div>
-                    <!-- Botón Apoyar -->
-                    <app-button variant="secondary" size="sm" class="mt-4 w-full">
-                      + Subir Apunte
-                    </app-button>
+
+                    <!-- Controles de Paginación -->
+                    @if (getMateriaTotalPages(materia.recursos) > 1) {
+                      <div class="flex items-center justify-between pt-6 mt-4 border-t border-cerulean-50">
+                        <button 
+                          [disabled]="getMateriaPage(materia.id) === 1"
+                          (click)="setMateriaPage(materia.id, getMateriaPage(materia.id) - 1)"
+                          class="text-xs font-bold px-4 py-2 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-white border border-cerulean-200 text-oxford-navy-600 hover:bg-cerulean-50 hover:text-cerulean-700 shadow-xs">
+                          Anterior
+                        </button>
+                        
+                        <span class="text-xs text-oxford-navy-500 font-medium">
+                          Página <span class="font-bold text-oxford-navy-900">{{ getMateriaPage(materia.id) }}</span> de <span class="font-bold text-oxford-navy-900">{{ getMateriaTotalPages(materia.recursos) }}</span>
+                        </span>
+                        
+                        <button 
+                          [disabled]="getMateriaPage(materia.id) === getMateriaTotalPages(materia.recursos)"
+                          (click)="setMateriaPage(materia.id, getMateriaPage(materia.id) + 1)"
+                          class="text-xs font-bold px-4 py-2 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-white border border-cerulean-200 text-oxford-navy-600 hover:bg-cerulean-50 hover:text-cerulean-700 shadow-xs">
+                          Siguiente
+                        </button>
+                      </div>
+                    }
+
+                    <div class="mt-6 pt-4 border-t border-cerulean-50 flex justify-end">
+                      <app-button [disabled]="!isAlumno()" variant="secondary" size="sm" class="w-full sm:w-auto">
+                        + Subir Recurso a la Materia
+                      </app-button>
+                    </div>
                   } @else {
-                    <div class="flex flex-col items-center justify-center py-8 opacity-60">
-                      <svg class="w-10 h-10 text-oxford-navy-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
-                      <p class="text-xs text-oxford-navy-500 font-medium">Aún no hay archivos en este repositorio</p>
+                    <div class="flex flex-col items-center justify-center py-10 bg-cerulean-50/20 rounded-xl border-2 border-dashed border-cerulean-100">
+                      <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-cerulean-300 mb-3 shadow-sm">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+                      </div>
+                      <p class="text-sm text-oxford-navy-600 font-bold mb-1">Repositorio vacío</p>
+                      <p class="text-xs text-oxford-navy-400 mb-4">Sé el primero en aportar un recurso para esta materia</p>
+                      <app-button [disabled]="!isAlumno()" variant="secondary" size="sm">Aportar Recurso</app-button>
                     </div>
-                    
-                    <app-button variant="secondary" size="sm" class="mt-4 w-full border-dashed">
-                      Sé el primero en aportar
-                    </app-button>
                   }
-
                 </div>
-              }
+              </div>
+            </app-materia-accordion>
+          }
+        </div>
+      } @else {
+        <!-- Vista de Trazabilidad / Historial -->
+        <div class="bg-white rounded-3xl p-8 shadow-sm border border-cerulean-100">
+          <div class="flex items-center gap-3 mb-8">
+            <div class="w-10 h-10 bg-cerulean-100 text-cerulean-600 rounded-xl flex items-center justify-center">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
             </div>
-          </app-materia-accordion>
-        }
+            <div>
+              <h3 class="text-xl font-bold text-oxford-navy-900">Trazabilidad Académica</h3>
+              <p class="text-sm text-oxford-navy-500">Historial temporal de materias impartidas por el docente</p>
+            </div>
+          </div>
 
-      </div>
+          <!-- Timeline Chart Mockup -->
+          <div class="relative pl-8 space-y-12 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-linear-to-b before:from-cerulean-400 before:via-cerulean-200 before:to-cerulean-50">
+            @for (materia of p.materiasPasadas; track materia.id; let i = $index) {
+              <div class="relative">
+                <!-- Dot -->
+                <div class="absolute -left-[33px] top-1.5 w-6 h-6 rounded-full bg-white border-4 border-{{getTheme(i)}}-400 shadow-sm z-10"></div>
+                
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <div class="flex items-center gap-2 mb-1">
+                      <span class="text-xs font-black text-{{getTheme(i)}}-600 uppercase tracking-widest bg-{{getTheme(i)}}-50 px-2 py-0.5 rounded border border-{{getTheme(i)}}-200">
+                        Clave: {{ materia.clave }}
+                      </span>
+                      <span class="text-sm text-oxford-navy-400 font-medium">Desde {{ materia.fechaInicio | date:'MMM yyyy' }}</span>
+                    </div>
+                    <h4 class="text-lg font-extrabold text-oxford-navy-900">{{ materia.nombre }}</h4>
+                  </div>
+                  
+                  <div class="flex flex-wrap gap-2">
+                    @for (semestre of materia.semestres; track semestre) {
+                      <span class="px-3 py-1.5 rounded-lg bg-cerulean-50 text-cerulean-700 text-xs font-bold border border-cerulean-100 shadow-xs">
+                        {{ semestre }}
+                      </span>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="mt-12 bg-cerulean-50/50 rounded-2xl p-6 border border-cerulean-100">
+            <h4 class="text-sm font-bold text-oxford-navy-900 mb-2 flex items-center gap-2">
+              <svg class="w-4 h-4 text-honeydew-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
+              Resumen de Trazabilidad
+            </h4>
+            <p class="text-sm text-oxford-navy-600 leading-relaxed">
+              El docente ha impartido un total de <span class="font-bold text-cerulean-600">{{ p.materiasPasadas.length }}</span> materias diferentes en los últimos semestres, destacando su especialización en el área de matemáticas elementales y avanzadas.
+            </p>
+          </div>
+        </div>
+      }
+
 
       <!-- Sección de Opiniones -->
       <div class="mt-16">

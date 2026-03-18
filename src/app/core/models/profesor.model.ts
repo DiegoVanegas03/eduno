@@ -7,7 +7,10 @@ export interface Profesor {
   calificacion: number;
   numResenas: number;
   descripcionAbreviada: string;
+  isVerificado?: boolean;
+  descripcionPerfil?: string;
 }
+
 
 export interface Recurso {
   id: number;
@@ -21,15 +24,28 @@ export interface Recurso {
 export interface Grupo {
   id: number;
   nombre: string; // Ej: "01", "04"
-  horario: string; // Ej: "Lunes, Miércoles y Viernes"
-  recursos: Recurso[];
+  dias: string[]; // Ej: ["Lunes", "Miércoles", "Viernes"]
+  horario: string; // Ej: "07:00 - 09:00"
+  salon: string;
+  ocupacion: number; // Porcentaje de ocupación
+  tipoDocencia: 'Presencial' | 'En línea' | 'Presencial en Inglés' | 'En línea en Inglés';
 }
 
 export interface Materia {
   id: number;
   nombre: string;
+  clave: string;
   gruposCount: number;
   grupos: Grupo[];
+  recursos: Recurso[];
+}
+
+export interface HistorialMateria {
+  id: number;
+  nombre: string;
+  clave: string;
+  semestres: string[]; // Ej: ["2023-1", "2023-2"]
+  fechaInicio: string; // Cuándo comenzó a impartirla
 }
 
 export interface Resena {
@@ -43,5 +59,6 @@ export interface Resena {
 
 export interface ProfesorDetalle extends Profesor {
   materias: Materia[];
+  materiasPasadas: HistorialMateria[];
   resenas: Resena[];
 }
