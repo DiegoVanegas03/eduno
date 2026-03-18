@@ -3,9 +3,9 @@ import { Observable, delay, of, tap, map } from 'rxjs';
 import { Router } from '@angular/router';
 
 export const Roles = {
-  ESTUDIANTE: 'estuadiante',
-  PROFESOR: 'profesor',
-  ADMIN: 'admin',
+  INVITADO: 'invitado',
+  ALUMNO: 'alumno',
+  ADMINISTRADOR: 'administrador',
 } as const;
 
 export type Role = (typeof Roles)[keyof typeof Roles];
@@ -62,7 +62,7 @@ export class AuthService {
               id: 'u_1',
               name: 'Diego Vanegas',
               username: 'diego',
-              role: Roles.ADMIN, // Podemos cambiarlo aquí a PROFESOR o ADMIN
+              role: Roles.ADMINISTRADOR, // Podemos cambiarlo aquí a PROFESOR o ADMIN
             };
             this.currentUser.set(mockUser);
           } else {

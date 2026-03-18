@@ -1,4 +1,4 @@
-import { ProfesorDetalle } from '../../models/profesor.model';
+import { ProfesorDetalle } from '@core/models/profesor.model';
 
 export const PROFESORES_MOCK: ProfesorDetalle[] = [
   {
