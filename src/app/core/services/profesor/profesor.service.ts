@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { Profesor, ProfesorDetalle } from '../../models/profesor.model';
+import { Profesor, ProfesorDetalle } from '@core/models/profesor.model';
 import { PROFESORES_MOCK } from './profesor.mock';
 
 @Injectable({
