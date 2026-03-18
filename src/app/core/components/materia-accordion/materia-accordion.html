@@ -9,11 +9,11 @@
         <ng-content select="[materiaIcon]"></ng-content>
       </div>
       <div class="text-left">
-        <h3 class="text-xl font-bold text-oxford-navy-900">{{ title }}</h3>
-        <p class="text-sm text-oxford-navy-500 font-medium">{{ subtitle }}</p>
+        <h3 class="text-xl font-semibold text-oxford-navy-900">{{ title() }}</h3>
+        <p class="text-sm text-oxford-navy-500 font-medium">{{ subtitle() }}</p>
       </div>
     </div>
-    <div class="text-oxford-navy-400 transition-transform duration-300" [class.rotate-180]="expanded">
+    <div class="text-oxford-navy-400 transition-transform duration-300" [class.rotate-180]="expanded()">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
       </svg>
@@ -21,7 +21,7 @@
   </button>
 
   <!-- Body / Grupos -->
-  @if (expanded) {
+  @if (expanded()) {
     <div class="p-6 border-t border-cerulean-100 bg-cerulean-50/20">
       <ng-content></ng-content>
     </div>

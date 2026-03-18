@@ -1,5 +1,7 @@
 <nav
-  class="fixed top-0 inset-x-0 z-50 bg-white/80 backdrop-blur-md border-b border-cerulean-100 transition-all duration-300"
+  class="fixed top-0 inset-x-0 z-50 bg-white/80 backdrop-blur-md border-b border-cerulean-100"
+  [class.transition-all]="isInitialized()"
+  [class.duration-300]="isInitialized()"
 >
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between h-20">
@@ -60,7 +62,7 @@
 
       <!-- Right Desktop Call To Actions -->
       <div class="hidden lg:flex lg:items-center lg:space-x-4">
-        @if (!authService.isLoggedIn) {
+        @if (!authService.isLoggedIn()) {
           <app-button variant="ghost" routerLink="/auth/login" [queryParams]="{ returnUrl: router.url }">
             Iniciar Sesión
           </app-button>
@@ -102,7 +104,10 @@
 
 <!-- Sliding menu drawer -->
 <div 
-  class="fixed top-0 right-0 z-50 h-screen w-72 bg-white shadow-2xl border-l border-cerulean-100 transform transition-transform duration-300 ease-in-out overflow-y-auto"
+  class="fixed top-0 right-0 z-50 h-screen w-72 bg-white shadow-2xl border-l border-cerulean-100 transform overflow-y-auto"
+  [class.transition-transform]="isInitialized()"
+  [class.duration-300]="isInitialized()"
+  [class.ease-in-out]="isInitialized()"
   [class.translate-x-0]="isMobileMenuOpen()"
   [class.translate-x-full]="!isMobileMenuOpen()"
 >
@@ -110,7 +115,7 @@
     <!-- Header inside drawer -->
     <div class="flex items-center justify-between mb-8 border-b border-cerulean-50 pb-4">
       <div class="flex items-center gap-2">
-        <app-logo></app-logo>
+        <app-logo/>
         <span class="font-extrabold text-xl text-oxford-navy-900 tracking-tight">Eduno</span>
       </div>
       <button (click)="toggleMobileMenu()" class="text-oxford-navy-500 hover:text-punch-red-500 p-2 rounded-md transition-colors cursor-pointer bg-cerulean-50 hover:bg-punch-red-50">
@@ -154,7 +159,7 @@
 
     <!-- Actions -->
     <div class="flex flex-col space-y-3 pt-6 border-t border-cerulean-100 mt-auto">
-      @if (!authService.isLoggedIn) {
+      @if (!authService.isLoggedIn()) {
         <app-button variant="ghost" class="w-full justify-center" routerLink="/auth/login" [queryParams]="{ returnUrl: router.url }" (click)="toggleMobileMenu()">Iniciar Sesión</app-button>
         <app-button variant="primary" class="w-full justify-center shadow-md" routerLink="/auth/register" (click)="toggleMobileMenu()">Únete a Eduno</app-button>
       } @else {
@@ -165,7 +170,7 @@
           </div>
           <div class="flex flex-col">
             <span class="text-base font-bold text-oxford-navy-900 leading-tight">{{ authService.currentUser()?.name }}</span>
-            <span class="text-xs text-oxford-navy-500 font-medium uppercase mt-1">{{ authService.userRole }}</span>
+            <span class="text-xs text-oxford-navy-500 font-medium uppercase mt-1">{{ authService.userRole() }}</span>
           </div>
         </div>
 
@@ -177,7 +182,7 @@
           </a>
 
           <!-- Admin Panel -->
-          @if (authService.hasRole(Roles.ADMIN)) {
+          @if (authService.hasRole(Roles.ADMINISTRADOR)) {
             <a routerLink="/admin/dashboard" (click)="toggleMobileMenu()" class="flex items-center px-4 py-3 text-sm font-medium text-oxford-navy-700 hover:bg-cerulean-50 rounded-xl transition-colors">
               <svg class="w-5 h-5 mr-3 text-oxford-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
               Panel Administrativo

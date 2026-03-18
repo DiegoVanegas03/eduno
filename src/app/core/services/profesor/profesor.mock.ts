@@ -1,4 +1,4 @@
-import { ProfesorDetalle } from '../../models/profesor.model';
+import { ProfesorDetalle } from '@core/models/profesor.model';
 
 export const PROFESORES_MOCK: ProfesorDetalle[] = [
   {
@@ -11,87 +11,126 @@ export const PROFESORES_MOCK: ProfesorDetalle[] = [
     numResenas: 12,
     descripcionAbreviada:
       '"Explica muy bien y los exámenes vienen exactamente de lo que se ve en clase. Es muy accesible para resolver dudas."',
+    isVerificado: true,
+    descripcionPerfil: 'Profesor con más de 15 años de experiencia en el área de matemáticas. Apasionado por la enseñanza de álgebra y geometría, siempre buscando nuevas formas de que los alumnos conecten con la materia.',
     materias: [
+
       {
         id: 1,
         nombre: 'Álgebra Lineal',
+        clave: '2008',
         gruposCount: 2,
-        grupos: [
+        recursos: [
           {
             id: 1,
-            nombre: '01',
-            horario: 'Lunes, Miércoles y Viernes',
-            recursos: [
-              {
-                id: 1,
-                nombre: 'Guia_Parcial_1.pdf',
-                subidoPor: 'Anon_Ing',
-                tamano: '2.4 MB',
-                isPdf: true,
-                fecha: '2023-10-15T10:00:00Z',
-              },
-              {
-                id: 2,
-                nombre: 'Probl_M1_resueltos.zip',
-                subidoPor: 'Admin',
-                tamano: '5.1 MB',
-                isPdf: false,
-                fecha: '2023-09-01T12:30:00Z',
-              },
-              {
-                id: 3,
-                nombre: 'Apuntes_Clase_1.pdf',
-                subidoPor: 'Admin',
-                tamano: '5.1 MB',
-                isPdf: true,
-                fecha: '2023-11-20T14:15:00Z',
-              },
-              {
-                id: 4,
-                nombre: 'Ejercicios_Practica.zip',
-                subidoPor: 'Admin',
-                tamano: '5.1 MB',
-                isPdf: false,
-                fecha: '2023-08-05T09:45:00Z',
-              },
-              {
-                id: 5,
-                nombre: 'Resumen_Final.pdf',
-                subidoPor: 'Admin',
-                tamano: '5.1 MB',
-                isPdf: true,
-                fecha: '2023-12-10T11:20:00Z',
-              },
-              {
-                id: 6,
-                nombre: 'Formulario_Algebra.pdf',
-                subidoPor: 'Admin',
-                tamano: '5.1 MB',
-                isPdf: true,
-                fecha: '2023-10-25T16:00:00Z',
-              },
-            ],
+            nombre: 'Guia_Parcial_1.pdf',
+            subidoPor: 'Anon_Ing',
+            tamano: '2.4 MB',
+            isPdf: true,
+            fecha: '2023-10-15T10:00:00Z',
           },
           {
             id: 2,
-            nombre: '04',
-            horario: 'Martes y Jueves',
-            recursos: [], // Empty to show empty state
+            nombre: 'Probl_M1_resueltos.zip',
+            subidoPor: 'Admin',
+            tamano: '5.1 MB',
+            isPdf: false,
+            fecha: '2023-09-01T12:30:00Z',
+          },
+          {
+            id: 3,
+            nombre: 'Apuntes_Clase_1.pdf',
+            subidoPor: 'Admin',
+            tamano: '5.1 MB',
+            isPdf: true,
+            fecha: '2023-11-20T14:15:00Z',
+          },
+          {
+            id: 4,
+            nombre: 'Ejercicios_Practica.zip',
+            subidoPor: 'Admin',
+            tamano: '5.1 MB',
+            isPdf: false,
+            fecha: '2023-08-05T09:45:00Z',
+          },
+          {
+            id: 5,
+            nombre: 'Resumen_Final.pdf',
+            subidoPor: 'Admin',
+            tamano: '5.1 MB',
+            isPdf: true,
+            fecha: '2023-12-10T11:20:00Z',
+          },
+          {
+            id: 6,
+            nombre: 'Formulario_Algebra.pdf',
+            subidoPor: 'Admin',
+            tamano: '5.1 MB',
+            isPdf: true,
+            fecha: '2023-10-25T16:00:00Z',
+          },
+        ],
+        grupos: [
+          {
+            id: 1,
+            nombre: '1',
+            dias: ['Lunes', 'Miercoles', 'Viernes'],
+            horario: '07:00 - 09:00',
+            salon: 'A-101',
+            ocupacion: 85,
+            tipoDocencia: 'Presencial',
+          },
+          {
+            id: 2,
+            nombre: '4',
+            dias: ['Martes', 'Jueves'],
+            horario: '09:00 - 11:00',
+            salon: 'B-202',
+            ocupacion: 60,
+            tipoDocencia: 'En línea',
           },
         ],
       },
       {
         id: 2,
         nombre: 'Geometría Analítica',
+        clave: '2010',
         gruposCount: 1,
+        recursos: [],
         grupos: [
           {
             id: 3,
-            nombre: '02',
-            horario: 'Lunes a Jueves',
-            recursos: [],
+            nombre: '2',
+            dias: ['Lunes', 'Jueves'],
+            horario: '11:00 - 13:00',
+            salon: 'C-303',
+            ocupacion: 95,
+            tipoDocencia: 'Presencial en Inglés',
           },
         ],
+      },
+    ],
+    materiasPasadas: [
+      {
+        id: 101,
+        nombre: 'Cálculo Diferencial',
+        clave: '1001',
+        semestres: ['2022-1', '2022-2'],
+        fechaInicio: '2022-01-15',
+      },
+      {
+        id: 102,
+        nombre: 'Matemáticas Discretas',
+        clave: '1005',
+        semestres: ['2021-2'],
+        fechaInicio: '2021-08-10',
+      },
+      {
+        id: 1,
+        nombre: 'Álgebra Lineal',
+        clave: '2008',
+        semestres: ['2023-1', '2023-2'],
+        fechaInicio: '2023-01-20',
       },
     ],
     resenas: [
@@ -125,28 +164,44 @@ export const PROFESORES_MOCK: ProfesorDetalle[] = [
     numResenas: 8,
     descripcionAbreviada:
       '"Deja muchos proyectos, pero si haces las prácticas pasas sin problema. Califica rudo pero justo."',
+    isVerificado: false,
     materias: [
+
       {
         id: 3,
         nombre: 'Programación I',
+        clave: '3001',
         gruposCount: 1,
+        recursos: [
+          {
+            id: 7,
+            nombre: 'Practica_01.pdf',
+            subidoPor: 'DevStudent',
+            tamano: '1.2 MB',
+            isPdf: true,
+            fecha: '2024-01-15T08:00:00Z',
+          },
+        ],
         grupos: [
           {
             id: 4,
-            nombre: '03',
-            horario: 'Martes y Jueves',
-            recursos: [
-              {
-                id: 7,
-                nombre: 'Practica_01.pdf',
-                subidoPor: 'DevStudent',
-                tamano: '1.2 MB',
-                isPdf: true,
-                fecha: '2024-01-15T08:00:00Z',
-              },
-            ],
+            nombre: '3',
+            dias: ['Martes', 'Jueves'],
+            horario: '15:00 - 17:00',
+            salon: 'Lab-1',
+            ocupacion: 40,
+            tipoDocencia: 'En línea en Inglés',
           },
         ],
+      },
+    ],
+    materiasPasadas: [
+      {
+        id: 201,
+        nombre: 'Fundamentos de Programación',
+        clave: '1002',
+        semestres: ['2022-2', '2023-1'],
+        fechaInicio: '2022-08-15',
       },
     ],
     resenas: [

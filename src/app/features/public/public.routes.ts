@@ -13,4 +13,18 @@ export const publicRoutes: Routes = [
     path: 'tips',
     loadComponent: () => import('./tips/tips.component').then((m) => m.TipsComponent),
   },
+  {
+    path: 'servicios/horarios',
+    loadComponent: () =>
+      import('./coming-soon/coming-soon.component').then(
+        (m) => m.ComingSoonComponent
+      ),
+  },
+  {
+    path: 'servicios/conecta',
+    loadComponent: () =>
+      import('./coming-soon/coming-soon.component').then(
+        (m) => m.ComingSoonComponent
+      ),
+  },
 ];

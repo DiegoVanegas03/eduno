@@ -7,4 +7,8 @@ import { LogoComponent } from '@shared/components/logo/logo.component';
   imports: [RouterOutlet, RouterLink, LogoComponent],
   templateUrl: './auth-layout.html',
 })
-export class AuthLayout {}
+export class AuthLayout {
+  continueWithGoogle() {}
+
+  continueWithMicrosoft() {}
+}
