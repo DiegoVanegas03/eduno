@@ -12,7 +12,7 @@ export class ProfesorService {
   getProfesores(): Observable<Profesor[]> {
     // Para la lista principal, podemos mapear a la estructura base y quitar detalles extraños
     const resumidos: Profesor[] = PROFESORES_MOCK.map((p) => {
-      const { materias, resenas, ...base } = p;
+      const { materias, resenas, materiasPasadas, ...base } = p;
       return base;
     });
     return of(resumidos);

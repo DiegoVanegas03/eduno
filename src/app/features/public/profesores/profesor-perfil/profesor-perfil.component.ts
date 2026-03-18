@@ -4,11 +4,13 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { ReviewCard } from '@core/components/review-card/review-card';
 import { MateriaAccordion } from '@core/components/materia-accordion/materia-accordion';
 import { ButtonComponent } from '@shared/components/button/button.component';
-import { AuthService } from '@app/core/services/auth/auth.service';
+import { AuthService, Roles } from '@app/core/services/auth/auth.service';
 import { ProfesorService } from '@core/services/profesor/profesor.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs/operators';
 import { BreadcrumbComponent } from '@shared/components/breadcrumb/breadcrumb.component';
+
+import { DaysFormatterPipe } from '@shared/pipes/days-formatter.pipe';
 
 @Component({
   selector: 'app-profesor-perfil',
@@ -21,7 +23,9 @@ import { BreadcrumbComponent } from '@shared/components/breadcrumb/breadcrumb.co
     BreadcrumbComponent,
     DatePipe,
     CommonModule,
+    DaysFormatterPipe,
   ],
+
   templateUrl: './profesor-perfil.component.html',
 })
 export class ProfesorPerfilComponent {
@@ -37,12 +41,17 @@ export class ProfesorPerfilComponent {
   );
 
   expandedMateriaId = signal<number | null>(1);
-  isAuthenticated = computed(() => this.authService.isLoggedIn());
 
-  // Estados para paginación y ordenamiento por Grupo ID
-  // key: grupoId, value: page number o sort order ('asc' o 'desc')
-  grupoPage = signal<Record<number, number>>({});
-  grupoSortOrder = signal<Record<number, 'desc' | 'asc'>>({});
+  initialLetter = computed(() => this.authService.currentUser()?.initialLetter);
+  isAuthenticated = computed(() => this.authService.isLoggedIn());
+  isAlumno = computed(() => this.authService.hasRole(Roles.ALUMNO));
+
+  viewMode = signal<'active' | 'history'>('active');
+
+  // Estados para paginación y ordenamiento por Materia ID
+  // key: materiaId, value: page number o sort order ('asc' o 'desc')
+  materiaPage = signal<Record<number, number>>({});
+  materiaSortOrder = signal<Record<number, 'desc' | 'asc'>>({});
   readonly ITEMS_PER_PAGE = 3;
 
   toggleMateria(id: number) {
@@ -50,39 +59,39 @@ export class ProfesorPerfilComponent {
   }
 
   // Métodos de Helper para la Vista de Recursos
-  getGrupoSortOrder(grupoId: number): 'desc' | 'asc' {
-    return this.grupoSortOrder()[grupoId] || 'desc'; // Por defecto, más recientes primero
+  getMateriaSortOrder(materiaId: number): 'desc' | 'asc' {
+    return this.materiaSortOrder()[materiaId] || 'desc'; // Por defecto, más recientes primero
   }
 
-  toggleGrupoSortOrder(grupoId: number) {
-    const current = this.getGrupoSortOrder(grupoId);
-    this.grupoSortOrder.update((orders) => ({
+  toggleMateriaSortOrder(materiaId: number) {
+    const current = this.getMateriaSortOrder(materiaId);
+    this.materiaSortOrder.update((orders) => ({
       ...orders,
-      [grupoId]: current === 'desc' ? 'asc' : 'desc',
+      [materiaId]: current === 'desc' ? 'asc' : 'desc',
     }));
     // Reset page to 1 when sorting changes
-    this.setGrupoPage(grupoId, 1);
+    this.setMateriaPage(materiaId, 1);
   }
 
-  getGrupoPage(grupoId: number): number {
-    return this.grupoPage()[grupoId] || 1;
+  getMateriaPage(materiaId: number): number {
+    return this.materiaPage()[materiaId] || 1;
   }
 
-  setGrupoPage(grupoId: number, page: number) {
-    this.grupoPage.update((pages) => ({
+  setMateriaPage(materiaId: number, page: number) {
+    this.materiaPage.update((pages) => ({
       ...pages,
-      [grupoId]: page,
+      [materiaId]: page,
     }));
   }
 
-  getProcessedRecursos(grupoId: number, recursos: any[]) {
+  getProcessedRecursos(materiaId: number, recursos: any[]) {
     if (!recursos || recursos.length === 0) return [];
 
     // Clonar para no mutar original
     let processed = [...recursos];
 
     // Sort
-    const sortOrder = this.getGrupoSortOrder(grupoId);
+    const sortOrder = this.getMateriaSortOrder(materiaId);
     processed.sort((a, b) => {
       const dateA = new Date(a.fecha).getTime();
       const dateB = new Date(b.fecha).getTime();
@@ -90,13 +99,13 @@ export class ProfesorPerfilComponent {
     });
 
     // Pagination
-    const page = this.getGrupoPage(grupoId);
+    const page = this.getMateriaPage(materiaId);
     const startIndex = (page - 1) * this.ITEMS_PER_PAGE;
 
     return processed.slice(startIndex, startIndex + this.ITEMS_PER_PAGE);
   }
 
-  getGrupoTotalPages(recursos: any[]): number {
+  getMateriaTotalPages(recursos: any[]): number {
     if (!recursos) return 1;
     return Math.max(1, Math.ceil(recursos.length / this.ITEMS_PER_PAGE));
   }
