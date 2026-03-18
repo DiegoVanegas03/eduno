@@ -1,0 +1,45 @@
+<div class="min-h-screen bg-cerulean-50 flex items-center justify-center p-4 selection:bg-punch-red-200 selection:text-punch-red-900 font-sans text-oxford-navy-900">
+  <div class="max-w-md w-full">
+    <!-- Branding / Logo -->
+    <div class="flex justify-center mb-8">
+      <a routerLink="/" class="flex flex-col items-center group cursor-pointer">
+        <div class="w-16 h-16 bg-white rounded-2xl shadow-md border border-cerulean-100 flex items-center justify-center mb-3 group-hover:shadow-lg transition-all duration-300 group-hover:-translate-y-1">
+          <app-logo></app-logo>
+        </div>
+        <span class="font-extrabold text-2xl tracking-tight text-oxford-navy-900 group-hover:text-punch-red-600 transition-colors">Eduno</span>
+      </a>
+    </div>
+
+    <!-- Auth Card -->
+    <div class="bg-white rounded-2xl shadow-xl border border-cerulean-100/50 backdrop-blur-sm p-8 sm:p-10 relative overflow-hidden">
+      <!-- Decorative top gradient -->
+      <div class="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-punch-red-400 to-punch-red-600"></div>
+      
+      <router-outlet></router-outlet>
+
+      <!-- Divider -->
+      <div class="mt-6 relative">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-cerulean-200"></div>
+        </div>
+        <div class="relative flex justify-center text-sm">
+          <span class="px-3 bg-white text-oxford-navy-400 font-medium">O continua con</span>
+        </div>
+      </div>
+
+      <!-- Social Logins -->
+      <div class="mt-6 grid grid-cols-2 gap-4">
+        <button (click)="continueWithGoogle()" class="w-full inline-flex justify-center items-center py-2 px-4 border-2 border-cerulean-100 rounded-xl shadow-sm bg-white text-sm font-bold text-oxford-navy-700 hover:bg-cerulean-50 transition-colors active:bg-cerulean-100">
+          <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="h-5 w-5 mr-2" alt="Google logo">
+          Google
+        </button>
+
+        <button (click)="continueWithMicrosoft()" class="w-full inline-flex justify-center items-center py-2.5 px-4 border-2 border-cerulean-100 rounded-xl shadow-sm bg-white text-sm font-bold text-oxford-navy-700 hover:bg-cerulean-50 transition-colors active:bg-cerulean-100">
+          <img src="assets/svgs/microsoft.svg" class="h-5 w-5 mr-2" alt="Microsoft logo">
+          Microsoft
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

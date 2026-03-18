@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { roleGuard } from '@core/guards/role/role-guard';
-import { Roles } from '@core/services/auth/auth';
+import { Roles } from '@app/core/services/auth/auth.service';
 
 export const routes: Routes = [
   {
@@ -16,7 +16,7 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('./features/public/public.component').then((m) => m.PublicComponent),
+      import('./core/layouts/public-layout/public-layout').then((m) => m.PublicLayout),
     loadChildren: () => import('./features/public/public.routes').then((m) => m.publicRoutes),
   },
   {

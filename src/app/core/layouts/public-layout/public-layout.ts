@@ -4,9 +4,9 @@ import { Navbar } from '@core/components/navbar/navbar';
 import { FooterComponent } from '@shared/components/footer/footer.component';
 
 @Component({
-  selector: 'app-public',
+  selector: 'app-public-layout',
   standalone: true,
   imports: [RouterOutlet, Navbar, FooterComponent],
-  templateUrl: './public.html',
+  templateUrl: './public-layout.html',
 })
-export class PublicComponent {}
+export class PublicLayout {}

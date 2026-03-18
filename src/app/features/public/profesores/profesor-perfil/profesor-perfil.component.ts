@@ -4,7 +4,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { ReviewCard } from '@core/components/review-card/review-card';
 import { MateriaAccordion } from '@core/components/materia-accordion/materia-accordion';
 import { ButtonComponent } from '@shared/components/button/button.component';
-import { AuthService } from '@core/services/auth/auth';
+import { AuthService } from '@app/core/services/auth/auth.service';
 import { ProfesorService } from '@core/services/profesor/profesor.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs/operators';
