@@ -14,6 +14,7 @@ export class ButtonComponent {
   variant = input<ButtonVariant>('primary');
   size = input<ButtonSize>('md');
   disabled = input<boolean>(false);
+  loading = input<boolean>(false);
   type = input<'button' | 'submit' | 'reset'>('button');
   customClass = input<string>('', { alias: 'class' }); // Allow passing custom classes utility-first
 

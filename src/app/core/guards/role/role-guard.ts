@@ -9,7 +9,7 @@ export const roleGuard: CanActivateFn = (route, state) => {
   // Expected roles can be passed in the route definitions using `data: { roles: ['ADMIN'] }`
   const expectedRoles: Role[] = route.data['roles'] || [];
 
-  if (!authService.isLoggedIn) {
+  if (!authService.isLoggedIn()) {
     return router.parseUrl('/auth/login');
   }
 

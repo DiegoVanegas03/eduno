@@ -37,7 +37,7 @@ export class ProfesorPerfilComponent {
   );
 
   expandedMateriaId = signal<number | null>(1);
-  isAuthenticated = computed(() => this.authService.isLoggedIn);
+  isAuthenticated = computed(() => this.authService.isLoggedIn());
 
   // Estados para paginación y ordenamiento por Grupo ID
   // key: grupoId, value: page number o sort order ('asc' o 'desc')

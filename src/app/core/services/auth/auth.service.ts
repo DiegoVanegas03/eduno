@@ -1,10 +1,10 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap, catchError, of, finalize } from 'rxjs';
+import { Observable, tap, catchError, of, finalize, map } from 'rxjs';
+import { ToastService } from '@shared/services/toast/toast.service';
 
 export const Roles = {
-  INVITADO: 'invitado',
   ALUMNO: 'alumno',
   ADMINISTRADOR: 'administrador',
 } as const;
@@ -14,9 +14,8 @@ export type Role = (typeof Roles)[keyof typeof Roles];
 export interface User {
   id: string;
   name: string;
-  username: string;
+  email: string;
   role: Role;
-  avatarUrl?: string;
 }
 
 @Injectable({
@@ -25,6 +24,7 @@ export interface User {
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private toastService = inject(ToastService);
 
   // Private signal for internal state
   private _currentUser = signal<User | null>(null);
@@ -46,7 +46,8 @@ export class AuthService {
    * Should be called on app load.
    */
   checkSession(): Observable<User | null> {
-    return this.http.get<User>('/auth/me').pipe(
+    return this.http.get<{ success: boolean; user: User }>('/auth/me').pipe(
+      map((res: { user: User }) => res.user),
       tap((user) => this._currentUser.set(user)),
       catchError(() => {
         this._currentUser.set(null);
@@ -61,8 +62,42 @@ export class AuthService {
    */
   login(email: string, password: string): Observable<User> {
     return this.http
-      .post<User>('/auth/login', { email, password })
-      .pipe(tap((user) => this._currentUser.set(user)));
+      .post<{ success: boolean; user: User }>('/auth/login', { email, password })
+      .pipe(
+        map((res: { user: User }) => res.user),
+        tap((user) => {
+          this._currentUser.set(user);
+          this.toastService.success(`Bienvenido de nuevo, ${user.name}`);
+        }),
+        catchError((err) => {
+          this.toastService.error(err.error?.message || 'Error al iniciar sesión');
+          throw err;
+        }),
+      );
+  }
+
+  /**
+   * Performs registration and sets user state.
+   * Cookies are handled by the browser/backend.
+   */
+  register(name: string, email: string, password: string): Observable<User> {
+    return this.http
+      .post<{ success: boolean; user: User }>('/auth/register', {
+        name,
+        email,
+        password,
+      })
+      .pipe(
+        map((res: { user: User }) => res.user),
+        tap((user) => {
+          this._currentUser.set(user);
+          this.toastService.success('Tu cuenta ha sido creada exitosamente. ¡Bienvenido!');
+        }),
+        catchError((err) => {
+          this.toastService.error(err.error?.message || 'Error al registrarse');
+          throw err;
+        }),
+      );
   }
 
   /**
@@ -84,6 +119,7 @@ export class AuthService {
         finalize(() => {
           this._currentUser.set(null);
           this.router.navigate(['/auth/login']);
+          this.toastService.info('Sesión cerrada correctamente');
         }),
       )
       .subscribe();
