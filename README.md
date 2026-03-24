@@ -8,12 +8,22 @@
 ## 📌 Propósito del Proyecto
 
 Eduno es una **plataforma web colaborativa y moderada** diseñada para la comunidad estudiantil de la Facultad de Ingeniería de la UASLP. Su objetivo es centralizar tres necesidades recurrentes de los estudiantes:
+<img width="1705" height="910" alt="Captura de pantalla 2026-03-23 a la(s) 11 12 24 p m" src="https://github.com/user-attachments/assets/cdbbefad-0984-4738-bdd8-86d2ee451594" />
+
 
 1. **Opiniones docentes** — Consultar y publicar experiencias reales sobre profesores, organizadas por materia y semestre, con sistema de votos y reportes.
+<img width="1704" height="910" alt="Captura de pantalla 2026-03-23 a la(s) 11 13 21 p m" src="https://github.com/user-attachments/assets/b78411bc-d9b8-4d3e-939b-4a642fca7a34" />
+
 2. **Repositorio de apuntes** — Compartir y descargar materiales de estudio bajo un esquema de reciprocidad: para descargar debes haber subido al menos un archivo aprobado por moderación.
-3. **Pizarra de tips** — Compartir consejos sobre horarios, dificultad de materias y elección de profesores por carrera.
+<img width="1708" height="885" alt="Captura de pantalla 2026-03-23 a la(s) 11 13 54 p m" src="https://github.com/user-attachments/assets/954539d0-bd56-4542-97d5-7a4bbba4ee17" />
+
+
+4. **Pizarra de tips** — Compartir consejos sobre horarios, dificultad de materias y elección de profesores por carrera.
+<img width="1709" height="910" alt="Captura de pantalla 2026-03-23 a la(s) 11 14 10 p m" src="https://github.com/user-attachments/assets/3156eec3-95dd-46f1-89b9-2f9e44245f0e" />
+
 
 La plataforma cuenta con **cuatro roles**: Invitado, Estudiante, Moderador y Administrador, cada uno con acceso cuidadosamente acotado. Los datos de profesores y materias se sincronizan automáticamente desde la página oficial de la UASLP mediante un proceso de **web scraping** programado.
+
 
 ---
 
