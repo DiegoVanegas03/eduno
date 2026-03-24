@@ -9,7 +9,10 @@
     "lint": "turbo lint",
     "test": "turbo test",
     "frontend": "pnpm --filter @eduno/frontend start",
-    "backend": "pnpm --filter @eduno/backend dev"
+    "backend": "pnpm --filter @eduno/backend dev",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
   },
   "devDependencies": {
     "turbo": "^2.0.0"
