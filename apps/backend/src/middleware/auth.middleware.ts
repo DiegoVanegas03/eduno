@@ -58,7 +58,9 @@ export const protect = async (
   }
 };
 
-export const authorize = (...roles: string[]) => {
+import { UserRole } from "@eduno/shared";
+
+export const authorize = (...roles: UserRole[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user || !roles.includes(req.user.role)) {
       return res.status(403).json({

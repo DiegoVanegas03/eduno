@@ -1,15 +1,18 @@
 import mongoose, { Document, Schema } from "mongoose";
 import bcrypt from "bcrypt";
+import { UserRole } from "@eduno/shared";
 
 export interface IUser extends Document {
   name: string;
   email: string;
   password?: string;
-  role: "alumno" | "profesor" | "moderador" | "admin";
+  role: UserRole;
   googleId?: string;
   microsoftId?: string;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
+
+const roles: UserRole[] = ["alumno", "profesor", "moderador", "admin"];
 
 const userSchema = new Schema<IUser>(
   {
@@ -33,7 +36,7 @@ const userSchema = new Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ["alumno", "profesor", "moderador", "admin"],
+      enum: roles,
       default: "alumno",
     },
     googleId: {

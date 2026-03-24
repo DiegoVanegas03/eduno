@@ -8,6 +8,17 @@
 
 services:
 
+  # ─── Base de Datos MongoDB ──────────────────────────────────
+  mongodb:
+    image: mongo:latest
+    container_name: eduno_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - eduno_network
+
   # ─── Almacenamiento de objetos (S3-compatible) ──────────────
   minio:
     image: minio/minio:latest
@@ -58,6 +69,7 @@ services:
       - eduno_network
 
 volumes:
+  mongo_data:
   minio_data:
 
 networks:

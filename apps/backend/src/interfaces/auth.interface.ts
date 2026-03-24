@@ -1,17 +1,10 @@
 import { IUser } from "@/models/user.model";
+import { IUserResponse, IAuthResponse as ISharedAuthResponse } from "@eduno/shared";
 
-export interface IUserResponse {
-  id: string;
-  initialLetter: string;
-  name: string;
-  email: string;
-  role: string;
-}
-
-export interface IAuthResponse {
+// Local extension if needed, but for now we use the shared one
+export interface IAuthResponse extends ISharedAuthResponse {
   success: boolean;
   message: string;
-  user?: IUserResponse;
   error?: string;
 }
 

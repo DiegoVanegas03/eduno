@@ -3,21 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap, catchError, of, finalize, map } from 'rxjs';
 import { ToastService } from '@shared/services/toast/toast.service';
+import { UserRole, IUserResponse as User } from '@eduno/shared';
 
 export const Roles = {
-  ALUMNO: 'alumno',
-  ADMINISTRADOR: 'administrador',
+  ALUMNO: 'alumno' as UserRole,
+  PROFESOR: 'profesor' as UserRole,
+  MODERADOR: 'moderador' as UserRole,
+  ADMINISTRADOR: 'admin' as UserRole,
 } as const;
-
-export type Role = (typeof Roles)[keyof typeof Roles];
-
-export interface User {
-  id: string;
-  initialLetter: string;
-  name: string;
-  email: string;
-  role: Role;
-}
 
 @Injectable({
   providedIn: 'root',
@@ -127,11 +120,11 @@ export class AuthService {
   }
 
   // Helper role checks
-  hasRole(role: Role): boolean {
+  hasRole(role: UserRole): boolean {
     return this.userRole() === role;
   }
 
-  hasAnyRole(roles: Role[]): boolean {
+  hasAnyRole(roles: UserRole[]): boolean {
     const currentRole = this.userRole();
     return currentRole ? roles.includes(currentRole) : false;
   }

@@ -1,11 +1,7 @@
 import mongoose, { Document, Schema } from "mongoose";
+import { IFileBase } from "@eduno/shared";
 
-export interface IFile extends Document {
-  originalName: string;
-  minioObjectName: string;
-  size: number;
-  mimetype: string;
-  isClean: boolean;
+export interface IFile extends Document, IFileBase {
   uploadedAt: Date;
 }
 

@@ -3,19 +3,23 @@
 // ============================================================
 
 // ─── Roles ───────────────────────────────────────────────────
-export type UserRole = 'student' | 'moderator' | 'admin';
+export type UserRole = 'alumno' | 'profesor' | 'moderador' | 'admin';
 
 // ─── Estado de archivos ───────────────────────────────────────
 export type FileStatus = 'pending' | 'approved' | 'rejected';
 
-// ─── Usuario ──────────────────────────────────────────────────
-export interface IUser {
-  id: string;
+// ─── Usuario (Base) ──────────────────────────────────────────
+export interface IUserBase {
   name: string;
   email: string;
   role: UserRole;
   googleId?: string;
   microsoftId?: string;
+}
+
+// ─── Usuario (DTO para Frontend/API) ─────────────────────────
+export interface IUser extends IUserBase {
+  id: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -31,30 +35,28 @@ export interface ISession {
 }
 
 // ─── Archivo / Apunte ─────────────────────────────────────────
-export interface IFile {
-  id: string;
+export interface IFileBase {
   originalName: string;
   minioObjectName: string;
   size: number;
   mimetype: string;
-  status: FileStatus;
   isClean: boolean;
-  uploadedBy: string; // userId
-  createdAt: Date;
-  updatedAt: Date;
+}
+
+export interface IFile extends IFileBase {
+  id: string;
+  uploadedAt: Date;
 }
 
 // ─── Respuestas de Auth ───────────────────────────────────────
-export interface IUserResponse {
+export interface IUserResponse extends IUserBase {
   id: string;
-  name: string;
-  email: string;
-  role: UserRole;
+  initialLetter?: string;
 }
 
 export interface IAuthResponse {
-  user: IUserResponse;
-  accessToken: string;
+  user?: IUserResponse;
+  accessToken?: string;
 }
 
 // ─── JWT Payload ──────────────────────────────────────────────

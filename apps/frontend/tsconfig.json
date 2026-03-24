@@ -20,7 +20,8 @@
       "@core/*": ["src/app/core/*"],
       "@shared/*": ["src/app/shared/*"],
       "@features/*": ["src/app/features/*"],
-      "@env/*": ["src/environments/*"]
+      "@env/*": ["src/environments/*"],
+      "@eduno/shared": ["../../packages/shared/src/index.ts"]
     }
   },
   "angularCompilerOptions": {
