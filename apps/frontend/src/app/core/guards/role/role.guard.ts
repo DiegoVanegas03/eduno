@@ -1,13 +1,14 @@
 import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
-import { AuthService, Role } from '@app/core/services/auth/auth.service';
+import { AuthService } from '@app/core/services/auth/auth.service';
+import { UserRole } from '@eduno/shared';
 
 export const roleGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
   // Expected roles can be passed in the route definitions using `data: { roles: ['ADMIN'] }`
-  const expectedRoles: Role[] = route.data['roles'] || [];
+  const expectedRoles: UserRole[] = route.data['roles'] || [];
 
   if (!authService.isLoggedIn()) {
     return router.parseUrl('/auth/login');
