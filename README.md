@@ -1,7 +1,7 @@
 # Eduno — Plataforma de Opiniones y Recursos Académicos
 
 > **Materia:** Aplicaciones Web Escalables · Facultad de Ingeniería, UASLP · Semestre 2025-2026-II  
-> **Estudiante:** Diego Emiliano Vanegas Cerda (0303943) · **Catedrático:** Francisco Javier Gómez Vázquez
+> **Estudiante:** Diego Emiliano Vanegas Cerda (0303943) · **Profesor:** Francisco Javier Gómez Vázquez
 
 ---
 
