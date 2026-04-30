@@ -1,15 +1,20 @@
 import mongoose, { Document, Schema } from "mongoose";
-import bcrypt from "bcrypt";
 import { UserRole } from "@eduno/shared";
 
+/**
+ * IUser represents the user document as stored in MongoDB.
+ * better-auth manages its own `user` and `session` collections automatically.
+ * This model is kept for application-level queries (e.g. enriching profile
+ * data with custom fields like `role`).
+ */
 export interface IUser extends Document {
   name: string;
   email: string;
-  password?: string;
   role: UserRole;
-  googleId?: string;
-  microsoftId?: string;
-  comparePassword(candidatePassword: string): Promise<boolean>;
+  emailVerified: boolean;
+  image?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const roles: UserRole[] = ["alumno", "profesor", "moderador", "admin"];
@@ -29,49 +34,25 @@ const userSchema = new Schema<IUser>(
       trim: true,
       match: [/\S+@\S+\.\S+/, "Por favor ingrese un correo válido"],
     },
-    password: {
-      type: String,
-      minlength: 6,
-      select: false, // No devolver la contraseña por defecto en las consultas
-    },
     role: {
       type: String,
       enum: roles,
       default: "alumno",
     },
-    googleId: {
-      type: String,
+    emailVerified: {
+      type: Boolean,
+      default: false,
     },
-    microsoftId: {
+    image: {
       type: String,
     },
   },
   {
     timestamps: true,
+    // better-auth uses the collection name "user" (lowercase, no plural)
+    collection: "user",
   },
 );
-
-// Hash password before saving
-userSchema.pre("save", async function (next) {
-  // Only hash the password if it has been modified (or is new)
-  if (!this.isModified("password") || !this.password) return next();
-
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error as Error);
-  }
-});
-
-// Compare hashed password
-userSchema.methods.comparePassword = async function (
-  candidatePassword: string,
-): Promise<boolean> {
-  if (!this.password) return false;
-  return bcrypt.compare(candidatePassword, this.password);
-};
 
 const User = mongoose.model<IUser>("User", userSchema);
 export default User;
