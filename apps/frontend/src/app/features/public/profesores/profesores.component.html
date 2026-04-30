@@ -109,7 +109,7 @@
           <div class="flex items-start justify-between mb-4">
             <div class="flex items-center gap-4">
               <div class="w-14 h-14 bg-{{getTheme(i)}}-100 rounded-full flex items-center justify-center text-xl font-bold text-{{getTheme(i)}}-700">
-                {{profesor.inicial}}
+                {{profesor.nombre.split(' ')[0].charAt(0)}}
               </div>
               <div>
                 <h3 class="font-bold text-oxford-navy-900 text-lg">{{profesor.titulo}} {{profesor.nombre.split(' ').pop()}}</h3>
