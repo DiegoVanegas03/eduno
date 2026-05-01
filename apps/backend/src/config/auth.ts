@@ -1,6 +1,8 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { MongoClient } from "mongodb";
+import { UserRole, USER_ROLES } from "@eduno/shared";
+
 
 // Re-use the same MONGO_URI used by Mongoose so we don't open a second pool.
 const mongoUri = process.env.MONGO_URI || "mongodb://localhost:27017/eduno";
@@ -28,6 +30,17 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,
+  },
+
+  // ---------- User Schema ----------
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        defaultValue: USER_ROLES.ALUMNO,
+
+      },
+    },
   },
 
   // ---------- Social providers ----------

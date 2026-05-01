@@ -4,7 +4,6 @@ import cookieParser from "cookie-parser";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./config/auth";
 import fileRoutes from "./routes/file.routes";
-import authRoutes from "./routes/auth.routes";
 
 const app: Application = express();
 
@@ -26,12 +25,16 @@ app.get("/", (_req: Request, res: Response) => {
 });
 
 // ── better-auth handler ───────────────────────────────────────────────────────
-// Mounts all auth endpoints under /api/auth  (sign-in, sign-up, sign-out,
-// /api/auth/google, /api/auth/google/callback, /api/auth/microsoft, …)
+// Mounts all auth endpoints under /api/auth:
+//   POST /api/auth/sign-up/email
+//   POST /api/auth/sign-in/email
+//   POST /api/auth/sign-out
+//   GET  /api/auth/get-session
+//   GET  /api/auth/sign-in/social  (Google, Microsoft)
+//   GET  /api/auth/callback/:provider
 app.all("/api/auth/*splat", toNodeHandler(auth));
 
-// ── Custom API routes ─────────────────────────────────────────────────────────
-app.use("/api/auth", authRoutes);   // /api/auth/me
+// ── API routes ────────────────────────────────────────────────────────────────
 app.use("/api/files", fileRoutes);
 
 export default app;

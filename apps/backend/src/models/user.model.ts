@@ -1,5 +1,7 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { UserRole } from "@eduno/shared";
+import { USER_ROLES } from "@eduno/shared";
+
 
 /**
  * IUser represents the user document as stored in MongoDB.
@@ -17,7 +19,8 @@ export interface IUser extends Document {
   updatedAt: Date;
 }
 
-const roles: UserRole[] = ["alumno", "profesor", "moderador", "admin"];
+const roles = Object.values(USER_ROLES);
+
 
 const userSchema = new Schema<IUser>(
   {

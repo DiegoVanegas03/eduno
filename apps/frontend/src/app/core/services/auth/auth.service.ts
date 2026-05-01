@@ -3,14 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap, catchError, of, finalize, map } from 'rxjs';
 import { ToastService } from '@shared/services/toast/toast.service';
-import { UserRole, IUserResponse as User } from '@eduno/shared';
+import { UserRole, IUserResponse as User, USER_ROLES } from '@eduno/shared';
+import { environment } from '@env/environment';
 
-export const Roles = {
-  ALUMNO: 'alumno' as UserRole,
-  PROFESOR: 'profesor' as UserRole,
-  MODERADOR: 'moderador' as UserRole,
-  ADMINISTRADOR: 'admin' as UserRole,
-} as const;
+
+export { USER_ROLES };
 
 @Injectable({
   providedIn: 'root',
@@ -37,17 +34,23 @@ export class AuthService {
 
   /**
    * Restores user session from cookies.
-   * Should be called on app load.
+   * Calls better-auth's built-in GET /api/auth/get-session.
    */
   checkSession(): Observable<User | null> {
-    return this.http.get<{ success: boolean; user: User }>('/auth/me').pipe(
-      map((res: { user: User }) => res.user),
-      tap((user) => this._currentUser.set(user)),
-      catchError(() => {
-        this._currentUser.set(null);
-        return of(null);
-      }),
-    );
+    return this.http
+      .get<{ session: unknown; user: User }>('/auth/get-session')
+      .pipe(
+        map((res) => {
+          if (!res?.user) return null;
+          // Derive initialLetter on the client — no need for the server to send it
+          return { ...res.user, initialLetter: res.user.name.charAt(0).toUpperCase() };
+        }),
+        tap((user) => this._currentUser.set(user)),
+        catchError(() => {
+          this._currentUser.set(null);
+          return of(null);
+        }),
+      );
   }
 
   /**
@@ -56,9 +59,9 @@ export class AuthService {
    */
   login(email: string, password: string): Observable<User> {
     return this.http
-      .post<{ success: boolean; user: User }>('/auth/login', { email, password })
+      .post<{ user: User }>('/auth/sign-in/email', { email, password })
       .pipe(
-        map((res: { user: User }) => res.user),
+        map((res) => res.user),
         tap((user) => {
           this._currentUser.set(user);
           this.toastService.success(`Bienvenido de nuevo, ${user.name}`);
@@ -76,13 +79,13 @@ export class AuthService {
    */
   register(name: string, email: string, password: string): Observable<User> {
     return this.http
-      .post<{ success: boolean; user: User }>('/auth/register', {
+      .post<{ user: User }>('/auth/sign-up/email', {
         name,
         email,
         password,
       })
       .pipe(
-        map((res: { user: User }) => res.user),
+        map((res) => res.user),
         tap((user) => {
           this._currentUser.set(user);
           this.toastService.success('Tu cuenta ha sido creada exitosamente. ¡Bienvenido!');
@@ -95,12 +98,11 @@ export class AuthService {
   }
 
   /**
-   * Refreshes the session using the Refresh Token cookie.
+   * Refreshes the session.
+   * with better-auth, this is handled automatically via cookies.
    */
   refreshToken(): Observable<any> {
-    return this.http
-      .post('/auth/refresh', {})
-      .pipe(tap(() => console.log('Token refreshed successfully')));
+    return this.checkSession();
   }
 
   /**
@@ -108,7 +110,7 @@ export class AuthService {
    */
   logout(): void {
     this.http
-      .post('/auth/logout', {})
+      .post('/auth/sign-out', {})
       .pipe(
         finalize(() => {
           this._currentUser.set(null);
@@ -117,6 +119,15 @@ export class AuthService {
         }),
       )
       .subscribe();
+  }
+
+  /**
+   * Redirects the user to the social login provider.
+   * better-auth handles the handshake and redirects back.
+   */
+  socialLogin(provider: 'google' | 'microsoft'): void {
+    const callbackUrl = window.location.origin + '/';
+    window.location.href = `${environment.apiUrl}/auth/sign-in/social?provider=${provider}&callbackURL=${callbackUrl}`;
   }
 
   // Helper role checks

@@ -2,7 +2,7 @@ import { Component, inject, signal, afterNextRender } from '@angular/core';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { ButtonComponent } from '@shared/components/button/button.component';
 import { LogoComponent } from '@shared/components/logo/logo.component';
-import { AuthService, Roles } from '@app/core/services/auth/auth.service';
+import { AuthService, USER_ROLES } from '@app/core/services/auth/auth.service';
 import { UserCardComponent } from '@shared/components/user-card/user-card.component';
 
 @Component({
@@ -17,7 +17,7 @@ export class Navbar {
   isMobileMenuOpen = signal(false);
   isMobileServicesOpen = signal(false);
   isInitialized = signal(false);
-  Roles = Roles;
+  Roles = USER_ROLES;
 
   constructor() {
     afterNextRender(() => {

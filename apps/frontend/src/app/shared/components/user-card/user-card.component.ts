@@ -1,7 +1,7 @@
 import { Component, inject, signal, ElementRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { AuthService, Roles } from '@app/core/services/auth/auth.service';
+import { AuthService, USER_ROLES } from '@app/core/services/auth/auth.service';
 
 @Component({
   selector: 'app-user-card',
@@ -14,7 +14,7 @@ export class UserCardComponent {
   elementRef = inject(ElementRef);
 
   isDropdownOpen = signal(false);
-  Roles = Roles; // Exponemos Roles al template para chequeo de '@if (authService.hasRole(Roles.ADMIN))'
+  Roles = USER_ROLES; // Exponemos USER_ROLES al template para chequeo de '@if (authService.hasRole(USER_ROLES.ADMIN))'
 
   toggleDropdown(event: Event) {
     event.stopPropagation();
