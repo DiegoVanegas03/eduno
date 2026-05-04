@@ -9,7 +9,7 @@ import { AuthService } from '@app/core/services/auth/auth.service';
   selector: 'app-login',
   standalone: true,
   imports: [RouterLink, ButtonComponent, ReactiveFormsModule, FormFieldComponent],
-  templateUrl: './login.html',
+  templateUrl: './login.component.html',
 })
 export class LoginComponent {
   private fb = inject(FormBuilder);
@@ -51,9 +51,5 @@ export class LoginComponent {
         this.errorMessage.set(err.error?.message || 'Error en autenticación');
       },
     });
-  }
-
-  loginWithSocial(provider: 'google' | 'microsoft') {
-    this.authService.socialLogin(provider);
   }
 }

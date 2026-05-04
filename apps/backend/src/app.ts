@@ -15,8 +15,6 @@ app.use(
   }),
 );
 
-// ── Body parsers ──────────────────────────────────────────────────────────────
-app.use(express.json());
 app.use(cookieParser());
 
 // ── Health check ──────────────────────────────────────────────────────────────
@@ -32,9 +30,10 @@ app.get("/", (_req: Request, res: Response) => {
 //   GET  /api/auth/get-session
 //   GET  /api/auth/sign-in/social  (Google, Microsoft)
 //   GET  /api/auth/callback/:provider
-app.all("/api/auth/*splat", toNodeHandler(auth));
+app.all("/api/auth/*", toNodeHandler(auth));
 
 // ── API routes ────────────────────────────────────────────────────────────────
+app.use(express.json());
 app.use("/api/files", fileRoutes);
 
 export default app;
