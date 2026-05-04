@@ -1,7 +1,5 @@
 <nav
-  class="fixed top-0 inset-x-0 z-50 bg-white/80 backdrop-blur-md border-b border-cerulean-100"
-  [class.transition-all]="isInitialized()"
-  [class.duration-300]="isInitialized()"
+  class="fixed top-0 inset-x-0 z-50 bg-white/80 backdrop-blur-md border-b border-cerulean-100 transition-all duration-300"
 >
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between h-20">
@@ -63,7 +61,7 @@
       <!-- Right Desktop Call To Actions -->
       <div class="hidden lg:flex lg:items-center lg:space-x-4">
         @if (!authService.isLoggedIn()) {
-          <app-button variant="ghost" routerLink="/auth/login" [queryParams]="{ returnUrl: router.url }">
+          <app-button variant="ghost" routerLink="/auth/login">
             Iniciar Sesión
           </app-button>
           <app-button variant="primary" routerLink="/auth/register">
@@ -103,101 +101,101 @@
 }
 
 <!-- Sliding menu drawer -->
-<div 
-  class="fixed top-0 right-0 z-50 h-screen w-72 bg-white shadow-2xl border-l border-cerulean-100 transform overflow-y-auto"
-  [class.transition-transform]="isInitialized()"
-  [class.duration-300]="isInitialized()"
-  [class.ease-in-out]="isInitialized()"
-  [class.translate-x-0]="isMobileMenuOpen()"
-  [class.translate-x-full]="!isMobileMenuOpen()"
->
-  <div class="p-6 flex flex-col h-full">
-    <!-- Header inside drawer -->
-    <div class="flex items-center justify-between mb-8 border-b border-cerulean-50 pb-4">
-      <div class="flex items-center gap-2">
-        <app-logo/>
-        <span class="font-extrabold text-xl text-oxford-navy-900 tracking-tight">Eduno</span>
-      </div>
-      <button (click)="toggleMobileMenu()" class="text-oxford-navy-500 hover:text-punch-red-500 p-2 rounded-md transition-colors cursor-pointer bg-cerulean-50 hover:bg-punch-red-50">
-        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
-      </button>
-    </div>
-
-    <!-- Links -->
-    <div class="flex flex-col space-y-2 flex-1">
-      <a routerLink="/" routerLinkActive="text-punch-red-500 font-extrabold bg-punch-red-50" [routerLinkActiveOptions]="{exact: true}" (click)="toggleMobileMenu()" class="text-oxford-navy-600 hover:text-punch-red-500 hover:bg-cerulean-50 font-medium px-4 py-3 rounded-xl transition-colors flex items-center gap-3">
-        Inicio
-      </a>
-      <a routerLink="/profesores" routerLinkActive="text-punch-red-500 font-extrabold bg-punch-red-50" (click)="toggleMobileMenu()" class="text-oxford-navy-600 hover:text-punch-red-500 hover:bg-cerulean-50 font-medium px-4 py-3 rounded-xl transition-colors flex items-center gap-3">
-        Explora Profesores
-      </a>
-      <a routerLink="/tips" routerLinkActive="text-punch-red-500 font-extrabold bg-punch-red-50" (click)="toggleMobileMenu()" class="text-oxford-navy-600 hover:text-punch-red-500 hover:bg-cerulean-50 font-medium px-4 py-3 rounded-xl transition-colors flex items-center gap-3">
-        Tips Universitarios
-      </a>
-      
-      <!-- Servicios Accordion (Mobile) -->
-      <div class="flex flex-col">
-        <button (click)="toggleMobileServices()" class="text-oxford-navy-600 hover:text-punch-red-500 hover:bg-cerulean-50 font-medium px-4 py-3 rounded-xl transition-colors flex items-center justify-between w-full">
-          <span>Servicios</span>
-          <svg class="w-5 h-5 transition-transform" [class.rotate-180]="isMobileServicesOpen()" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+@if(isInitialized()){
+  <div 
+    class="fixed top-0 right-0 z-50 h-screen w-72 transition-transform duration-300 ease-in-out bg-white shadow-2xl border-l border-cerulean-100 transform overflow-y-auto"
+    [class.translate-x-0]="isMobileMenuOpen()"
+    [class.translate-x-full]="!isMobileMenuOpen()"
+  >
+    <div class="p-6 flex flex-col h-full">
+      <!-- Header inside drawer -->
+      <div class="flex items-center justify-between mb-8 border-b border-cerulean-50 pb-4">
+        <div class="flex items-center gap-2">
+          <app-logo/>
+          <span class="font-extrabold text-xl text-oxford-navy-900 tracking-tight">Eduno</span>
+        </div>
+        <button (click)="toggleMobileMenu()" class="text-oxford-navy-500 hover:text-punch-red-500 p-2 rounded-md transition-colors cursor-pointer bg-cerulean-50 hover:bg-punch-red-50">
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
         </button>
+      </div>
+
+      <!-- Links -->
+      <div class="flex flex-col space-y-2 flex-1">
+        <a routerLink="/" routerLinkActive="text-punch-red-500 font-extrabold bg-punch-red-50" [routerLinkActiveOptions]="{exact: true}" (click)="toggleMobileMenu()" class="text-oxford-navy-600 hover:text-punch-red-500 hover:bg-cerulean-50 font-medium px-4 py-3 rounded-xl transition-colors flex items-center gap-3">
+          Inicio
+        </a>
+        <a routerLink="/profesores" routerLinkActive="text-punch-red-500 font-extrabold bg-punch-red-50" (click)="toggleMobileMenu()" class="text-oxford-navy-600 hover:text-punch-red-500 hover:bg-cerulean-50 font-medium px-4 py-3 rounded-xl transition-colors flex items-center gap-3">
+          Explora Profesores
+        </a>
+        <a routerLink="/tips" routerLinkActive="text-punch-red-500 font-extrabold bg-punch-red-50" (click)="toggleMobileMenu()" class="text-oxford-navy-600 hover:text-punch-red-500 hover:bg-cerulean-50 font-medium px-4 py-3 rounded-xl transition-colors flex items-center gap-3">
+          Tips Universitarios
+        </a>
         
-        @if (isMobileServicesOpen()) {
-          <div class="flex flex-col pl-4 mt-1 space-y-1">
-            <a routerLink="/servicios/horarios" (click)="toggleMobileMenu()" class="text-sm text-oxford-navy-600 hover:text-punch-red-500 hover:bg-cerulean-50/50 font-medium px-4 py-2.5 rounded-xl transition-colors block ml-2">
-              Generador de Horarios
-            </a>
-            <a routerLink="/servicios/conecta" (click)="toggleMobileMenu()" class="text-sm text-oxford-navy-600 hover:text-punch-red-500 hover:bg-cerulean-50/50 font-medium px-4 py-2.5 rounded-xl transition-colors block ml-2">
-              Conecta
-            </a>
+        <!-- Servicios Accordion (Mobile) -->
+        <div class="flex flex-col">
+          <button (click)="toggleMobileServices()" class="text-oxford-navy-600 hover:text-punch-red-500 hover:bg-cerulean-50 font-medium px-4 py-3 rounded-xl transition-colors flex items-center justify-between w-full">
+            <span>Servicios</span>
+            <svg class="w-5 h-5 transition-transform" [class.rotate-180]="isMobileServicesOpen()" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
+          
+          @if (isMobileServicesOpen()) {
+            <div class="flex flex-col pl-4 mt-1 space-y-1">
+              <a routerLink="/servicios/horarios" (click)="toggleMobileMenu()" class="text-sm text-oxford-navy-600 hover:text-punch-red-500 hover:bg-cerulean-50/50 font-medium px-4 py-2.5 rounded-xl transition-colors block ml-2">
+                Generador de Horarios
+              </a>
+              <a routerLink="/servicios/conecta" (click)="toggleMobileMenu()" class="text-sm text-oxford-navy-600 hover:text-punch-red-500 hover:bg-cerulean-50/50 font-medium px-4 py-2.5 rounded-xl transition-colors block ml-2">
+                Conecta
+              </a>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex flex-col space-y-3 pt-6 border-t border-cerulean-100 mt-auto">
+        @if (!authService.isLoggedIn()) {
+          <app-button variant="ghost" class="w-full justify-center" routerLink="/auth/login" (click)="toggleMobileMenu()">Iniciar Sesión</app-button>
+          <app-button variant="primary" class="w-full justify-center shadow-md" routerLink="/auth/register" (click)="toggleMobileMenu()">Únete a Eduno</app-button>
+        } @else {
+          <!-- Renderizado de las opciones para móviles directamente -->
+          <div class="flex items-center gap-3 mb-4 bg-cerulean-50 p-4 rounded-2xl border border-cerulean-100">
+            <div class="w-12 h-12 bg-cerulean-100 rounded-full flex items-center justify-center text-cerulean-700 font-bold shrink-0 shadow-sm border border-cerulean-200 text-lg">
+              {{ authService.currentUser()?.initialLetter }}
+            </div>
+            <div class="flex flex-col">
+              <span class="text-base font-bold text-oxford-navy-900 leading-tight">{{ authService.currentUser()?.name }}</span>
+              <span class="text-xs text-oxford-navy-500 font-medium uppercase mt-1">{{ authService.userRole() }}</span>
+            </div>
           </div>
+
+          <div class="flex flex-col space-y-1 mb-2">
+            <!-- Mi Cuenta -->
+            <a routerLink="/perfil/mi-cuenta" (click)="toggleMobileMenu()" class="flex items-center px-4 py-3 text-sm font-medium text-oxford-navy-700 hover:bg-cerulean-50 rounded-xl transition-colors">
+              <svg class="w-5 h-5 mr-3 text-oxford-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+              Mi Cuenta
+            </a>
+
+            <!-- Admin Panel -->
+            @if (authService.hasRole(Roles.ADMIN)) {
+              <a routerLink="/admin/dashboard" (click)="toggleMobileMenu()" class="flex items-center px-4 py-3 text-sm font-medium text-oxford-navy-700 hover:bg-cerulean-50 rounded-xl transition-colors">
+                <svg class="w-5 h-5 mr-3 text-oxford-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                Panel Administrativo
+              </a>
+            }
+          </div>
+
+          <div class="h-px bg-cerulean-100 my-2 w-full"></div>
+
+          <!-- Cerrar Sesión (Mobile) -->
+          <button (click)="logout()" class="w-full flex items-center px-4 py-3 text-sm font-bold text-punch-red-600 hover:bg-punch-red-50 rounded-xl transition-colors text-left cursor-pointer">
+            <svg class="w-5 h-5 mr-3 text-punch-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+            Cerrar Sesión
+          </button>
         }
       </div>
     </div>
-
-    <!-- Actions -->
-    <div class="flex flex-col space-y-3 pt-6 border-t border-cerulean-100 mt-auto">
-      @if (!authService.isLoggedIn()) {
-        <app-button variant="ghost" class="w-full justify-center" routerLink="/auth/login" [queryParams]="{ returnUrl: router.url }" (click)="toggleMobileMenu()">Iniciar Sesión</app-button>
-        <app-button variant="primary" class="w-full justify-center shadow-md" routerLink="/auth/register" (click)="toggleMobileMenu()">Únete a Eduno</app-button>
-      } @else {
-        <!-- Renderizado de las opciones para móviles directamente -->
-        <div class="flex items-center gap-3 mb-4 bg-cerulean-50 p-4 rounded-2xl border border-cerulean-100">
-          <div class="w-12 h-12 bg-cerulean-100 rounded-full flex items-center justify-center text-cerulean-700 font-bold shrink-0 shadow-sm border border-cerulean-200 text-lg">
-             {{ authService.currentUser()?.name?.charAt(0) || 'U' }}
-          </div>
-          <div class="flex flex-col">
-            <span class="text-base font-bold text-oxford-navy-900 leading-tight">{{ authService.currentUser()?.name }}</span>
-            <span class="text-xs text-oxford-navy-500 font-medium uppercase mt-1">{{ authService.userRole() }}</span>
-          </div>
-        </div>
-
-        <div class="flex flex-col space-y-1 mb-2">
-          <!-- Mi Cuenta -->
-          <a routerLink="/perfil/mi-cuenta" (click)="toggleMobileMenu()" class="flex items-center px-4 py-3 text-sm font-medium text-oxford-navy-700 hover:bg-cerulean-50 rounded-xl transition-colors">
-            <svg class="w-5 h-5 mr-3 text-oxford-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-            Mi Cuenta
-          </a>
-
-          <!-- Admin Panel -->
-          @if (authService.hasRole(Roles.ADMINISTRADOR)) {
-            <a routerLink="/admin/dashboard" (click)="toggleMobileMenu()" class="flex items-center px-4 py-3 text-sm font-medium text-oxford-navy-700 hover:bg-cerulean-50 rounded-xl transition-colors">
-              <svg class="w-5 h-5 mr-3 text-oxford-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-              Panel Administrativo
-            </a>
-          }
-        </div>
-
-        <div class="h-px bg-cerulean-100 my-2 w-full"></div>
-
-        <!-- Cerrar Sesión (Mobile) -->
-        <button (click)="logout()" class="w-full flex items-center px-4 py-3 text-sm font-bold text-punch-red-600 hover:bg-punch-red-50 rounded-xl transition-colors text-left cursor-pointer">
-          <svg class="w-5 h-5 mr-3 text-punch-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-          Cerrar Sesión
-        </button>
-      }
-    </div>
   </div>
-</div>
+}
+

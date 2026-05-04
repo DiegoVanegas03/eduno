@@ -1,0 +1,153 @@
+<div class="text-center mb-8">
+  <h2 class="text-2xl font-extrabold text-oxford-navy-900 tracking-tight mb-2">
+    Crea tu cuenta
+  </h2>
+  <p class="text-oxford-navy-500 text-sm">
+    Únete a Eduno y transforma tu aprendizaje
+  </p>
+</div>
+
+@if (errorMessage()) {
+  <div class="mb-6 p-4 bg-punch-red-50 border border-punch-red-100 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+    <svg class="w-5 h-5 text-punch-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <p class="text-sm font-medium text-punch-red-800">{{ errorMessage() }}</p>
+  </div>
+}
+
+<form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-y-4">
+  <!-- Nombre -->
+  <app-form-field
+    id="name"
+    formControlName="name"
+    label="Nombre completo"
+    icon="user"
+    type="text"
+    placeholder="Juan Pérez"
+    autocomplete="name"
+    [error]="f['name'].touched && f['name'].errors?.['required'] ? 'El nombre es obligatorio' : 
+            f['name'].touched && f['name'].errors?.['minlength'] ? 'Mínimo 3 caracteres' : ''"
+  />
+
+  <!-- Email -->
+  <app-form-field
+    id="email"
+    formControlName="email"
+    label="Correo electrónico"
+    icon="email"
+    type="email"
+    placeholder="a234567@alumnos.uaslp.mx"
+    autocomplete="email"
+    [error]="f['email'].touched && f['email'].errors?.['required'] ? 'El correo es obligatorio' : 
+            f['email'].touched && f['email'].errors?.['email'] ? 'Formato de correo inválido' : ''"
+  />
+
+  <!-- Contraseñas -->
+  <app-form-field
+    id="password"
+    formControlName="password"
+    label="Contraseña"
+    icon="password"
+    type="password"
+    placeholder="••••••••"
+    autocomplete="new-password"
+    [error]="f['password'].touched && f['password'].errors?.['required'] ? 'La contraseña es obligatoria' : 
+            f['password'].touched && f['password'].errors?.['minlength'] ? 'Mínimo 8 caracteres' : ''"
+  />
+
+  @if (passwordValue.length > 0) {
+    <div class="px-1 -mt-1 mb-2 animate-in fade-in slide-in-from-top-2 duration-300">
+      <div class="flex gap-1 mb-2">
+        <div class="h-1.5 flex-1 rounded-full transition-colors duration-300" [class]="passwordStrength >= 1 ? 'bg-punch-red-500' : 'bg-gray-200'"></div>
+        <div class="h-1.5 flex-1 rounded-full transition-colors duration-300" [class]="passwordStrength >= 2 ? (passwordStrength === 2 ? 'bg-orange-500' : 'bg-amber-400') : 'bg-gray-200'"></div>
+        <div class="h-1.5 flex-1 rounded-full transition-colors duration-300" [class]="passwordStrength >= 3 ? (passwordStrength === 4 ? 'bg-honeydew-500' : 'bg-honeydew-400') : 'bg-gray-200'"></div>
+        <div class="h-1.5 flex-1 rounded-full transition-colors duration-300" [class]="passwordStrength >= 4 ? 'bg-honeydew-500' : 'bg-gray-200'"></div>
+      </div>
+      
+      <p class="text-xs font-bold mb-3 transition-colors duration-300" 
+         [class]="passwordStrength <= 1 ? 'text-punch-red-500' : passwordStrength === 2 ? 'text-orange-500' : passwordStrength === 3 ? 'text-honeydew-600' : 'text-honeydew-600'">
+        {{ passwordStrength <= 1 ? 'Contraseña Débil' : passwordStrength === 2 ? 'Contraseña Regular' : passwordStrength === 3 ? 'Contraseña Buena' : 'Contraseña Fuerte' }}
+      </p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-2 text-xs text-oxford-navy-500">
+        <div class="flex items-center gap-1.5 transition-colors duration-300" [class.text-honeydew-600]="hasMinLength">
+          <svg class="w-4 h-4 transition-colors duration-300" [class]="hasMinLength ? 'text-honeydew-500' : 'text-gray-300'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            @if (hasMinLength) {
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+            } @else {
+              <circle cx="12" cy="12" r="8" stroke-width="2" />
+            }
+          </svg>
+          <span [class.font-medium]="hasMinLength">Mínimo 8 caracteres</span>
+        </div>
+        
+        <div class="flex items-center gap-1.5 transition-colors duration-300" [class.text-honeydew-600]="hasUpperAndLowerCase">
+          <svg class="w-4 h-4 transition-colors duration-300" [class]="hasUpperAndLowerCase ? 'text-honeydew-500' : 'text-gray-300'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            @if (hasUpperAndLowerCase) {
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+            } @else {
+              <circle cx="12" cy="12" r="8" stroke-width="2" />
+            }
+          </svg>
+          <span [class.font-medium]="hasUpperAndLowerCase">Mayúsculas y minúsculas</span>
+        </div>
+        
+        <div class="flex items-center gap-1.5 transition-colors duration-300" [class.text-honeydew-600]="hasNumbers">
+          <svg class="w-4 h-4 transition-colors duration-300" [class]="hasNumbers ? 'text-honeydew-500' : 'text-gray-300'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            @if (hasNumbers) {
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+            } @else {
+              <circle cx="12" cy="12" r="8" stroke-width="2" />
+            }
+          </svg>
+          <span [class.font-medium]="hasNumbers">Al menos un número</span>
+        </div>
+        
+        <div class="flex items-center gap-1.5 transition-colors duration-300" [class.text-honeydew-600]="hasSpecialChars">
+          <svg class="w-4 h-4 transition-colors duration-300" [class]="hasSpecialChars ? 'text-honeydew-500' : 'text-gray-300'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            @if (hasSpecialChars) {
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+            } @else {
+              <circle cx="12" cy="12" r="8" stroke-width="2" />
+            }
+          </svg>
+          <span [class.font-medium]="hasSpecialChars">Carácter especial (!@#$%)</span>
+        </div>
+      </div>
+    </div>
+  }
+
+  <app-form-field
+    id="confirm_password"
+    formControlName="confirmPassword"
+    label="Confirmar contraseña"
+    icon="password"
+    type="password"
+    placeholder="••••••••"
+    autocomplete="new-password"
+    [error]="f['confirmPassword'].touched && registerForm.errors?.['mismatch'] ? 'Las contraseñas no coinciden' : ''"
+  />
+
+  <!-- Submit -->
+  <div class="pt-2">
+    <app-button
+      variant="primary"
+      size="lg"
+      type="submit"
+      class="w-full"
+      [loading]="isLoading()"
+      [disabled]="isLoading()"
+    >
+      Crear cuenta
+    </app-button>
+  </div>
+</form>
+
+<!-- Login Prompt -->
+<div class="mt-6 text-center text-sm">
+  <span class="text-oxford-navy-600">¿Ya tienes cuenta?</span>
+  <a routerLink="/auth/login" class="ml-1 font-bold text-punch-red-500 hover:text-punch-red-600 transition-colors">
+    Inicia sesión
+  </a>
+</div>

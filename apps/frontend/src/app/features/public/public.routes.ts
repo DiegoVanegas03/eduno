@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 export const publicRoutes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./landing/landing').then((m) => m.Landing),
+    loadComponent: () => import('./landing/landing.component').then((m) => m.Landing),
   },
   {
     path: 'profesores',

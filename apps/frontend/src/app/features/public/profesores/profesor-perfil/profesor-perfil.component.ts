@@ -4,7 +4,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { ReviewCard } from '@core/components/review-card/review-card';
 import { MateriaAccordion } from '@core/components/materia-accordion/materia-accordion';
 import { ButtonComponent } from '@shared/components/button/button.component';
-import { AuthService, Roles } from '@app/core/services/auth/auth.service';
+import { AuthService, USER_ROLES } from '@app/core/services/auth/auth.service';
 import { ProfesorService } from '@core/services/profesor/profesor.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs/operators';
@@ -44,7 +44,7 @@ export class ProfesorPerfilComponent {
 
   initialLetter = computed(() => this.authService.currentUser()?.initialLetter);
   isAuthenticated = computed(() => this.authService.isLoggedIn());
-  isAlumno = computed(() => this.authService.hasRole(Roles.ALUMNO));
+  isAlumno = computed(() => this.authService.hasRole(USER_ROLES.ALUMNO));
 
   viewMode = signal<'active' | 'history'>('active');
 

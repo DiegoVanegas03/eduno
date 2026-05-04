@@ -5,7 +5,7 @@ import { LogoComponent } from '@shared/components/logo/logo.component';
 @Component({
   selector: 'app-footer',
   imports: [RouterLink, LogoComponent],
-  templateUrl: './footer.html',
+  templateUrl: './footer.component.html',
   standalone: true,
 })
 export class FooterComponent {}

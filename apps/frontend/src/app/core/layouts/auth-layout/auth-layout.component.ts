@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
+import { AuthService } from '@app/core/services/auth/auth.service';
 import { LogoComponent } from '@shared/components/logo/logo.component';
 
 @Component({
@@ -8,7 +9,9 @@ import { LogoComponent } from '@shared/components/logo/logo.component';
   templateUrl: './auth-layout.html',
 })
 export class AuthLayout {
-  continueWithGoogle() {}
+  authService = inject(AuthService);
 
-  continueWithMicrosoft() {}
+  loginWithSocial(provider: 'google' | 'microsoft') {
+    this.authService.socialLogin(provider);
+  }
 }

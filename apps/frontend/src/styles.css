@@ -77,3 +77,30 @@
   --color-orange-900: #7c2d12;
   --color-orange-950: #431407;
 }
+
+@keyframes shimmer-gold {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+
+@utility animate-shimmer-gold {
+  background: linear-gradient(
+    110deg,
+    rgba(255, 255, 255, 0.7) 0%,
+    rgba(255, 255, 255, 0.7) 42%,
+    #ffaa00 48%,
+    #f59e0b 50%,
+    #ffaa00 52%,
+    rgba(255, 255, 255, 0.7) 58%,
+    rgba(255, 255, 255, 0.7) 100%
+  );
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shimmer-gold 6s linear infinite;
+}

@@ -1,0 +1,70 @@
+<div class="text-center mb-8">
+  <h2 class="text-2xl font-extrabold text-oxford-navy-900 tracking-tight mb-2">
+    Inicia sesión en Eduno
+  </h2>
+  <p class="text-oxford-navy-500 text-sm">
+    Tu puerta de entrada al éxito universitario
+  </p>
+</div>
+
+<form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-y-4">
+  <!-- Email -->
+  <app-form-field
+    id="email"
+    formControlName="email"
+    label="Correo institucional o personal"
+    icon="email"
+    type="email"
+    placeholder="a234567@alumnos.uaslp.mx"
+    autocomplete="username"
+    [error]="f['email'].touched && f['email'].errors?.['required'] ? 'El correo es obligatorio' : 
+            f['email'].touched && f['email'].errors?.['email'] ? 'Formato de correo inválido' : ''"
+  />
+
+  <!-- Password -->
+  <div>
+    <app-form-field
+      id="password"
+      formControlName="password"
+      label="Contraseña"
+      icon="password"
+      type="password"
+      placeholder="••••••••"
+      autocomplete="current-password"
+      [error]="f['password'].touched && f['password'].errors?.['required'] ? 'La contraseña es obligatoria' : ''"
+    />
+    <div class="flex justify-end mt-2">
+      <a href="#" class="text-sm font-medium text-punch-red-500 hover:text-punch-red-600 transition-colors">
+        ¿Olvidaste tu contraseña?
+      </a>
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div>
+    @if (errorMessage()) {
+      <div class="mb-4 text-sm font-medium text-punch-red-600 bg-punch-red-50 p-3 rounded-lg border border-punch-red-100 flex items-center">
+        <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        {{ errorMessage() }}
+      </div>
+    }
+    <app-button variant="primary" size="lg" type="submit" class="w-full" [disabled]="isLoading()">
+      {{ isLoading() ? 'Verificando...' : 'Iniciar sesión' }}
+      <ng-container icon-right>
+        <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        </svg>
+      </ng-container>
+    </app-button>
+  </div>
+</form>
+
+<!-- Sign Up Prompt -->
+<div class="mt-8 text-center text-sm">
+  <span class="text-oxford-navy-600">¿No tienes cuenta?</span>
+  <a routerLink="/auth/register" class="ml-1 font-bold text-punch-red-500 hover:text-punch-red-600 transition-colors">
+    Regístrate gratis
+  </a>
+</div>

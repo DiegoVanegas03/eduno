@@ -3,35 +3,51 @@
 // ============================================================
 
 // ─── Roles ───────────────────────────────────────────────────
-export type UserRole = 'alumno' | 'profesor' | 'moderador' | 'admin';
+export const USER_ROLES = {
+  ALUMNO: 'alumno',
+  PROFESOR: 'profesor',
+  MODERADOR: 'moderador',
+  ADMIN: 'admin',
+} as const;
+
+export type UserRole = (typeof USER_ROLES)[keyof typeof USER_ROLES];
 
 // ─── Estado de archivos ───────────────────────────────────────
-export type FileStatus = 'pending' | 'approved' | 'rejected';
+export const FILE_STATUS = {
+  PENDING: 'pending',
+  APPROVED: 'approved',
+  REJECTED: 'rejected',
+} as const;
+
+export type FileStatus = (typeof FILE_STATUS)[keyof typeof FILE_STATUS];
 
 // ─── Usuario (Base) ──────────────────────────────────────────
+// googleId y microsoftId fueron eliminados: better-auth los gestiona
+// en su propia colección `account`, no en el documento del usuario.
 export interface IUserBase {
   name: string;
   email: string;
   role: UserRole;
-  googleId?: string;
-  microsoftId?: string;
 }
 
-// ─── Usuario (DTO para Frontend/API) ─────────────────────────
+// ─── Usuario (DTO completo) ───────────────────────────────────
 export interface IUser extends IUserBase {
   id: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-// ─── Sesión ───────────────────────────────────────────────────
-export interface ISession {
+// ─── Usuario (DTO para respuestas de API / Frontend) ─────────
+export interface IUserResponse extends IUserBase {
   id: string;
-  userId: string;
-  userAgent?: string;
-  ip?: string;
-  expiresAt: Date;
-  createdAt: Date;
+  initialLetter?: string;
+}
+
+// ─── Respuesta de Auth ────────────────────────────────────────
+// accessToken fue eliminado: better-auth gestiona la sesión
+// mediante cookies HttpOnly, no devuelve tokens en el body.
+export interface IAuthResponse {
+  user?: IUserResponse;
 }
 
 // ─── Archivo / Apunte ─────────────────────────────────────────
@@ -46,24 +62,4 @@ export interface IFileBase {
 export interface IFile extends IFileBase {
   id: string;
   uploadedAt: Date;
-}
-
-// ─── Respuestas de Auth ───────────────────────────────────────
-export interface IUserResponse extends IUserBase {
-  id: string;
-  initialLetter?: string;
-}
-
-export interface IAuthResponse {
-  user?: IUserResponse;
-  accessToken?: string;
-}
-
-// ─── JWT Payload ──────────────────────────────────────────────
-export interface IJwtPayload {
-  sub: string;   // userId
-  email: string;
-  role: UserRole;
-  iat?: number;
-  exp?: number;
 }
