@@ -1,0 +1,206 @@
+<div class="flex flex-col gap-12 py-4 animate-in fade-in duration-500 max-w-4xl relative">
+  <div class="flex justify-end">
+    <button [disabled]="!hasChanges()" (click)="cancel()" class="text-right text-sm font-bold cursor-pointer disabled:cursor-not-allowed disabled:text-gray-400 disabled:hover:text-gray-400 text-red-600 hover:text-red-700 transition-colors duration-300">Resetear cambios</button>
+  </div>
+  <!-- Sobre ti -->
+  <section id="sobre-ti" class="scroll-mt-32">
+    <div class="mb-8">
+      <h2 class="font-bold text-red-600 text-2xl tracking-tight mb-1">Sobre ti</h2>
+      <p class="font-normal text-gray-500 text-base">Configura tu cuenta y personaliza tu perfil público.</p>
+    </div>
+
+    <div class="flex gap-12 items-start">
+      <div class="flex flex-col items-center gap-4 group">
+        <div class="bg-cerulean-100 w-32 h-32 rounded-full flex items-center justify-center shadow-inner relative overflow-hidden transition-transform duration-500 group-hover:scale-105">
+          <span class="font-black text-cerulean-700 text-6xl">D</span>
+          <div class="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors"></div>
+        </div>
+        <span class="font-bold text-cerulean-700 text-xs tracking-[0.2em] uppercase">Alumno</span>
+      </div>
+
+      <div class="flex flex-col gap-6 flex-1 max-w-md">
+        <!-- Input field: Nombre -->
+        <div class="relative pt-2 group">
+          <div class="absolute left-4 top-0 bg-white px-2 text-xs font-bold text-gray-400 uppercase tracking-wider transition-colors group-focus-within:text-red-600">Nombre</div>
+          <div class="flex items-center gap-2">
+            <div class="flex-1 border border-gray-200 rounded-xl p-4 text-base font-medium text-gray-700 bg-white transition-all duration-300 group-hover:border-gray-300 group-focus-within:border-red-500">
+              @if(editModes()['nombre']){
+              <input 
+                type="text" 
+                [ngModel]="profileData().nombre" 
+                (ngModelChange)="updateField('nombre', $event)"
+                class="w-full bg-transparent border-none outline-none focus:ring-0"
+              >
+              }@else{
+                <span>{{ profileData().nombre }}</span>
+              }
+
+            </div>
+            <button (click)="toggleEdit('nombre')" class="p-2 text-gray-400 hover:text-red-600 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Input field: Correo -->
+        <div class="relative pt-2 group">
+          <div class="absolute left-4 top-0 bg-white px-2 text-xs font-bold text-gray-400 uppercase tracking-wider transition-colors group-focus-within:text-red-600">Correo</div>
+          <div class="flex items-center gap-2">
+            <div class="flex-1 border border-gray-200 rounded-xl p-4 text-base font-medium text-gray-700 bg-white transition-all duration-300 group-hover:border-gray-300 group-focus-within:border-red-500">
+              <input 
+                *ngIf="editModes()['correo']" 
+                type="email" 
+                [ngModel]="profileData().correo" 
+                (ngModelChange)="updateField('correo', $event)"
+                class="w-full bg-transparent border-none outline-none focus:ring-0"
+              >
+              <span *ngIf="!editModes()['correo']">{{ profileData().correo }}</span>
+            </div>
+            <button (click)="toggleEdit('correo')" class="p-2 text-gray-400 hover:text-red-600 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+            </button>
+          </div>
+          <div class="mt-2 flex items-center justify-end gap-2 text-xs">
+            <span class="font-medium text-orange-500 italic">Correo sin verificar</span>
+            <button class="font-bold text-red-600 cursor-pointer hover:underline">Reenviar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Información complementaria -->
+  <section id="complementary" class="scroll-mt-32">
+    <div class="mb-8">
+      <h2 class="font-bold text-red-600 text-2xl tracking-tight mb-1">Información complementaria</h2>
+      <p class="font-normal text-gray-500 text-base">Cuéntanos un poco más de ti</p>
+    </div>
+
+    <div class="flex flex-col gap-6 max-w-md ml-4">
+      <div class="relative pt-2 group">
+        <div class="absolute left-4 top-0 bg-white px-2 text-xs font-bold text-gray-400 uppercase tracking-wider transition-colors group-focus-within:text-red-600">Carrera</div>
+        <div class="flex items-center gap-2">
+          <div class="flex-1 border border-gray-200 rounded-xl p-4 text-base font-medium text-gray-700 bg-white transition-all duration-300 group-hover:border-gray-300 group-focus-within:border-red-500">
+            <input 
+              *ngIf="editModes()['carrera']" 
+              type="text" 
+              [ngModel]="profileData().carrera" 
+              (ngModelChange)="updateField('carrera', $event)"
+              class="w-full bg-transparent border-none outline-none focus:ring-0"
+            >
+            <span *ngIf="!editModes()['carrera']">{{ profileData().carrera }}</span>
+          </div>
+          <button (click)="toggleEdit('carrera')" class="p-2 text-gray-400 hover:text-red-600 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="relative pt-2 group">
+        <div class="absolute left-4 top-0 bg-white px-2 text-xs font-bold text-gray-400 uppercase tracking-wider transition-colors group-focus-within:text-red-600">Semestre</div>
+        <div class="flex items-center gap-2">
+          <div class="flex-1 border border-gray-200 rounded-xl p-4 text-base font-medium text-gray-700 bg-white transition-all duration-300 group-hover:border-gray-300 group-focus-within:border-red-500">
+            <input 
+              *ngIf="editModes()['semestre']" 
+              type="text" 
+              [ngModel]="profileData().semestre" 
+              (ngModelChange)="updateField('semestre', $event)"
+              class="w-full bg-transparent border-none outline-none focus:ring-0"
+            >
+            <span *ngIf="!editModes()['semestre']">{{ profileData().semestre }}</span>
+          </div>
+          <button (click)="toggleEdit('semestre')" class="p-2 text-gray-400 hover:text-red-600 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Cuentas vinculadas -->
+  <section id="linked" class="scroll-mt-32">
+    <div class="mb-6">
+      <h2 class="font-bold text-red-600 text-2xl tracking-tight mb-1">Cuentas vinculadas</h2>
+    </div>
+    
+    <div class="flex gap-4 ml-4">
+      <button class="bg-white px-6 py-3 rounded-xl border border-gray-200 flex items-center gap-3 hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer group">
+        <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5 grayscale group-hover:grayscale-0 transition-all" alt="Google">
+        <span class="font-bold text-gray-600 group-hover:text-[#1a73e8] text-base">Google</span>
+      </button>
+      <button class="bg-white px-6 py-3 rounded-xl border border-gray-200 flex items-center gap-3 hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer group">
+        <img src="https://www.svgrepo.com/show/303108/microsoft-icon-logo.svg" class="w-5 h-5 grayscale group-hover:grayscale-0 transition-all" alt="Microsoft">
+        <span class="font-bold text-gray-600 group-hover:text-[#00a4ef] text-base">Microsoft</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Estado de tu cuenta -->
+  <section id="status" class="scroll-mt-32">
+    <div class="mb-8">
+      <h2 class="font-bold text-red-600 text-2xl tracking-tight mb-1">Estado de tu cuenta</h2>
+      <p class="font-normal text-gray-500 text-base">Verifica el estado de tus descargas</p>
+    </div>
+
+    <!-- KPI Card Compact -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center relative overflow-hidden max-w-xl group">
+      <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-honeydew-700"></div>
+      
+      <div class="ml-6 flex-1">
+        <div class="flex justify-between items-center mb-4">
+          <div class="flex items-center gap-3">
+            <div class="bg-honeydew-50 rounded-lg p-2 border border-honeydew-100">
+               <svg class="w-5 h-5 text-honeydew-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path></svg>
+            </div>
+            <span class="text-base font-bold text-gray-700">Descargas disponibles</span>
+          </div>
+          <span class="text-lg font-black text-gray-800">4 <span class="text-gray-300 font-medium text-sm">/ 5</span></span>
+        </div>
+        
+        <div class="w-full bg-gray-50 h-2 rounded-full mb-3 overflow-hidden">
+          <div class="bg-honeydew-700 h-full rounded-full w-[80%] transition-all duration-1000"></div>
+        </div>
+        
+        <p class="text-gray-400 text-xs font-medium">Última descarga: 21 de abril del 2026</p>
+      </div>
+    </div>
+    
+    <div class="mt-4 max-w-xl">
+        <button [routerLink]="['/auth/settings/uploads']" class="text-red-600 text-sm font-bold hover:underline cursor-pointer">
+          Ver documentos subidos →
+        </button>
+    </div>
+  </section>
+
+  <!-- ¿Eres un profesor? -->
+  <section id="teacher" class="scroll-mt-32 pb-6">
+    <div class="bg-red-50/30 border border-red-100 rounded-2xl p-8 flex items-center justify-between gap-6">
+      <div class="flex-1">
+        <h2 class="font-bold text-red-600 text-xl mb-2">¿Eres un profesor?</h2>
+        <p class="text-gray-500 text-sm leading-relaxed">Solicita tu cambio a profesor para acceder a herramientas exclusivas.</p>
+      </div>
+      <button class="bg-red-600 text-white px-6 py-3 rounded-xl font-bold text-sm shadow-sm hover:bg-red-700 transition-all cursor-pointer whitespace-nowrap">
+        Solicitar verificación
+      </button>
+    </div>
+  </section>
+
+  <!-- Botón flotante de guardado -->
+   @if(hasChanges()){
+    <div 
+      class="fixed bottom-12 right-12 z-50 flex flex-col gap-4 animate-in slide-in-from-bottom duration-300"
+    >
+      <button 
+        (click)="save()" 
+        class="bg-punch-red-600 text-white p-5 rounded-full shadow-2xl shadow-punch-red-500/40 hover:bg-punch-red-700 transition-all active:scale-90 group relative overflow-hidden animate-shine"
+      >
+        <svg class="w-8 h-8 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V7.414A2 2 0 0019.414 6L18 4.586A2 2 0 0016.586 4H16m-8 0v4h8V4m-2 12a2 2 0 11-4 0 2 2 0 014 0z"></path>
+        </svg>
+        <!-- Efecto de brillo (shining) -->
+        <div class="absolute inset-0 bg-linear-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-[shine_2s_infinite]"></div>
+      </button>
+    
+    </div>
+  }
+</div>

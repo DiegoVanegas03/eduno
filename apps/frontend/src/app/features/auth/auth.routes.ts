@@ -2,7 +2,8 @@ import { Routes } from '@angular/router';
 export const authRoutes: Routes = [
   {
     path: '',
-    loadComponent: () => import('../../core/layouts/auth-layout/auth-layout.component').then((m) => m.AuthLayout),
+    loadComponent: () =>
+      import('@core/layouts/auth-layout/auth-layout.component').then((m) => m.AuthLayout),
     children: [
       {
         path: 'login',
@@ -16,6 +17,25 @@ export const authRoutes: Routes = [
       {
         path: '',
         redirectTo: 'login',
+        pathMatch: 'full',
+      },
+    ],
+  },
+  {
+    path: 'settings',
+    loadComponent: () =>
+      import('@core/layouts/settings-layout/settings-layout.component').then(
+        (m) => m.SettingsLayoutComponent
+      ),
+    children: [
+      {
+        path: 'my-account',
+        loadComponent: () =>
+          import('./my-account/my-account.component').then((m) => m.MyAccountComponent),
+      },
+      {
+        path: '',
+        redirectTo: 'my-account',
         pathMatch: 'full',
       },
     ],

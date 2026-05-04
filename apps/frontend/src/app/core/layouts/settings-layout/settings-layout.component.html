@@ -1,0 +1,71 @@
+<div class="min-h-screen max-w-7xl mx-auto flex relative gap-25 pt-16 md:pt-32 px-8">
+  <!-- Sidebar (Desktop) -->
+  <aside class="hidden md:flex sticky top-32 h-fit flex-col gap-12">
+    <ng-container *ngTemplateOutlet="navContent"></ng-container>
+  </aside>
+
+  <!-- Drawer Overlay (Mobile) -->
+  @if(isDrawerOpen()){
+    <div 
+      class="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 transition-opacity animate-in fade-in duration-300"
+      (click)="toggleDrawer()"
+    ></div>
+  }
+
+  <!-- Drawer Content (Mobile) -->
+  <aside 
+    class="fixed inset-y-0 left-0 w-80 bg-white z-60 p-10 flex flex-col gap-8 shadow-2xl transition-transform duration-500 ease-in-out transform"
+    [class.-translate-x-full]="!isDrawerOpen()"
+  >
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold text-oxford-navy-800 uppercase tracking-widest text-xs">Menú de Ajustes</h3>
+        <button (click)="toggleDrawer()" class="p-2 text-gray-400 hover:text-red-600 transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+    </div>
+    <div class="flex flex-col gap-10">
+        <ng-container *ngTemplateOutlet="navContent"></ng-container>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 pb-32">
+    <app-breadcrumb [items]="[{label: 'Eduno', link: '/'},{ label: 'Configuración' }, { label: 'Mi cuenta' }]">
+       <button 
+         (click)="toggleDrawer()" 
+         class="md:hidden flex items-center gap-2 px-4 py-2 bg-white border border-gray-100 rounded-full shadow-sm text-oxford-navy-600 hover:text-red-600 transition-all active:scale-95"
+       >
+         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+         <span class="font-bold text-[10px] uppercase tracking-[0.2em]">Menú</span>
+       </button>
+    </app-breadcrumb>
+    <router-outlet></router-outlet>
+  </main>
+</div>
+<app-footer/>
+
+<!-- Shared Navigation Template -->
+<ng-template #navContent>
+    <app-aside-settings-navigation 
+      (click)="isDrawerOpen.set(false)"
+      [section]="{label:'Mi cuenta', link:'/auth/settings/my-account'}" 
+      [items]="[
+        {label:'Sobre ti', link:'/auth/settings/my-account', fragment:'sobre-ti'},
+        {label:'Información complementaria', link:'/auth/settings/my-account', fragment:'complementary'},
+        {label:'Estado de tu cuenta', link:'/auth/settings/my-account', fragment:'status'},
+        {label:'Solicitar cambio a profesor', link:'/auth/settings/my-account', fragment:'teacher'}
+        ]" 
+    />
+    
+    <app-aside-settings-navigation 
+      (click)="isDrawerOpen.set(false)"
+      [section]="{label:'Seguridad', link:'/auth/settings/security'}" 
+      [items]="[
+        {label:'Cambio de contraseña', link:'/auth/settings/security', fragment:'password'},
+        {label:'Sesiones activas', link:'/auth/settings/security', fragment:'sessions'},
+        {label:'Eliminar cuenta', link:'/auth/settings/security', fragment:'delete'}
+        ]" 
+    />
+
+    <app-aside-settings-navigation (click)="isDrawerOpen.set(false)" [section]="{label:'Subidos', link:'/auth/settings/uploads'}" />
+</ng-template>

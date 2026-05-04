@@ -52,7 +52,7 @@ export class AuthService {
         }),
       );
   }
-
+  
   /**
    * Performs login and sets user state.
    * Cookies are handled by the browser/backend.
