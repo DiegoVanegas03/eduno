@@ -1,34 +1,129 @@
-import { Component, signal, computed, HostListener } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, signal, computed, HostListener, inject, OnInit, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { EditableFieldComponent } from '@shared/components/editable-field/editable-field.component';
+import {
+  DownloadStatusComponent,
+  DownloadStatusState,
+} from '@core/components/download-status/download-status.component';
+import { MyAccountService, ProfileData } from '@core/services/auth/my-account.service';
+import { ModalService } from '@shared/services/modal.service';
+import { toast } from 'ngx-sonner';
+import { USER_ROLES } from '@eduno/shared';
+import { AuthService } from '@core/services/auth/auth.service';
 
 @Component({
   selector: 'app-my-account',
   standalone: true,
-  imports: [RouterLink, FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, EditableFieldComponent, DownloadStatusComponent],
   templateUrl: './my-account.component.html',
-  styleUrl: './my-account.component.css',
 })
 export class MyAccountComponent {
-  // Datos iniciales (en una app real vendrían de un servicio)
-  initialData = {
-    nombre: 'Diego Emiliano Vanegas Cerda',
-    correo: 'eduno+gamesonfn@gmail.com',
-    carrera: 'Ingeniería en computación',
-    semestre: 'Tercer Semestre',
-  };
+  private myAccountService = inject(MyAccountService);
+  private modalService = inject(ModalService);
+  private authService = inject(AuthService);
 
-  // Señal para los datos actuales (editables)
-  profileData = signal({ ...this.initialData });
+  initialData: ProfileData | null = null;
+  isLoading = signal(true);
 
-  // Estado de edición por campo
+  profileData = signal<ProfileData>({
+    id: '',
+    name: '',
+    email: '',
+    role: USER_ROLES.ALUMNO,
+    emailVerified: false,
+    career: '',
+    semester: '',
+    description: '',
+    downloadsLeft: 0,
+    maxDownloads: 5,
+    lastDownloadDate: null,
+    totalUploads: 0,
+    image: null,
+    initialLetter: '',
+    connectedAccounts: [],
+    createdAt: new Date(),
+  });
+
+  semesterOptions = signal<{ label: string; value: string }[]>([]);
   editModes = signal<{ [key: string]: boolean }>({});
 
-  // Detectar si hay cambios sin guardar
   hasChanges = computed(() => {
+    if (!this.initialData) return false;
     return JSON.stringify(this.profileData()) !== JSON.stringify(this.initialData);
   });
+
+  accountState = computed<DownloadStatusState>(() => {
+    const data = this.profileData();
+    if (data.totalUploads === 0) return 'first-time';
+    if (data.downloadsLeft === 0) return 'empty';
+    return 'available';
+  });
+
+  constructor() {
+    // Escucha cambios en la carrera para actualizar los semestres disponibles
+    effect(() => {
+      const career = this.profileData().career;
+      if (career) {
+        this.myAccountService.getSemesterOptions(career).subscribe((options) => {
+          this.semesterOptions.set(options);
+        });
+      }
+    });
+
+    // Sincroniza los datos del usuario con los campos locales y los mocks
+    effect(
+      () => {
+        const user = this.authService.currentUser();
+        if (user) {
+          const fullData: ProfileData = {
+            ...user,
+            initialLetter: user.initialLetter || '',
+            career: user.career || '',
+            semester: user.semester || '',
+            description: user.description || '',
+            // Mocks locales para lo que aún no está en el backend
+            downloadsLeft: 4,
+            maxDownloads: 5,
+            lastDownloadDate: '21 de abril del 2026',
+            totalUploads: 1,
+            connectedAccounts: [], // Se llenará desde el endpoint
+          };
+
+          if (!this.initialData || this.initialData.id !== user.id) {
+            this.initialData = { ...fullData };
+          }
+
+          if (this.isLoading()) {
+            this.profileData.set({ ...fullData });
+            this.isLoading.set(false);
+          }
+        }
+      },
+      { allowSignalWrites: true },
+    );
+
+    // Consulta de cuentas vinculadas reales
+    this.authService.listAccounts().subscribe({
+      next: (accounts) => {
+        const providers = accounts.map((a) => a.provider);
+        const connectedAccounts: { provider: 'google' | 'microsoft'; connected: boolean }[] = [
+          { provider: 'google', connected: providers.includes('google') },
+          { provider: 'microsoft', connected: providers.includes('microsoft') },
+        ];
+
+        this.profileData.update((data) => ({
+          ...data,
+          connectedAccounts,
+        }));
+
+        if (this.initialData) {
+          this.initialData.connectedAccounts = connectedAccounts;
+        }
+      },
+      error: (err) => console.error('Error cargando cuentas vinculadas', err),
+    });
+  }
 
   toggleEdit(field: string) {
     this.editModes.update((modes) => ({
@@ -52,15 +147,79 @@ export class MyAccountComponent {
   }
 
   save() {
-    // Simulación de guardado
-    console.log('Guardando datos:', this.profileData());
-    this.initialData = { ...this.profileData() };
-    this.editModes.set({});
-    // Aquí se llamaría al servicio de backend
+    const changes: Record<string, { old: any; new: any }> = {};
+    const currentData = this.profileData();
+
+    if (this.initialData) {
+      Object.keys(currentData).forEach((key) => {
+        const typedKey = key as keyof ProfileData;
+        if (currentData[typedKey] !== this.initialData![typedKey]) {
+          changes[key] = {
+            old: this.initialData![typedKey],
+            new: currentData[typedKey],
+          };
+        }
+      });
+    }
+
+    if (Object.keys(changes).length === 0) {
+      this.editModes.set({});
+      return;
+    }
+
+    this.modalService.open({
+      title: 'Confirmar Cambios',
+      content: '¿Estás seguro de que quieres guardar los siguientes cambios en tu perfil?',
+      changes,
+      confirmText: 'Guardar',
+      cancelText: 'Cancelar',
+      onConfirm: () => {
+        const dto: any = {};
+        Object.keys(changes).forEach((key) => {
+          dto[key] = changes[key].new;
+        });
+
+        this.myAccountService.updateProfile(dto).subscribe({
+          next: (response) => {
+            if (response.success && response.data) {
+              const updatedUser = response.data;
+              this.profileData.update((current) => ({
+                ...current,
+                ...updatedUser,
+              }));
+              this.initialData = { ...this.profileData() };
+              this.editModes.set({});
+              toast.success(response.message || 'Perfil actualizado');
+            }
+          },
+          error: (err) => {
+            toast.error('Error al actualizar el perfil');
+            console.error(err);
+          },
+        });
+      },
+    });
+  }
+
+  openImageUpload() {
+    this.modalService.open({
+      title: 'Actualizar foto de perfil',
+      content: 'Selecciona una nueva imagen para tu cuenta.',
+      isImageUpload: true,
+      cancelText: 'Cancelar',
+      onImageSelected: (file: File) => {
+        const imageUrl = URL.createObjectURL(file);
+        this.updateField('image', imageUrl);
+        this.editModes.update((modes) => ({ ...modes, image: true }));
+        toast.success('Foto seleccionada temporalmente. Guarda los cambios para confirmar.');
+      },
+    });
   }
 
   cancel() {
-    this.profileData.set({ ...this.initialData });
+    if (this.initialData) {
+      this.profileData.set({ ...this.initialData });
+    }
     this.editModes.set({});
   }
 }
