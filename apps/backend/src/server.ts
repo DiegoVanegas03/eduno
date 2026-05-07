@@ -2,6 +2,7 @@ import "dotenv/config";
 import app from "./app";
 import { connectDB } from "./config/database";
 import { initClamAv } from "./config/clamav";
+import { logger } from "./utils/logger";
 const PORT = process.env.PORT || 3000;
 
 const startServer = async () => {
@@ -9,13 +10,11 @@ const startServer = async () => {
   await connectDB();
 
   // 2. Inicializar Antivirus
-  // await initClamAv();
+  await initClamAv();
 
   // 3. Iniciar el servidor Express
   app.listen(PORT, () => {
-    console.log(
-      `🚀 Servidor backend TypeScript escuchando en http://localhost:${PORT}`,
-    );
+    logger.info(`🚀 Servidor backend TypeScript escuchando en http://localhost:${PORT}`);
   });
 };
 
