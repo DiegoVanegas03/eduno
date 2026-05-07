@@ -161,9 +161,7 @@
         } @else {
           <!-- Renderizado de las opciones para móviles directamente -->
           <div class="flex items-center gap-3 mb-4 bg-cerulean-50 p-4 rounded-2xl border border-cerulean-100">
-            <div class="w-12 h-12 bg-cerulean-100 rounded-full flex items-center justify-center text-cerulean-700 font-bold shrink-0 shadow-sm border border-cerulean-200 text-lg">
-              {{ authService.currentUser()?.initialLetter }}
-            </div>
+            <app-avatar [user]="authService.currentUser()" size="lg" />
             <div class="flex flex-col">
               <span class="text-base font-bold text-oxford-navy-900 leading-tight">{{ authService.currentUser()?.name }}</span>
               <span class="text-xs text-oxford-navy-500 font-medium uppercase mt-1">{{ authService.userRole() }}</span>

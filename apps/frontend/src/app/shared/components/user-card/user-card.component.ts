@@ -2,11 +2,12 @@ import { Component, inject, signal, ElementRef, HostListener } from '@angular/co
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService, USER_ROLES } from '@app/core/services/auth/auth.service';
+import { AvatarComponent } from '../avatar/avatar.component';
 
 @Component({
   selector: 'app-user-card',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, AvatarComponent],
   templateUrl: './user-card.component.html',
 })
 export class UserCardComponent {

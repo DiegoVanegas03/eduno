@@ -4,10 +4,11 @@ import { ButtonComponent } from '@shared/components/button/button.component';
 import { LogoComponent } from '@shared/components/logo/logo.component';
 import { AuthService, USER_ROLES } from '@app/core/services/auth/auth.service';
 import { UserCardComponent } from '@shared/components/user-card/user-card.component';
+import { AvatarComponent } from '@shared/components/avatar/avatar.component';
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, RouterLinkActive, ButtonComponent, LogoComponent, UserCardComponent],
+  imports: [RouterLink, RouterLinkActive, ButtonComponent, LogoComponent, UserCardComponent, AvatarComponent],
   templateUrl: './navbar.component.html',
   standalone: true,
 })
