@@ -4,19 +4,9 @@ import { v4 as uuidv4 } from "uuid";
 import { Readable } from "stream";
 
 /**
- * Sube una imagen en base64 a MinIO, previa validación de tipo y escaneo de virus.
+ * Sube un buffer de imagen a MinIO, previa validación de tipo y escaneo de virus.
  */
-export const uploadBase64Image = async (base64String: string): Promise<string> => {
-  // 1. Extraer el tipo y la data
-  const matches = base64String.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
-  
-  if (!matches || matches.length !== 3) {
-    throw new Error("Formato de imagen base64 inválido");
-  }
-
-  const type = matches[1];
-  const buffer = Buffer.from(matches[2], "base64");
-
+export const uploadBufferToMinio = async (buffer: Buffer, type: string): Promise<string> => {
   // 2. Validación de Tipo MIME (Seguridad básica)
   if (!type.startsWith("image/")) {
     throw new Error("Solo se permiten archivos de imagen.");
@@ -46,6 +36,8 @@ export const uploadBase64Image = async (base64String: string): Promise<string> =
   const extension = type.split("/")[1] || "png";
   const fileName = `${uuidv4()}.${extension}`;
 
+  console.log(`[uploadBufferToMinio] Subiendo archivo a MinIO. Bucket: ${BUCKETS.PROFILES}, Archivo: ${fileName}, Tamaño: ${buffer.length}, Tipo: ${type}`);
+
   await minioClient.putObject(
     BUCKETS.PROFILES,
     fileName,
@@ -55,4 +47,21 @@ export const uploadBase64Image = async (base64String: string): Promise<string> =
   );
 
   return `eduno:${fileName}`;
+};
+
+/**
+ * Sube una imagen en base64 a MinIO, previa validación de tipo y escaneo de virus.
+ */
+export const uploadBase64Image = async (base64String: string): Promise<string> => {
+  // 1. Extraer el tipo y la data
+  const matches = base64String.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
+  
+  if (!matches || matches.length !== 3) {
+    throw new Error("Formato de imagen base64 inválido");
+  }
+
+  const type = matches[1];
+  const buffer = Buffer.from(matches[2], "base64");
+
+  return uploadBufferToMinio(buffer, type);
 };

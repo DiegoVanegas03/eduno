@@ -40,6 +40,7 @@ app.all("/api/auth/*", toNodeHandler(auth));
 
 // ── API routes ────────────────────────────────────────────────────────────────
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use("/api/files", fileRoutes);
 app.use("/api/users", userRoutes);
 

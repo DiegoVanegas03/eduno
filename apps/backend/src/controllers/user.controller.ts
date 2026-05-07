@@ -6,12 +6,12 @@ import {
   IApiResponse,
   IBetterAuthUser,
 } from "@eduno/shared";
-import { uploadBase64Image } from "@/utils/minio-upload";
+import { uploadBufferToMinio, uploadBase64Image } from "@/utils/minio-upload";
 import { asyncHandler } from "@/utils/async-handler";
 import { logger } from "@/utils/logger";
 
 export const updateProfile = asyncHandler(
-  async (req, res: Response<IApiResponse<IBetterAuthUser>>) => {
+  async (req: any, res: Response<IApiResponse<IBetterAuthUser>>) => {
     const user = req.user;
 
     if (!user) {
@@ -29,10 +29,14 @@ export const updateProfile = asyncHandler(
 
     logger.debug(`[updateProfile] Body recibido para: ${email || user.email}`);
 
-    // 1. Si la imagen viene en Base64, subirla a MinIO
+    // 1. Si la imagen viene como archivo (multipart/form-data)
     let finalImage = image;
-    if (image?.startsWith("data:image")) {
-      logger.info(`[updateProfile] Subiendo imagen a MinIO para usuario ${user.id}...`);
+    if (req.file) {
+      logger.info(`[updateProfile] Subiendo imagen a MinIO para usuario ${user.id} desde archivo adjunto...`);
+      finalImage = await uploadBufferToMinio(req.file.buffer, req.file.mimetype);
+      logger.debug(`[updateProfile] Imagen subida exitosamente`);
+    } else if (image?.startsWith("data:image")) {
+      logger.info(`[updateProfile] Subiendo imagen a MinIO para usuario ${user.id} desde base64...`);
       finalImage = await uploadBase64Image(image);
       logger.debug(`[updateProfile] Imagen subida exitosamente`);
     }
