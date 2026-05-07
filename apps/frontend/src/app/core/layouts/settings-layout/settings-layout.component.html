@@ -1,6 +1,7 @@
-<div class="min-h-screen max-w-7xl mx-auto flex relative gap-25 pt-16 md:pt-32 px-8">
+<div class="min-h-screen max-w-7xl mx-auto flex relative gap-25 pt-16 md:pt-15 px-8">
   <!-- Sidebar (Desktop) -->
-  <aside class="hidden md:flex sticky top-32 h-fit flex-col gap-12">
+  <aside class="hidden md:flex sticky top-15 h-fit flex-col gap-12 mb-12">
+    <app-logo cssClass="mx-auto text-punch-red-600 w-18 h-18 cursor-pointer"/>
     <ng-container *ngTemplateOutlet="navContent"></ng-container>
   </aside>
 
@@ -24,13 +25,13 @@
         </button>
     </div>
     <div class="flex flex-col gap-10">
-        <ng-container *ngTemplateOutlet="navContent"></ng-container>
+        <ng-container *ngTemplateOutlet="navContent"/>
     </div>
   </aside>
 
   <!-- Main Content -->
   <main class="flex-1 pb-32">
-    <app-breadcrumb [items]="[{label: 'Eduno', link: '/'},{ label: 'Configuración' }, { label: 'Mi cuenta' }]">
+    <app-breadcrumb cssClass="mb-0" [items]="[{label: 'Eduno', link: '/'},{ label: 'Configuración' }, { label: 'Mi cuenta' }]">
        <button 
          (click)="toggleDrawer()" 
          class="md:hidden flex items-center gap-2 px-4 py-2 bg-white border border-gray-100 rounded-full shadow-sm text-oxford-navy-600 hover:text-red-600 transition-all active:scale-95"

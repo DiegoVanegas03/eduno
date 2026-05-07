@@ -13,33 +13,36 @@ export interface SettingNavigation {
   standalone: true,
   imports: [RouterLinkActive, RouterLink],
   template: `
-    <h3
-      class="font-semibold text-lg mb-4 cursor-pointer"
-      [routerLink]="section().link"
-      [fragment]="section().fragment"
-      routerLinkActive="text-punch-red-600"
-      [routerLinkActiveOptions]="{ exact: false }"
-    >
-      {{ section().label }}
-    </h3>
-    <ul class="flex flex-col gap-5 text-sm text-gray-400 font-medium ml-6">
-      @for (item of items(); track item.link + item.fragment) {
-        <li class="hover:text-punch-red-500 transition-colors cursor-pointer">
-          <a
-            [routerLink]="item.link"
-            [fragment]="item.fragment"
-            [class.text-punch-red-600]="isActive(item)"
-          >
-            {{ item.label }}
-          </a>
-        </li>
-      }
-    </ul>
+    <div [class]="cssClass()">
+      <h3
+        class="font-semibold mb-4 cursor-pointer"
+        [routerLink]="section().link"
+        [fragment]="section().fragment"
+        routerLinkActive="text-punch-red-600"
+        [routerLinkActiveOptions]="{ exact: false }"
+      >
+        {{ section().label }}
+      </h3>
+      <ul class="flex flex-col gap-3 text-xs text-gray-400 font-medium ml-6">
+        @for (item of items(); track item.link + item.fragment) {
+          <li class="hover:text-punch-red-500 transition-colors cursor-pointer">
+            <a
+              [routerLink]="item.link"
+              [fragment]="item.fragment"
+              [class.text-punch-red-600]="isActive(item)"
+            >
+              {{ item.label }}
+            </a>
+          </li>
+        }
+      </ul>
+    </div>
   `,
 })
 export class AsideSettingsNavigationComponent {
   items = input<SettingNavigation[]>([]);
   section = input.required<SettingNavigation>();
+  cssClass = input('');
 
   private route = inject(ActivatedRoute);
   urlFragment = toSignal(this.route.fragment);

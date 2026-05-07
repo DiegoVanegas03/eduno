@@ -63,8 +63,6 @@
   --color-oxford-navy-900: #0d1726;
   --color-oxford-navy-950: #09101b;
 
-  /* Remover esto , para el toast usar colores de la linea previeamnte definidos */
-
   --color-orange-50: #fff7ed;
   --color-orange-100: #ffedd5;
   --color-orange-200: #fed7aa;
@@ -76,6 +74,18 @@
   --color-orange-800: #9a3412;
   --color-orange-900: #7c2d12;
   --color-orange-950: #431407;
+}
+
+/* ngx-sonner custom theme with app colors */
+.sonner-toast {
+  --toast-primary: var(--color-cerulean-500);
+  --toast-primary-foreground: white;
+  --toast-success: var(--color-punch-red-500);
+  --toast-success-foreground: white;
+  --toast-error: var(--color-honeydew-500);
+  --toast-error-foreground: var(--color-honeydew-900);;
+  --toast-warning: var(--color-orange-500);
+  --toast-warning-foreground: white;
 }
 
 @keyframes shimmer-gold {

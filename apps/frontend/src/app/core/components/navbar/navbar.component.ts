@@ -8,7 +8,7 @@ import { UserCardComponent } from '@shared/components/user-card/user-card.compon
 @Component({
   selector: 'app-navbar',
   imports: [RouterLink, RouterLinkActive, ButtonComponent, LogoComponent, UserCardComponent],
-  templateUrl: './navbar.html',
+  templateUrl: './navbar.component.html',
   standalone: true,
 })
 export class Navbar {
