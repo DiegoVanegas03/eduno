@@ -58,7 +58,10 @@ export class MyAccountService {
   }
 
   updateProfile(data: IUpdateProfileDTO): Observable<IApiResponse<IBetterAuthUser>> {
-    // El interceptor se encargará de reemplazar '/api' por la URL base del entorno
+    return this.http.patch<IApiResponse<IBetterAuthUser>>(`/api/users/profile`, data);
+  }
+
+  updateProfileFormData(data: FormData): Observable<IApiResponse<IBetterAuthUser>> {
     return this.http.patch<IApiResponse<IBetterAuthUser>>(`/api/users/profile`, data);
   }
 }

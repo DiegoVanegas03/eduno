@@ -11,11 +11,12 @@ import { ModalService } from '@shared/services/modal.service';
 import { toast } from 'ngx-sonner';
 import { USER_ROLES } from '@eduno/shared';
 import { AuthService } from '@core/services/auth/auth.service';
+import { AvatarComponent } from '@shared/components/avatar/avatar.component';
 
 @Component({
   selector: 'app-my-account',
   standalone: true,
-  imports: [FormsModule, CommonModule, EditableFieldComponent, DownloadStatusComponent],
+  imports: [FormsModule, CommonModule, EditableFieldComponent, DownloadStatusComponent, AvatarComponent],
   templateUrl: './my-account.component.html',
 })
 export class MyAccountComponent {
@@ -146,6 +147,8 @@ export class MyAccountComponent {
     }
   }
 
+  imageFile: File | null = null;
+
   save() {
     const changes: Record<string, { old: any; new: any }> = {};
     const currentData = this.profileData();
@@ -174,12 +177,26 @@ export class MyAccountComponent {
       confirmText: 'Guardar',
       cancelText: 'Cancelar',
       onConfirm: () => {
-        const dto: any = {};
+        const formData = new FormData();
+        let hasData = false;
+
         Object.keys(changes).forEach((key) => {
-          dto[key] = changes[key].new;
+          if (key === 'image' && this.imageFile) {
+            formData.append('image', this.imageFile);
+            hasData = true;
+          } else {
+            formData.append(key, changes[key].new);
+            hasData = true;
+          }
         });
 
-        this.myAccountService.updateProfile(dto).subscribe({
+        const request$ = hasData && this.imageFile 
+          ? this.myAccountService.updateProfileFormData(formData)
+          : this.myAccountService.updateProfile(Object.fromEntries(
+              Object.keys(changes).filter(k => k !== 'image' || !this.imageFile).map(k => [k, changes[k].new])
+            ));
+
+        request$.subscribe({
           next: (response) => {
             if (response.success && response.data) {
               const updatedUser = response.data;
@@ -189,6 +206,7 @@ export class MyAccountComponent {
               }));
               this.initialData = { ...this.profileData() };
               this.editModes.set({});
+              this.imageFile = null;
               toast.success(response.message || 'Perfil actualizado');
             }
           },
@@ -208,6 +226,7 @@ export class MyAccountComponent {
       isImageUpload: true,
       cancelText: 'Cancelar',
       onImageSelected: (file: File) => {
+        this.imageFile = file;
         const imageUrl = URL.createObjectURL(file);
         this.updateField('image', imageUrl);
         this.editModes.update((modes) => ({ ...modes, image: true }));
@@ -221,5 +240,6 @@ export class MyAccountComponent {
       this.profileData.set({ ...this.initialData });
     }
     this.editModes.set({});
+    this.imageFile = null;
   }
 }

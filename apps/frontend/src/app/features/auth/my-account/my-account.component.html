@@ -12,14 +12,11 @@
 
     <div class="md:w-2/3 flex-1 flex flex-col gap-8 w-full">
       <div class="flex items-center gap-6 group">
-        <div class="bg-cerulean-100 w-24 h-24 rounded-full flex items-center justify-center shadow-inner relative overflow-hidden transition-transform duration-500 group-hover:scale-105">
-          @if (profileData().image) {
-            <img [src]="profileData().image" alt="Foto de perfil" class="w-full h-full object-cover">
-          } @else {
-            <span class="font-black text-cerulean-700 text-4xl">{{ profileData().initialLetter || 'U' }}</span>
-          }
-          <div class="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors"></div>
-        </div>
+        <app-avatar 
+          [user]="profileData()" 
+          size="xl" 
+          cssClass="transition-transform duration-500 group-hover:scale-105" 
+        />
         <div class="flex flex-col">
           <div class="flex items-center gap-3 mb-1">
             <span class="font-bold text-cerulean-700 text-xs tracking-[0.2em] uppercase">{{ profileData().role }}</span>
