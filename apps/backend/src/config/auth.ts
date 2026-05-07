@@ -1,8 +1,8 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { MongoClient } from "mongodb";
-import { UserRole, USER_ROLES } from "@eduno/shared";
-
+import { UserRole, USER_ROLES, IUserBase } from "@eduno/shared";
+import { customSession } from "better-auth/plugins";
 
 // Re-use the same MONGO_URI used by Mongoose so we don't open a second pool.
 const mongoUri = process.env.MONGO_URI || "mongodb://localhost:27017/eduno";
@@ -38,8 +38,22 @@ export const auth = betterAuth({
       role: {
         type: "string",
         defaultValue: USER_ROLES.ALUMNO,
-
       },
+      career: {
+        type: "string",
+        defaultValue: "",
+      },
+      semester: {
+        type: "string",
+        defaultValue: "",
+      },
+      description: {
+        type: "string",
+        defaultValue: "",
+      },
+    },
+    changeEmail: {
+      enabled: true,
     },
   },
 
@@ -56,4 +70,36 @@ export const auth = betterAuth({
       tenantId: process.env.MICROSOFT_TENANT_ID || "common",
     },
   },
+
+  // ---------- Plugins ----------
+  plugins: [
+    customSession(async ({ session, user }) => {
+      // Cast para que TypeScript reconozca los campos adicionales
+      const extendedUser = user as typeof user & IUserBase;
+
+      const { id, updatedAt, image, ...cleanedValues } = extendedUser;
+
+      // Construir la URL de la imagen si es local (empieza con "eduno:")
+      let finalImage = image;
+      if (image && image.startsWith("eduno:")) {
+        const fileName = image.split(":")[1];
+        const minioHost = (
+          process.env.MINIO_PUBLIC_URL || "http://localhost:9000"
+        ).replace(/\/$/, "");
+        finalImage = `${minioHost}/perfiles/${fileName}`;
+      }
+
+      return {
+        session: {
+          id: session.id,
+          expiresAt: session.expiresAt,
+          userId: session.userId,
+        },
+        user: {
+          ...cleanedValues,
+          image: finalImage,
+        },
+      };
+    }),
+  ],
 });
