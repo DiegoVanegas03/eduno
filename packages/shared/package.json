@@ -15,6 +15,9 @@
     "build": "tsc --project tsconfig.json",
     "dev": "tsc --project tsconfig.json --watch"
   },
+  "dependencies": {
+    "zod": "^4.4.3"
+  },
   "devDependencies": {
     "typescript": "~5.9.2"
   }
