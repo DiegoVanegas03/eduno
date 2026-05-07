@@ -64,7 +64,9 @@ services:
       mc alias set local http://minio:9000 minioadmin minioadmin123;
       mc mb --ignore-existing local/documentos;
       mc anonymous set public local/documentos;
-      echo '✅ Bucket documentos listo';
+      mc mb --ignore-existing local/perfiles;
+      mc anonymous set public local/perfiles;
+      echo '✅ Buckets documentos y perfiles listos';
       exit 0;
       "
     networks:

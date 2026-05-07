@@ -1,0 +1,81 @@
+<div class="relative overflow-hidden rounded-2xl bg-white border border-gray-200 shadow-sm transition-all duration-300 hover:border-gray-300 group max-w-xl">
+  <!-- Lína lateral de acento -->
+  <div class="absolute left-0 top-0 bottom-0 w-1.5 transition-colors duration-500"
+       [ngClass]="{
+         'bg-honeydew-600': state() === 'available',
+         'bg-orange-500': state() === 'empty',
+         'bg-cerulean-500': state() === 'first-time'
+       }"></div>
+
+  <div class="p-5 pl-6">
+    @switch (state()) {
+      
+      @case ('available') {
+        <div class="animate-in fade-in duration-300">
+          <div class="flex justify-between items-center mb-3">
+            <div class="flex items-center gap-2.5">
+              <div class="bg-honeydew-50 rounded-lg p-1.5 border border-honeydew-100">
+                 <svg class="w-4 h-4 text-honeydew-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path></svg>
+              </div>
+              <span class="text-sm font-bold text-gray-700">Descargas disponibles</span>
+            </div>
+            <div class="flex items-baseline gap-1">
+              <span class="text-lg font-black text-gray-800">{{ downloadsLeft() }}</span>
+              <span class="text-gray-400 font-medium text-xs">/ {{ maxDownloads() }}</span>
+            </div>
+          </div>
+          
+          <div class="w-full bg-gray-100 h-1.5 rounded-full mb-3 overflow-hidden">
+            <div class="bg-honeydew-600 h-full rounded-full transition-all duration-1000 ease-out" [style.width.%]="progressPercentage()"></div>
+          </div>
+          
+          <div class="flex justify-between items-center">
+            <p class="text-gray-400 text-[11px] font-medium">
+              @if(lastDownloadDate()) {
+                Última descarga: <span class="text-gray-500">{{ lastDownloadDate() }}</span>
+              } @else {
+                Aún no has descargado nada
+              }
+            </p>
+            <button [routerLink]="['/auth/settings/uploads']" class="text-punch-red-600 text-xs font-bold hover:underline transition-all">
+              Ver documentos subidos &rarr;
+            </button>
+          </div>
+        </div>
+      }
+
+      @case ('empty') {
+        <div class="animate-in fade-in duration-300 flex items-start gap-4">
+          <div class="bg-orange-50 rounded-xl p-2 border border-orange-100 shrink-0 mt-0.5">
+            <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-sm font-bold text-gray-800 mb-1">¡Se agotaron tus descargas!</h3>
+            <p class="text-gray-500 text-xs mb-3 leading-relaxed">Para seguir descargando, apoya a la comunidad subiendo tus apuntes. <span class="font-bold text-orange-600">Obtén 5 descargas extra.</span></p>
+            <button [routerLink]="['/profesores']" class="inline-flex items-center gap-1.5 bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-lg font-bold text-xs shadow-sm hover:border-orange-200 hover:text-orange-600 hover:bg-orange-50 transition-all active:scale-95">
+              <span>Buscar materia</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </button>
+          </div>
+        </div>
+      }
+
+      @case ('first-time') {
+        <div class="animate-in fade-in duration-300 flex items-start gap-4">
+          <div class="bg-cerulean-50 rounded-xl p-2 border border-cerulean-100 shrink-0 mt-0.5">
+            <svg class="w-5 h-5 text-cerulean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-sm font-bold text-gray-800 mb-1">Desbloquea tus descargas</h3>
+            <p class="text-gray-500 text-xs mb-3 leading-relaxed">Eduno funciona gracias a estudiantes como tú. Sube tu primer apunte y <span class="font-bold text-cerulean-600">obtén 5 descargas gratuitas.</span></p>
+            <button [routerLink]="['/profesores']" class="inline-flex items-center gap-1.5 bg-cerulean-600 text-white px-3 py-1.5 rounded-lg font-bold text-xs shadow-sm hover:bg-cerulean-700 transition-all active:scale-95">
+              <span>Subir primer documento</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+            </button>
+          </div>
+        </div>
+      }
+
+    }
+  </div>
+</div>
