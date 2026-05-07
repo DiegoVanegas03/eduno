@@ -6,16 +6,7 @@ import {
   HttpHandlerFn,
 } from '@angular/common/http';
 import { inject } from '@angular/core';
-import {
-  catchError,
-  switchMap,
-  throwError,
-  BehaviorSubject,
-  filter,
-  take,
-  finalize,
-  Observable,
-} from 'rxjs';
+import { catchError, switchMap, throwError, BehaviorSubject, filter, take, Observable } from 'rxjs';
 import { environment } from '@env/environment';
 import { AuthService } from '../services/auth/auth.service';
 
@@ -30,7 +21,11 @@ export const apiInterceptor: HttpInterceptorFn = (
 
   // 1. Prepend Base URL
   let apiReq = req;
-  if (!req.url.startsWith('http') && !req.url.startsWith('assets')) {
+  if (req.url.startsWith('/api')) {
+    apiReq = req.clone({
+      url: req.url.replace('/api', environment.apiUrl),
+    });
+  } else if (!req.url.startsWith('http') && !req.url.startsWith('assets')) {
     apiReq = req.clone({
       url: `${environment.apiUrl}${req.url.startsWith('/') ? '' : '/'}${req.url}`,
     });

@@ -1,0 +1,89 @@
+@if (isOpen()) {
+  <div class="fixed inset-0 z-100 flex items-center justify-center p-4 bg-oxford-navy-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+    <div class="bg-white rounded-3xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+       <!-- Modal Header -->
+       <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-linear-to-r from-cerulean-50 to-white">
+          <h3 class="text-xl font-bold text-oxford-navy-800">{{ options()?.title }}</h3>
+          <button (click)="cancel()" class="text-oxford-navy-400 hover:text-punch-red-500 transition-colors p-1 rounded-full hover:bg-punch-red-50">
+            <!-- Icon X -->
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+       </div>
+       
+       <!-- Modal Body -->
+       <div class="p-6 overflow-y-auto max-h-[60vh] custom-scrollbar">
+         @if (options()?.content) {
+            <p class="text-oxford-navy-600 mb-6 text-base leading-relaxed">{{ options()?.content }}</p>
+         }
+         
+         @if (options()?.changes) {
+            <div class="space-y-4">
+              <h4 class="text-sm font-bold text-oxford-navy-700 uppercase tracking-wider mb-2">Cambios Detectados</h4>
+              @for (change of getChanges(); track change.key) {
+                <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 transition-all hover:shadow-sm hover:border-cerulean-100">
+                  <span class="block text-xs font-bold text-oxford-navy-400 uppercase tracking-wider mb-2">{{ change.key }}</span>
+                  <div class="flex items-center gap-3 text-sm">
+                    @if (change.key === 'image') {
+                      <div class="flex-1 bg-white p-2 rounded-lg border border-gray-100 flex justify-center items-center h-20">
+                        @if (change.old) {
+                          <img [src]="change.old" class="h-full object-cover rounded" alt="Vieja foto">
+                        } @else {
+                          <span class="text-xs text-gray-400 font-medium">Sin foto</span>
+                        }
+                      </div>
+                      <div class="shrink-0 w-8 h-8 flex items-center justify-center bg-cerulean-50 text-cerulean-500 rounded-full">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                      </div>
+                      <div class="flex-1 bg-white p-2 rounded-lg border border-green-100 flex justify-center items-center h-20 shadow-sm">
+                        @if (change.new) {
+                          <img [src]="change.new" class="h-full object-cover rounded" alt="Nueva foto">
+                        } @else {
+                          <span class="text-xs text-gray-400 font-medium">Sin foto</span>
+                        }
+                      </div>
+                    } @else {
+                      <div class="flex-1 bg-white p-2 rounded-lg border border-gray-100 text-punch-red-500 line-through truncate" [title]="change.old || 'Vacío'">
+                        {{ change.old || 'Vacío' }}
+                      </div>
+                      <div class="shrink-0 w-8 h-8 flex items-center justify-center bg-cerulean-50 text-cerulean-500 rounded-full">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                      </div>
+                      <div class="flex-1 bg-white p-2 rounded-lg border border-green-100 text-green-600 font-medium truncate" [title]="change.new || 'Vacío'">
+                        {{ change.new || 'Vacío' }}
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+         }
+         
+         @if (options()?.isImageUpload) {
+           <div 
+             class="mt-2 border-2 border-dashed rounded-2xl p-10 flex flex-col items-center justify-center text-center cursor-pointer transition-all group" 
+             [ngClass]="isDragging() ? 'border-cerulean-500 bg-cerulean-50 scale-105' : 'border-gray-300 hover:bg-gray-50 hover:border-cerulean-400'"
+             (click)="fileInput.click()"
+             (dragover)="onDragOver($event)"
+             (dragleave)="onDragLeave($event)"
+             (drop)="onDrop($event)"
+           >
+             <input type="file" #fileInput class="hidden" accept="image/*" (change)="onFileSelected($event)">
+             <div class="w-16 h-16 rounded-full bg-cerulean-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+               <svg class="w-8 h-8 text-cerulean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+             </div>
+             <span class="font-bold text-gray-700 text-base">Haz clic para seleccionar una imagen</span>
+             <span class="text-xs text-gray-500 mt-2">Formatos soportados: PNG, JPG, GIF (Max. 5MB)</span>
+           </div>
+         }
+       </div>
+       
+       <!-- Modal Footer -->
+       <div class="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50/50">
+          <app-button variant="ghost" (onClick)="cancel()">{{ options()?.cancelText || 'Cancelar' }}</app-button>
+          @if (!options()?.isImageUpload) {
+            <app-button variant="primary" (onClick)="confirm()">{{ options()?.confirmText || 'Confirmar' }}</app-button>
+          }
+       </div>
+    </div>
+  </div>
+}
