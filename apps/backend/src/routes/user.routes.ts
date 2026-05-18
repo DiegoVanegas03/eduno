@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { updateProfile } from "../controllers/user.controller";
-import { isAuthenticated } from "../middleware/auth.middleware";
-import { validate } from "../middleware/validate.middleware";
+import { updatePassword, updateProfile, deleteAccount } from "@/controllers/user.controller";
+import { isAuthenticated } from "@/middleware/auth.middleware";
+import { validate } from "@/middleware/validate.middleware";
 import multer from "multer";
-import { updateProfileSchema } from "../schemas/user.schema";
+import { updateProfileSchema, updatePasswordSchema, backendDeleteAccountSchema } from "@/schemas/user.schema";
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -16,4 +16,10 @@ router.patch(
   updateProfile
 );
 
+router.patch("/password", isAuthenticated, validate(updatePasswordSchema), updatePassword);
+
+// DELETE /api/users/account — permanently removes the account after password verification
+router.delete("/account", isAuthenticated, validate(backendDeleteAccountSchema), deleteAccount);
+
 export default router;
+

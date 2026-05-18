@@ -22,20 +22,25 @@ export const authRoutes: Routes = [
     ],
   },
   {
-    path: 'settings',
+    path: 'my-account',
     loadComponent: () =>
-      import('@core/layouts/settings-layout/settings-layout.component').then(
-        (m) => m.SettingsLayoutComponent
+      import('@core/layouts/my-account-layout/my-account-layout.component').then(
+        (m) => m.MyAccountLayoutComponent,
       ),
     children: [
       {
-        path: 'my-account',
+        path: 'settings',
         loadComponent: () =>
-          import('./my-account/my-account.component').then((m) => m.MyAccountComponent),
+          import('./settings/settings.component').then((m) => m.SettingsComponent),
+      },
+      {
+        path: 'security',
+        loadComponent: () =>
+          import('./security/security.component').then((m) => m.SecurityComponent),
       },
       {
         path: '',
-        redirectTo: 'my-account',
+        redirectTo: 'settings',
         pathMatch: 'full',
       },
     ],

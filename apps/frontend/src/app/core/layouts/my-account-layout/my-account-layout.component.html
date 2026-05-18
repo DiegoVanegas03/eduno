@@ -2,7 +2,7 @@
   <!-- Sidebar (Desktop) -->
   <aside class="hidden md:flex sticky top-15 h-fit flex-col gap-12 mb-12">
     <app-logo cssClass="mx-auto text-punch-red-600 w-18 h-18 cursor-pointer"/>
-    <ng-container *ngTemplateOutlet="navContent"></ng-container>
+    <ng-container *ngTemplateOutlet="navContent"/>
   </aside>
 
   <!-- Drawer Overlay (Mobile) -->
@@ -31,7 +31,7 @@
 
   <!-- Main Content -->
   <main class="flex-1 pb-32">
-    <app-breadcrumb cssClass="mb-0" [items]="[{label: 'Eduno', link: '/'},{ label: 'Configuración' }, { label: 'Mi cuenta' }]">
+    <app-breadcrumb cssClass="mb-0" [items]="breadcrumbItems()">
        <button 
          (click)="toggleDrawer()" 
          class="md:hidden flex items-center gap-2 px-4 py-2 bg-white border border-gray-100 rounded-full shadow-sm text-oxford-navy-600 hover:text-red-600 transition-all active:scale-95"
@@ -49,24 +49,24 @@
 <ng-template #navContent>
     <app-aside-settings-navigation 
       (click)="isDrawerOpen.set(false)"
-      [section]="{label:'Mi cuenta', link:'/auth/settings/my-account'}" 
+      [section]="{label:'Mi cuenta', link:'/auth/my-account/settings'}" 
       [items]="[
-        {label:'Sobre ti', link:'/auth/settings/my-account', fragment:'sobre-ti'},
-        {label:'Información complementaria', link:'/auth/settings/my-account', fragment:'complementary'},
-        {label:'Estado de tu cuenta', link:'/auth/settings/my-account', fragment:'status'},
-        {label:'Solicitar cambio a profesor', link:'/auth/settings/my-account', fragment:'teacher'}
+        {label:'Sobre ti', link:'/auth/my-account/settings', fragment:'sobre-ti'},
+        {label:'Información complementaria', link:'/auth/my-account/settings', fragment:'complementary'},
+        {label:'Estado de tu cuenta', link:'/auth/my-account/settings', fragment:'status'},
+        {label:'Solicitar cambio a profesor', link:'/auth/my-account/settings', fragment:'teacher'}
         ]" 
     />
     
     <app-aside-settings-navigation 
       (click)="isDrawerOpen.set(false)"
-      [section]="{label:'Seguridad', link:'/auth/settings/security'}" 
+      [section]="{label:'Seguridad', link:'/auth/my-account/security'}" 
       [items]="[
-        {label:'Cambio de contraseña', link:'/auth/settings/security', fragment:'password'},
-        {label:'Sesiones activas', link:'/auth/settings/security', fragment:'sessions'},
-        {label:'Eliminar cuenta', link:'/auth/settings/security', fragment:'delete'}
+        {label:'Cambio de contraseña', link:'/auth/my-account/security', fragment:'password'},
+        {label:'Sesiones activas', link:'/auth/my-account/security', fragment:'sessions'},
+        {label:'Eliminar cuenta', link:'/auth/my-account/security', fragment:'delete'}
         ]" 
     />
 
-    <app-aside-settings-navigation (click)="isDrawerOpen.set(false)" [section]="{label:'Subidos', link:'/auth/settings/uploads'}" />
+    <app-aside-settings-navigation (click)="isDrawerOpen.set(false)" [section]="{label:'Subidos', link:'/auth/my-account/uploads'}" />
 </ng-template>

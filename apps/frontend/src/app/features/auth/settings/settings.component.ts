@@ -1,4 +1,4 @@
-import { Component, signal, computed, HostListener, inject, OnInit, effect } from '@angular/core';
+import { Component, signal, computed, HostListener, inject, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { EditableFieldComponent } from '@shared/components/editable-field/editable-field.component';
@@ -14,12 +14,18 @@ import { AuthService } from '@core/services/auth/auth.service';
 import { AvatarComponent } from '@shared/components/avatar/avatar.component';
 
 @Component({
-  selector: 'app-my-account',
+  selector: 'app-settings',
   standalone: true,
-  imports: [FormsModule, CommonModule, EditableFieldComponent, DownloadStatusComponent, AvatarComponent],
-  templateUrl: './my-account.component.html',
+  imports: [
+    FormsModule,
+    CommonModule,
+    EditableFieldComponent,
+    DownloadStatusComponent,
+    AvatarComponent,
+  ],
+  templateUrl: './settings.component.html',
 })
-export class MyAccountComponent {
+export class SettingsComponent {
   private myAccountService = inject(MyAccountService);
   private modalService = inject(ModalService);
   private authService = inject(AuthService);
@@ -190,11 +196,16 @@ export class MyAccountComponent {
           }
         });
 
-        const request$ = hasData && this.imageFile 
-          ? this.myAccountService.updateProfileFormData(formData)
-          : this.myAccountService.updateProfile(Object.fromEntries(
-              Object.keys(changes).filter(k => k !== 'image' || !this.imageFile).map(k => [k, changes[k].new])
-            ));
+        const request$ =
+          hasData && this.imageFile
+            ? this.myAccountService.updateProfileFormData(formData)
+            : this.myAccountService.updateProfile(
+                Object.fromEntries(
+                  Object.keys(changes)
+                    .filter((k) => k !== 'image' || !this.imageFile)
+                    .map((k) => [k, changes[k].new]),
+                ),
+              );
 
         request$.subscribe({
           next: (response) => {

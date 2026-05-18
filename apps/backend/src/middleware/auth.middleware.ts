@@ -13,7 +13,7 @@ export const isAuthenticated = async (req: Request, res: Response, next: NextFun
   }
 
   // Attach user to request for downstream middlewares
-  (req as any).user = session.user;
+  req.user = session.user as any;
   next();
 };
 
@@ -24,7 +24,7 @@ export const isAuthenticated = async (req: Request, res: Response, next: NextFun
  */
 export const authorize = (...roles: UserRole[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    const user = (req as any).user;
+    const user = req.user;
     if (!user || !roles.includes(user.role)) {
       return res.status(403).json({
         success: false,

@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { updateProfileBodySchema } from "@eduno/shared";
-import { createMulterFileSchema } from "../utils/zod.utils";
+import { updateProfileBodySchema, updateBodyPasswordSchema } from "@eduno/shared";
+import { createMulterFileSchema } from "@/utils/zod.utils";
 
 export const updateProfileSchema = z.object({
   body: updateProfileBodySchema,
@@ -16,4 +16,14 @@ export const updateProfileSchema = z.object({
 }, { 
   message: "Debe proporcionar al menos un campo para actualizar",
   path: ["body"] 
+});
+
+export const updatePasswordSchema = z.object({
+  body: updateBodyPasswordSchema,
+});
+
+export const backendDeleteAccountSchema = z.object({
+  body: z.object({
+    password: z.string().min(1, "La contraseña es requerida para confirmar la eliminación"),
+  }),
 });
