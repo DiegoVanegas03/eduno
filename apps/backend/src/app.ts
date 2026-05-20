@@ -7,6 +7,7 @@ import { auth } from "./config/auth";
 import fileRoutes from "./routes/file.routes";
 import userRoutes from "./routes/user.routes";
 import { logger, stream } from "./utils/logger";
+import { AppError } from "./utils/app-error";
 
 const app: Application = express();
 
@@ -46,15 +47,21 @@ app.use("/api/users", userRoutes);
 
 // ── Global error handler ───────────────────────────────────────────────────
 app.use((err: any, _req: Request, res: Response, _next: Function) => {
-  const status = err?.status ?? err?.statusCode ?? 500;
+  const status = err?.statusCode ?? err?.status ?? 500;
+  const isOperational = err instanceof AppError ? err.isOperational : false;
   
   logger.error(`[${status}] ${err?.message || "Unknown error"}`);
   if (err?.body)  logger.error(`   body   → ${JSON.stringify(err.body)}`);
   if (err?.stack) logger.error(`   stack  → ${err.stack.split("\n").slice(0, 4).join("\n           ")}`);
 
+  // Safeguard internal server error messages from leaking in production
+  const errorMsg = (status === 500 && !isOperational)
+    ? "Error interno del servidor"
+    : err?.message || "Error interno del servidor";
+
   res.status(status).json({
     success: false,
-    error: err?.message || "Error interno del servidor",
+    error: errorMsg,
   });
 });
 

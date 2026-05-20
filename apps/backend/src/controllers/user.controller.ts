@@ -10,12 +10,13 @@ import {
 import { uploadBufferToMinio, uploadBase64Image } from "@/utils/minio-upload";
 import { asyncHandler } from "@/utils/async-handler";
 import { logger } from "@/utils/logger";
+import { UnauthorizedError } from "@/utils/app-error";
 
 export const updateProfile = asyncHandler(
   async (req: Request, res: Response<IApiResponse<IBetterAuthUser>>) => {
     const user = req.user;
 
-    if(!user) throw new Error("No autorizado");
+    if(!user) throw new UnauthorizedError();
 
     const {
       name,
@@ -80,7 +81,7 @@ export const updatePassword = asyncHandler(
   async (req: Request, res: Response<IApiResponse<void>>) => {
     const user = req.user;
 
-    if(!user) throw new Error("No autorizado");
+    if(!user) throw new UnauthorizedError();
 
     const { currentPassword, newPassword }: IUpdatePasswordDTO = req.body;
 
@@ -104,7 +105,7 @@ export const deleteAccount = asyncHandler(
   async (req: Request, res: Response<IApiResponse<void>>) => {
     const user = req.user;
 
-    if(!user) throw new Error("No autorizado");
+    if(!user) throw new UnauthorizedError();
 
     
     const { password }: { password: string } = req.body;

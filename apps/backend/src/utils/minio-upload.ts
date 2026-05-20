@@ -2,6 +2,7 @@ import { minioClient, BUCKETS } from "../config/minio";
 import { getClamScanner } from "../config/clamav";
 import { v4 as uuidv4 } from "uuid";
 import { Readable } from "stream";
+import { BadRequestError } from "./app-error";
 
 /**
  * Sube un buffer de imagen a MinIO, previa validación de tipo y escaneo de virus.
@@ -9,7 +10,7 @@ import { Readable } from "stream";
 export const uploadBufferToMinio = async (buffer: Buffer, type: string): Promise<string> => {
   // 2. Validación de Tipo MIME (Seguridad básica)
   if (!type.startsWith("image/")) {
-    throw new Error("Solo se permiten archivos de imagen.");
+    throw new BadRequestError("Solo se permiten archivos de imagen.");
   }
 
   // 3. Escaneo de Virus (ClamAV)
@@ -20,14 +21,14 @@ export const uploadBufferToMinio = async (buffer: Buffer, type: string): Promise
       const { isInfected, viruses } = await scanner.scanStream(stream);
       if (isInfected) {
         console.error(`🚨 Virus detectado en subida de perfil: ${viruses.join(", ")}`);
-        throw new Error("El archivo contiene una amenaza de seguridad y ha sido rechazado.");
+        throw new BadRequestError("El archivo contiene una amenaza de seguridad y ha sido rechazado.");
       }
     } catch (scanError: any) {
       // Si ClamAV falla, decidimos si bloquear o dejar pasar. 
       // Por seguridad, aquí bloqueamos si el escáner está activo pero falla.
       console.error("❌ Error durante el escaneo de virus:", scanError);
       if (process.env.NODE_ENV === "production") {
-        throw new Error("No se pudo verificar la seguridad del archivo.");
+        throw new BadRequestError("No se pudo verificar la seguridad del archivo.");
       }
     }
   }
@@ -57,7 +58,7 @@ export const uploadBase64Image = async (base64String: string): Promise<string> =
   const matches = base64String.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
   
   if (!matches || matches.length !== 3) {
-    throw new Error("Formato de imagen base64 inválido");
+    throw new BadRequestError("Formato de imagen base64 inválido");
   }
 
   const type = matches[1];
