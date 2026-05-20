@@ -34,6 +34,10 @@ export class AuthService {
     this.checkSession().subscribe();
   }
 
+  updateCurrentUser(user: User): void {
+    this._currentUser.set(user);
+  }
+
   checkSession(): Observable<User | null> {
     return this.http.get<IAuthResponse>('/auth/get-session').pipe(
       tap((res) => {
@@ -81,7 +85,14 @@ export class AuthService {
   }
 
   refreshToken(): Observable<any> {
-    return this.checkSession();
+    return this.checkSession().pipe(
+      map((user) => {
+        if (!user) {
+          throw new Error('No session available');
+        }
+        return user;
+      }),
+    );
   }
 
   listAccounts(): Observable<{ provider: string; id: string; accountId: string }[]> {

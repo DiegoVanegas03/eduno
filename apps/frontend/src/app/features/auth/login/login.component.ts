@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angula
 import { ButtonComponent } from '@shared/components/button/button.component';
 import { FormFieldComponent } from '@shared/components/form-field/form-field.component';
 import { AuthService } from '@app/core/services/auth/auth.service';
+import { toast } from 'ngx-sonner';
 
 @Component({
   selector: 'app-login',
@@ -16,8 +17,8 @@ export class LoginComponent {
   authService = inject(AuthService);
   router = inject(Router);
   route = inject(ActivatedRoute);
+  private toast = toast;
 
-  errorMessage = signal('');
   isLoading = signal(false);
 
   loginForm: FormGroup = this.fb.group({
@@ -35,21 +36,16 @@ export class LoginComponent {
       return;
     }
 
-    this.errorMessage.set('');
     this.isLoading.set(true);
 
     const { email, password } = this.loginForm.value;
 
     this.authService.login(email, password).subscribe({
       next: () => {
-        this.isLoading.set(false);
         const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
         this.router.navigateByUrl(returnUrl);
       },
-      error: (err) => {
-        this.isLoading.set(false);
-        this.errorMessage.set(err.error?.message || 'Error en autenticación');
-      },
+      error: () => this.isLoading.set(false),
     });
   }
 }

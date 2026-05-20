@@ -3,6 +3,7 @@ import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { MongoClient } from "mongodb";
 import { UserRole, USER_ROLES, IUserBase } from "@eduno/shared";
 import { customSession } from "better-auth/plugins";
+import { createAuthMiddleware } from "better-auth/api";
 
 // Re-use the same MONGO_URI used by Mongoose so we don't open a second pool.
 const mongoUri = process.env.MONGO_URI || "mongodb://localhost:27017/eduno";
@@ -102,4 +103,38 @@ export const auth = betterAuth({
       };
     }),
   ],
+
+  // ---------- Hooks ----------
+  hooks: {
+    after: createAuthMiddleware(async (ctx) => {
+      const returned = ctx.context.returned;
+      if (returned && typeof returned === "object") {
+        const transformUser = (user: any) => {
+          if (user && typeof user.image === "string" && user.image.startsWith("eduno:")) {
+            const fileName = user.image.split(":")[1];
+            const minioHost = (
+              process.env.MINIO_PUBLIC_URL || "http://localhost:9000"
+            ).replace(/\/$/, "");
+            user.image = `${minioHost}/perfiles/${fileName}`;
+          }
+        };
+
+        let modified = false;
+
+        if ("user" in returned && returned.user) {
+          transformUser(returned.user);
+          modified = true;
+        }
+
+        if ("image" in returned && typeof returned.image === "string" && returned.image.startsWith("eduno:")) {
+          transformUser(returned);
+          modified = true;
+        }
+
+        if (modified) {
+          return ctx.json(returned);
+        }
+      }
+    }),
+  },
 });

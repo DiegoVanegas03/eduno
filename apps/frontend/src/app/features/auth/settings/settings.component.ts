@@ -79,36 +79,33 @@ export class SettingsComponent {
     });
 
     // Sincroniza los datos del usuario con los campos locales y los mocks
-    effect(
-      () => {
-        const user = this.authService.currentUser();
-        if (user) {
-          const fullData: ProfileData = {
-            ...user,
-            initialLetter: user.initialLetter || '',
-            career: user.career || '',
-            semester: user.semester || '',
-            description: user.description || '',
-            // Mocks locales para lo que aún no está en el backend
-            downloadsLeft: 4,
-            maxDownloads: 5,
-            lastDownloadDate: '21 de abril del 2026',
-            totalUploads: 1,
-            connectedAccounts: [], // Se llenará desde el endpoint
-          };
+    effect(() => {
+      const user = this.authService.currentUser();
+      if (user) {
+        const fullData: ProfileData = {
+          ...user,
+          initialLetter: user.initialLetter || '',
+          career: user.career || '',
+          semester: user.semester || '',
+          description: user.description || '',
+          // Mocks locales para lo que aún no está en el backend
+          downloadsLeft: 4,
+          maxDownloads: 5,
+          lastDownloadDate: '21 de abril del 2026',
+          totalUploads: 1,
+          connectedAccounts: [], // Se llenará desde el endpoint
+        };
 
-          if (!this.initialData || this.initialData.id !== user.id) {
-            this.initialData = { ...fullData };
-          }
-
-          if (this.isLoading()) {
-            this.profileData.set({ ...fullData });
-            this.isLoading.set(false);
-          }
+        if (!this.initialData || this.initialData.id !== user.id) {
+          this.initialData = { ...fullData };
         }
-      },
-      { allowSignalWrites: true },
-    );
+
+        if (this.isLoading()) {
+          this.profileData.set({ ...fullData });
+          this.isLoading.set(false);
+        }
+      }
+    });
 
     // Consulta de cuentas vinculadas reales
     this.authService.listAccounts().subscribe({
@@ -184,38 +181,22 @@ export class SettingsComponent {
       cancelText: 'Cancelar',
       onConfirm: () => {
         const formData = new FormData();
-        let hasData = false;
 
         Object.keys(changes).forEach((key) => {
           if (key === 'image' && this.imageFile) {
             formData.append('image', this.imageFile);
-            hasData = true;
           } else {
             formData.append(key, changes[key].new);
-            hasData = true;
           }
         });
 
-        const request$ =
-          hasData && this.imageFile
-            ? this.myAccountService.updateProfileFormData(formData)
-            : this.myAccountService.updateProfile(
-                Object.fromEntries(
-                  Object.keys(changes)
-                    .filter((k) => k !== 'image' || !this.imageFile)
-                    .map((k) => [k, changes[k].new]),
-                ),
-              );
-
-        request$.subscribe({
+        this.myAccountService.updateProfile(formData).subscribe({
           next: (response) => {
             if (response.success && response.data) {
+              this.modalService.close();
+              this.initialData = null;
               const updatedUser = response.data;
-              this.profileData.update((current) => ({
-                ...current,
-                ...updatedUser,
-              }));
-              this.initialData = { ...this.profileData() };
+              this.authService.updateCurrentUser(updatedUser);
               this.editModes.set({});
               this.imageFile = null;
               toast.success(response.message || 'Perfil actualizado');

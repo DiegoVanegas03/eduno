@@ -39,7 +39,7 @@ export const apiInterceptor: HttpInterceptorFn = (
   return next(apiReq).pipe(
     catchError((error: HttpErrorResponse) => {
       // 3. Handle 401 Unauthorized (Token Expired)
-      if (error.status === 401 && !apiReq.url.includes('/auth/login')) {
+      if (error.status === 401 && !apiReq.url.includes('/auth/')) {
         return handle401Error(apiReq, next, authService);
       }
       return throwError(() => error);

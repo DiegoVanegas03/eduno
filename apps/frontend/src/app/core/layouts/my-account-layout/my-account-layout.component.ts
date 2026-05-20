@@ -35,25 +35,22 @@ export class MyAccountLayoutComponent {
   urlSignal = toSignal(
     this.router.events.pipe(
       filter((e): e is NavigationEnd => e instanceof NavigationEnd),
-      map((e) => e.urlAfterRedirects)
+      map((e) => e.urlAfterRedirects),
     ),
-    { initialValue: this.router.url }
+    { initialValue: this.router.url },
   );
 
   // Computa de manera reactiva los ítems del breadcrumb
   breadcrumbItems = computed(() => {
     const url = this.urlSignal();
-    const items = [
-      { label: 'Eduno', link: '/' },
-      { label: 'Configuración' }
-    ];
+    const items = [{ label: 'Eduno', link: '/' }, { label: 'Mi cuenta' }];
 
     if (url.includes('/security')) {
       items.push({ label: 'Seguridad' });
     } else if (url.includes('/uploads')) {
       items.push({ label: 'Subidos' });
     } else {
-      items.push({ label: 'Mi cuenta' });
+      items.push({ label: 'Configuración' });
     }
 
     return items;
