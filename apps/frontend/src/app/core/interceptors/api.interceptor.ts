@@ -5,7 +5,7 @@ import {
   HttpRequest,
   HttpHandlerFn,
 } from '@angular/common/http';
-import { inject } from '@angular/core';
+import { inject, Injector } from '@angular/core';
 import { catchError, switchMap, throwError, BehaviorSubject, filter, take, Observable } from 'rxjs';
 import { environment } from '@env/environment';
 import { AuthService } from '../services/auth/auth.service';
@@ -17,7 +17,7 @@ export const apiInterceptor: HttpInterceptorFn = (
   req: HttpRequest<any>,
   next: HttpHandlerFn,
 ): Observable<HttpEvent<any>> => {
-  const authService = inject(AuthService);
+  const injector = inject(Injector);
 
   // 1. Prepend Base URL
   let apiReq = req;
@@ -40,6 +40,7 @@ export const apiInterceptor: HttpInterceptorFn = (
     catchError((error: HttpErrorResponse) => {
       // 3. Handle 401 Unauthorized (Token Expired)
       if (error.status === 401 && !apiReq.url.includes('/auth/')) {
+        const authService = injector.get(AuthService);
         return handle401Error(apiReq, next, authService);
       }
       return throwError(() => error);

@@ -1,7 +1,7 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap, catchError, of, finalize, map } from 'rxjs';
+import { Observable, tap, catchError, of, finalize, map, shareReplay } from 'rxjs';
 import { toast } from 'ngx-sonner';
 import {
   UserRole,
@@ -9,6 +9,7 @@ import {
   USER_ROLES,
   IAuthResponse,
   getInitialLetter,
+  IApiResponse,
 } from '@eduno/shared';
 import { environment } from '@env/environment';
 
@@ -30,8 +31,16 @@ export class AuthService {
   isLoggedIn = computed(() => this._currentUser() !== null);
   userRole = computed(() => this._currentUser()?.role || null);
 
+  private initialCheck$: Observable<User | null>;
+
   constructor() {
-    this.checkSession().subscribe();
+    this.initialCheck$ = this.checkSession().pipe(shareReplay(1));
+    // Trigger initial session check immediately
+    this.initialCheck$.subscribe();
+  }
+
+  waitForAuth(): Observable<User | null> {
+    return this.initialCheck$;
   }
 
   updateCurrentUser(user: User): void {
@@ -39,12 +48,18 @@ export class AuthService {
   }
 
   checkSession(): Observable<User | null> {
-    return this.http.get<IAuthResponse>('/auth/get-session').pipe(
+    return this.http.get<IApiResponse<void> | IAuthResponse>('/auth/get-session').pipe(
       tap((res) => {
-        this._currentSessionId.set(res?.session?.id ?? null);
+        if (res && 'session' in res) {
+          this._currentSessionId.set(res.session?.id ?? null);
+        } else if (res && 'success' in res) {
+          if (!res.success && res.message) {
+            this.toast.error(res.message);
+          }
+        }
       }),
       map((res) => {
-        if (!res?.user) return null;
+        if (!res || !('user' in res) || !res.user) return null;
         return { ...res.user, initialLetter: getInitialLetter(res.user.name) };
       }),
       tap((user) => this._currentUser.set(user)),
@@ -56,32 +71,48 @@ export class AuthService {
     );
   }
 
-  login(email: string, password: string): Observable<User> {
-    return this.http.post<IAuthResponse>('/auth/sign-in/email', { email, password }).pipe(
-      map((res) => ({ ...res.user, initialLetter: getInitialLetter(res.user.name) })),
-      tap((user) => {
-        this._currentUser.set(user);
-        this.toast.success(`Bienvenido de nuevo, ${user.name}`);
-      }),
-      catchError((err) => {
-        this.toast.error(err.error?.message || 'Error al iniciar sesión');
-        throw err;
-      }),
-    );
+  login(email: string, password: string): Observable<User | null> {
+    return this.http
+      .post<IApiResponse<void> | IAuthResponse>('/auth/sign-in/email', { email, password })
+      .pipe(
+        map((res) => {
+          if (!res || !('user' in res) || !res.user) return null;
+          return { ...res.user, initialLetter: getInitialLetter(res.user.name) };
+        }),
+        tap((user) => {
+          if (user) {
+            this._currentUser.set(user);
+            this.toast.success(`Bienvenido de nuevo, ${user.name}`);
+          } else {
+            this.toast.error('Error al iniciar sesión');
+          }
+        }),
+        catchError((err) => {
+          this.toast.error(err.error?.message || 'Error al iniciar sesión');
+          throw err;
+        }),
+      );
   }
 
-  register(name: string, email: string, password: string): Observable<User> {
-    return this.http.post<IAuthResponse>('/auth/sign-up/email', { name, email, password }).pipe(
-      map((res) => ({ ...res.user, initialLetter: getInitialLetter(res.user.name) })),
-      tap((user) => {
-        this._currentUser.set(user);
-        this.toast.success('Tu cuenta ha sido creada exitosamente. ¡Bienvenido!');
-      }),
-      catchError((err) => {
-        this.toast.error(err.error?.message || 'Error al registrarse');
-        throw err;
-      }),
-    );
+  register(name: string, email: string, password: string): Observable<User | null> {
+    return this.http
+      .post<IApiResponse<void> | IAuthResponse>('/auth/sign-up/email', { name, email, password })
+      .pipe(
+        map((res) => {
+          if (!res || !('user' in res) || !res.user) return null;
+          return { ...res.user, initialLetter: getInitialLetter(res.user.name) };
+        }),
+        tap((user) => {
+          if (user) {
+            this._currentUser.set(user);
+            this.toast.success('Tu cuenta ha sido creada exitosamente. ¡Bienvenido!');
+          }
+        }),
+        catchError((err) => {
+          this.toast.error(err.error?.message || 'Error al registrarse');
+          throw err;
+        }),
+      );
   }
 
   refreshToken(): Observable<any> {
