@@ -1,9 +1,11 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { MongoClient } from "mongodb";
-import { UserRole, USER_ROLES, IUserBase } from "@eduno/shared";
+import { USER_ROLES, IUserBase } from "@eduno/shared";
 import { customSession } from "better-auth/plugins";
 import { createAuthMiddleware } from "better-auth/api";
+
+import { getProfilePictureUrl } from "@/utils/minio-upload";
 
 // Re-use the same MONGO_URI used by Mongoose so we don't open a second pool.
 const mongoUri = process.env.MONGO_URI || "mongodb://localhost:27017/eduno";
@@ -52,6 +54,10 @@ export const auth = betterAuth({
         type: "string",
         defaultValue: "",
       },
+      isBanned: {
+        type: "boolean",
+        defaultValue: false,
+      },
     },
     changeEmail: {
       enabled: true,
@@ -78,17 +84,7 @@ export const auth = betterAuth({
       // Cast para que TypeScript reconozca los campos adicionales
       const extendedUser = user as typeof user & IUserBase;
 
-      const { id, updatedAt, image, ...cleanedValues } = extendedUser;
-
-      // Construir la URL de la imagen si es local (empieza con "eduno:")
-      let finalImage = image;
-      if (image && image.startsWith("eduno:")) {
-        const fileName = image.split(":")[1];
-        const minioHost = (
-          process.env.MINIO_PUBLIC_URL || "http://localhost:9000"
-        ).replace(/\/$/, "");
-        finalImage = `${minioHost}/perfiles/${fileName}`;
-      }
+      const finalImage = getProfilePictureUrl(extendedUser.image);
 
       return {
         session: {
@@ -97,7 +93,7 @@ export const auth = betterAuth({
           userId: session.userId,
         },
         user: {
-          ...cleanedValues,
+          ...extendedUser,
           image: finalImage,
         },
       };
@@ -109,30 +105,28 @@ export const auth = betterAuth({
     after: createAuthMiddleware(async (ctx) => {
       const returned = ctx.context.returned;
       if (returned && typeof returned === "object") {
-        const transformUser = (user: any) => {
-          if (user && typeof user.image === "string" && user.image.startsWith("eduno:")) {
-            const fileName = user.image.split(":")[1];
-            const minioHost = (
-              process.env.MINIO_PUBLIC_URL || "http://localhost:9000"
-            ).replace(/\/$/, "");
-            user.image = `${minioHost}/perfiles/${fileName}`;
-          }
-        };
-
-        let modified = false;
+        // Bloquear acceso a usuarios baneados
+        const userObj = "user" in returned ? (returned as any).user : returned;
+        if (userObj && "isBanned" in userObj && userObj.isBanned === true) {
+          return ctx.json(
+            {
+              success: false,
+              message:
+                "Tu cuenta ha sido suspendida/baneada. Comunícate con soporte.",
+              error: "BANNED_USER",
+            },
+            { status: 403 },
+          );
+        }
 
         if ("user" in returned && returned.user) {
-          transformUser(returned.user);
-          modified = true;
-        }
-
-        if ("image" in returned && typeof returned.image === "string" && returned.image.startsWith("eduno:")) {
-          transformUser(returned);
-          modified = true;
-        }
-
-        if (modified) {
-          return ctx.json(returned);
+          return ctx.json({
+            ...returned,
+            user: {
+              ...(returned as any).user,
+              image: getProfilePictureUrl((returned as any).user.image),
+            },
+          });
         }
       }
     }),

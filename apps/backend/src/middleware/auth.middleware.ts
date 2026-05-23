@@ -12,8 +12,14 @@ export const isAuthenticated = async (req: Request, res: Response, next: NextFun
     return res.status(401).json({ success: false, message: "No autorizado. Sesión inválida o expirada." });
   }
 
+  // Cast user to include possible isBanned property
+  const user = session.user as any;
+  if (user.isBanned) {
+    return res.status(403).json({ success: false, message: "Tu cuenta ha sido suspendida/baneada." });
+  }
+
   // Attach user to request for downstream middlewares
-  req.user = session.user as any;
+  req.user = user;
   next();
 };
 

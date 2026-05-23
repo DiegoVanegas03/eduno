@@ -7,7 +7,10 @@ import { BadRequestError } from "./app-error";
 /**
  * Sube un buffer de imagen a MinIO, previa validación de tipo y escaneo de virus.
  */
-export const uploadBufferToMinio = async (buffer: Buffer, type: string): Promise<string> => {
+export const uploadBufferToMinio = async (
+  buffer: Buffer,
+  type: string,
+): Promise<string> => {
   // 2. Validación de Tipo MIME (Seguridad básica)
   if (!type.startsWith("image/")) {
     throw new BadRequestError("Solo se permiten archivos de imagen.");
@@ -20,15 +23,21 @@ export const uploadBufferToMinio = async (buffer: Buffer, type: string): Promise
     try {
       const { isInfected, viruses } = await scanner.scanStream(stream);
       if (isInfected) {
-        console.error(`🚨 Virus detectado en subida de perfil: ${viruses.join(", ")}`);
-        throw new BadRequestError("El archivo contiene una amenaza de seguridad y ha sido rechazado.");
+        console.error(
+          `🚨 Virus detectado en subida de perfil: ${viruses.join(", ")}`,
+        );
+        throw new BadRequestError(
+          "El archivo contiene una amenaza de seguridad y ha sido rechazado.",
+        );
       }
     } catch (scanError: any) {
-      // Si ClamAV falla, decidimos si bloquear o dejar pasar. 
+      // Si ClamAV falla, decidimos si bloquear o dejar pasar.
       // Por seguridad, aquí bloqueamos si el escáner está activo pero falla.
       console.error("❌ Error durante el escaneo de virus:", scanError);
       if (process.env.NODE_ENV === "production") {
-        throw new BadRequestError("No se pudo verificar la seguridad del archivo.");
+        throw new BadRequestError(
+          "No se pudo verificar la seguridad del archivo.",
+        );
       }
     }
   }
@@ -37,14 +46,16 @@ export const uploadBufferToMinio = async (buffer: Buffer, type: string): Promise
   const extension = type.split("/")[1] || "png";
   const fileName = `${uuidv4()}.${extension}`;
 
-  console.log(`[uploadBufferToMinio] Subiendo archivo a MinIO. Bucket: ${BUCKETS.PROFILES}, Archivo: ${fileName}, Tamaño: ${buffer.length}, Tipo: ${type}`);
+  console.log(
+    `[uploadBufferToMinio] Subiendo archivo a MinIO. Bucket: ${BUCKETS.PROFILES}, Archivo: ${fileName}, Tamaño: ${buffer.length}, Tipo: ${type}`,
+  );
 
   await minioClient.putObject(
     BUCKETS.PROFILES,
     fileName,
     buffer,
     buffer.length,
-    { "Content-Type": type }
+    { "Content-Type": type },
   );
 
   return `eduno:${fileName}`;
@@ -53,10 +64,12 @@ export const uploadBufferToMinio = async (buffer: Buffer, type: string): Promise
 /**
  * Sube una imagen en base64 a MinIO, previa validación de tipo y escaneo de virus.
  */
-export const uploadBase64Image = async (base64String: string): Promise<string> => {
+export const uploadBase64Image = async (
+  base64String: string,
+): Promise<string> => {
   // 1. Extraer el tipo y la data
   const matches = base64String.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
-  
+
   if (!matches || matches.length !== 3) {
     throw new BadRequestError("Formato de imagen base64 inválido");
   }
@@ -65,4 +78,16 @@ export const uploadBase64Image = async (base64String: string): Promise<string> =
   const buffer = Buffer.from(matches[2], "base64");
 
   return uploadBufferToMinio(buffer, type);
+};
+
+export const getProfilePictureUrl = (fileName: string | undefined | null) => {
+  //External picture configured in the user model
+  if (!fileName || !fileName.startsWith("eduno:")) return fileName;
+
+  const fileNameNoPrefix = fileName.split(":")[1];
+
+  const minioHost = (
+    process.env.MINIO_PUBLIC_URL || "http://localhost:9000"
+  ).replace(/\/$/, "");
+  return `${minioHost}/perfiles/${fileNameNoPrefix}`;
 };
