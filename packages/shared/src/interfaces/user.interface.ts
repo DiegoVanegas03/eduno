@@ -7,21 +7,42 @@ export interface IUserBase {
   career?: string;
   semester?: string;
   description?: string;
+  isBanned?: boolean;
 }
 
 export interface IUser extends IUserBase {
   id: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 }
 
 export interface IBetterAuthUser extends IUserBase {
   id: string;
-  createdAt: Date;
+  createdAt: Date | string;
   emailVerified: boolean;
   image?: string | null | undefined;
 }
 
 export interface IUserResponse extends IBetterAuthUser {
   initialLetter?: string;
+}
+
+export interface IAdminSession {
+  id: string;
+  ipAddress: string;
+  userAgent: string;
+  createdAt: Date | string;
+  expiresAt: Date | string;
+}
+
+export interface IAdminUserProfile {
+  user: IBetterAuthUser & {
+    isBanned: boolean;
+    career?: string;
+    semester?: string;
+    description?: string;
+    createdAt: Date | string;
+    updatedAt: Date | string;
+  };
+  sessions: IAdminSession[];
 }
