@@ -10,6 +10,8 @@ import { auth } from "./config/auth";
 // Routes
 import fileRoutes from "./routes/file.routes";
 import userRoutes from "./routes/user.routes";
+import scraperRoutes from "./routes/scraper.routes";
+import scheduleRoutes from "./routes/schedule.routes";
 
 // Utils
 import { GlobalErrorHandler } from "./utils/app-error";
@@ -54,6 +56,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api/files", fileRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/scraper", scraperRoutes);
+app.use("/api/schedules", scheduleRoutes);
 
 // ── Global error handler ───────────────────────────────────────────────────
 app.use(GlobalErrorHandler);

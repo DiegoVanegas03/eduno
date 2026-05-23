@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Duplex } from "stream";
 import zlib from "zlib";
-import { minioClient, bucketName } from "../config/minio";
+import { minioClient, BUCKETS } from "../config/minio";
 import { getClamScanner } from "../config/clamav";
 import { FileModel } from "../models/file.model";
 
@@ -54,7 +54,7 @@ export const uploadFile = async (
     const objectName = `${Date.now()}-${req.file.originalname}.gz`;
 
     await minioClient.putObject(
-      bucketName,
+      BUCKETS.DOCUMENTS,
       objectName,
       compressedBuffer,
       compressedSize,
