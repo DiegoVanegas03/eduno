@@ -1,91 +1,112 @@
-<div class="flex h-screen bg-cerulean-50 font-sans overflow-hidden">
-  
+<div class="flex h-screen bg-gray-50/50 font-sans overflow-hidden relative">
+
   <!-- Sidebar -->
   <aside 
-    class="bg-white flex flex-col shadow-xl transition-all duration-300 z-20"
+    class="relative bg-white border-r border-gray-200/60 shadow-[1px_0_10px_rgba(0,0,0,0.01)] transition-all duration-300 z-20 flex flex-col"
     [class.w-64]="!isSidebarCollapsed()"
     [class.w-20]="isSidebarCollapsed()"
   >
+    <!-- Toggle Expand/Collapse Button (Perfectly anchored on the border edge) -->
+    <button 
+      (click)="toggleSidebar()" 
+      class="absolute -right-3 top-6 z-30 flex items-center justify-center w-6 h-6 rounded-full border border-gray-200 bg-white text-gray-500 hover:text-cerulean-600 hover:bg-gray-50 transition-all shadow-xs active:scale-95 cursor-pointer"
+      [title]="isSidebarCollapsed() ? 'Expandir menú' : 'Colapsar menú'"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 transition-transform duration-300" [class.rotate-180]="isSidebarCollapsed()" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+      </svg>
+    </button>
+
     <!-- Sidebar Header -->
-    <div class="h-20 flex items-center px-4 border-b border-gray-100 justify-between">
+    <div class="h-20 flex items-center px-5 border-b border-gray-100 justify-between">
       <div class="flex items-center gap-3 overflow-hidden" *ngIf="!isSidebarCollapsed()">
-        <app-logo></app-logo>
+        <app-logo cssClass="w-9 h-9 text-cerulean-600"></app-logo>
+        <span class="font-bold text-base text-oxford-navy-950 tracking-tight">Eduno Admin</span>
       </div>
       <div class="flex items-center justify-center w-full" *ngIf="isSidebarCollapsed()">
-        <div class="w-8 h-8 bg-cerulean-600 rounded-lg flex items-center justify-center text-white font-bold">E</div>
+        <app-logo cssClass="w-9 h-9 text-cerulean-600"></app-logo>
       </div>
-      <button 
-        (click)="toggleSidebar()" 
-        class="text-gray-400 hover:text-cerulean-600 transition-colors p-1"
-        [class.absolute]="isSidebarCollapsed()"
-        [class.right-[-12px]]="isSidebarCollapsed()"
-        [class.bg-white]="isSidebarCollapsed()"
-        [class.rounded-full]="isSidebarCollapsed()"
-        [class.shadow]="isSidebarCollapsed()"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-transform" [class.rotate-180]="isSidebarCollapsed()" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-        </svg>
-      </button>
     </div>
 
     <!-- Navigation -->
-    <nav class="flex-1 px-3 py-6 space-y-2 overflow-y-auto custom-scrollbar">
+    <nav class="flex-1 px-3 py-6 space-y-1 overflow-y-auto custom-scrollbar z-10">
       <a 
         routerLink="dashboard" 
-        routerLinkActive="bg-cerulean-50 text-cerulean-700 font-semibold" 
-        class="flex items-center gap-3 px-3 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all group"
+        routerLinkActive="bg-gray-50 border-l-3 border-cerulean-600 text-oxford-navy-950 font-bold" 
+        class="flex items-center gap-3.5 px-4 py-3 rounded-r-xl text-gray-400 hover:bg-gray-50/50 hover:text-gray-900 border-l-3 border-transparent transition-all duration-150 group relative"
         [title]="isSidebarCollapsed() ? 'Dashboard' : ''"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 transition-colors group-hover:text-cerulean-600" [class.text-cerulean-600]="false" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 transition-all duration-200 group-hover:text-cerulean-600 group-[.text-oxford-navy-950]:text-cerulean-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
         </svg>
-        <span class="whitespace-nowrap transition-opacity duration-300" [class.opacity-0]="isSidebarCollapsed()" [class.w-0]="isSidebarCollapsed()">Dashboard</span>
+        <span class="whitespace-nowrap transition-all duration-200 font-medium group-[.text-oxford-navy-950]:font-semibold" [class.opacity-0]="isSidebarCollapsed()" [class.w-0]="isSidebarCollapsed()">Dashboard</span>
       </a>
-
-
 
       <a 
         routerLink="manage-users" 
-        routerLinkActive="bg-cerulean-50 text-cerulean-700 font-semibold" 
-        class="flex items-center gap-3 px-3 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all group"
+        routerLinkActive="bg-gray-50 border-l-3 border-cerulean-600 text-oxford-navy-950 font-bold" 
+        class="flex items-center gap-3.5 px-4 py-3 rounded-r-xl text-gray-400 hover:bg-gray-50/50 hover:text-gray-900 border-l-3 border-transparent transition-all duration-150 group relative"
         [title]="isSidebarCollapsed() ? 'Usuarios' : ''"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 transition-colors group-hover:text-cerulean-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 transition-all duration-200 group-hover:text-cerulean-600 group-[.text-oxford-navy-950]:text-cerulean-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
         </svg>
-        <span class="whitespace-nowrap transition-opacity duration-300" [class.opacity-0]="isSidebarCollapsed()" [class.w-0]="isSidebarCollapsed()">Usuarios</span>
+        <span class="whitespace-nowrap transition-all duration-200 font-medium group-[.text-oxford-navy-950]:font-semibold" [class.opacity-0]="isSidebarCollapsed()" [class.w-0]="isSidebarCollapsed()">Usuarios</span>
       </a>
     </nav>
     
     <!-- Sidebar Footer with User Card -->
-    <div class="p-3 border-t border-gray-100 min-h-20 flex items-center justify-center">
-      <div [class.hidden]="isSidebarCollapsed()" class="w-full">
-        <app-user-card></app-user-card>
+    <div class="p-3 border-t border-gray-100 min-h-20 flex flex-col items-center justify-center bg-transparent">
+      <!-- Expanded Footer: User Card (Inert) + Space Between + Logout Button -->
+      <div *ngIf="!isSidebarCollapsed()" class="flex items-center justify-between gap-2 w-full px-1">
+        <div class="flex-1 min-w-0">
+          <app-user-card [isInteractive]="false"></app-user-card>
+        </div>
+        <!-- Logout Button next to inert user card, pushed to the right with space-between behavior -->
+        <button 
+          (click)="authService.logout()" 
+          title="Cerrar sesión"
+          class="p-2.5 text-gray-400 hover:text-punch-red-500 hover:bg-punch-red-50/50 rounded-xl transition-all duration-200 cursor-pointer shrink-0"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+        </button>
       </div>
-      <div *ngIf="isSidebarCollapsed()">
-         <!-- Minimal user representation when collapsed -->
-         <div class="w-10 h-10 bg-cerulean-100 rounded-full flex items-center justify-center text-cerulean-700 font-bold shadow-sm cursor-pointer hover:ring-2 ring-cerulean-400 transition-all">
-            U
-         </div>
+
+      <!-- Collapsed Footer: Avatar (Inert) + Logout Button below it -->
+      <div *ngIf="isSidebarCollapsed()" class="flex flex-col items-center gap-3 w-full">
+         <!-- Minimal user representation when collapsed using Avatar component (no active click pointer) -->
+         <app-avatar [user]="authService.currentUser()" size="md" [title]="authService.currentUser()?.name" class="select-none pointer-events-none" />
+         
+         <!-- Dedicated clean minimalist logout button for collapsed mode -->
+         <button 
+           (click)="authService.logout()" 
+           title="Cerrar sesión"
+           class="p-2 text-gray-400 hover:text-punch-red-500 hover:bg-punch-red-50/50 rounded-xl transition-all duration-200 cursor-pointer"
+         >
+           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+           </svg>
+         </button>
       </div>
     </div>
   </aside>
 
   <!-- Main Content -->
-  <main class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+  <main class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative">
     <!-- Top Header -->
-    <header class="h-20 bg-white/80 backdrop-blur-md shadow-sm flex items-center justify-between px-8 z-10 sticky top-0">
+    <header class="h-20 bg-white border-b border-gray-200/60 flex items-center justify-between px-8 sticky top-0 z-10">
       <div>
-        <h2 class="text-xl font-bold text-oxford-navy-800">Administración general</h2>
-        <p class="text-sm text-gray-500">Gestiona los recursos de la plataforma</p>
+        <h2 class="text-base font-bold text-oxford-navy-950">Administración General</h2>
+        <p class="text-xs text-gray-400 font-medium mt-0.5">Plataforma Educativa Eduno • Panel de control y seguridad</p>
       </div>
 
       <div class="flex items-center gap-4">
         <!-- Notification Bell -->
-        <button class="relative p-2 text-gray-400 hover:text-cerulean-600 transition-colors bg-gray-50 hover:bg-cerulean-50 rounded-full">
-          <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-punch-red-500 rounded-full border-2 border-white"></span>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <button class="relative p-2.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 border border-transparent hover:border-gray-100 bg-transparent rounded-xl transition-all duration-200 cursor-pointer group">
+          <span class="absolute top-2.5 right-2.5 w-2 h-2 bg-punch-red-500 rounded-full border border-white"></span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
           </svg>
         </button>
@@ -93,7 +114,7 @@
     </header>
 
     <!-- Scrollable Content Area -->
-    <div class="flex-1 overflow-auto p-4 md:p-8">
+    <div class="flex-1 overflow-auto p-6 md:p-8 custom-scrollbar">
       <router-outlet></router-outlet>
     </div>
   </main>

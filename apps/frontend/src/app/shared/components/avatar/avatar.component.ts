@@ -21,6 +21,19 @@ export class AvatarComponent {
       xl: 'w-20 h-20 text-2xl',
     };
 
-    return `${sizeClasses[this.size()]} ${this.cssClass()} bg-cerulean-100 rounded-full flex items-center justify-center text-cerulean-700 font-bold shrink-0 shadow-sm border border-cerulean-200 overflow-hidden`;
+    const role = this.user()?.role;
+    let colorClasses = 'bg-cerulean-100 text-cerulean-700 border-cerulean-200';
+
+    if (role === 'admin') {
+      colorClasses = 'bg-gray-100 text-gray-700 border-gray-250';
+    } else if (role === 'profesor') {
+      colorClasses = 'bg-blue-50/70 text-blue-600 border-blue-150';
+    } else if (role === 'alumno') {
+      colorClasses = 'bg-green-50/70 text-green-600 border-green-150';
+    } else if (role === 'moderador') {
+      colorClasses = 'bg-yellow-50/70 text-yellow-600 border-yellow-150';
+    }
+
+    return `${sizeClasses[this.size()]} ${this.cssClass()} ${colorClasses} rounded-full flex items-center justify-center font-bold shrink-0 shadow-xs border overflow-hidden`;
   });
 }

@@ -18,6 +18,11 @@ export const adminRoutes: Routes = [
           import('./manage-users/manage-users.component').then((m) => m.ManageUsersComponent),
       },
       {
+        path: 'manage-users/:id',
+        loadComponent: () =>
+          import('./user-profile/user-profile.component').then((m) => m.UserProfileComponent),
+      },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full',
