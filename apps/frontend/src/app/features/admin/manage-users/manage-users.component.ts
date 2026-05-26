@@ -6,7 +6,7 @@ import { AvatarComponent } from '@shared/components/avatar/avatar.component';
 import { AdminUsersService } from '@core/services/admin-users/admin-users.service';
 import { toast } from 'ngx-sonner';
 import { firstValueFrom } from 'rxjs';
-import { IUserResponse, UserRole } from '@eduno/shared';
+import { IUserResponse, UserRole, IUserDashboardStats } from '@eduno/shared';
 
 @Component({
   selector: 'app-manage-users',
@@ -22,6 +22,7 @@ export class ManageUsersComponent implements OnInit {
 
   users = signal<IUserResponse[]>([]);
   isLoading = signal<boolean>(true);
+  stats = signal<IUserDashboardStats | null>(null);
 
   constructor() {
     // Read and normalize initial query params from the URL on component creation
@@ -81,6 +82,7 @@ export class ManageUsersComponent implements OnInit {
 
   ngOnInit() {
     this.loadUsersFromBackend();
+    this.loadStatsFromBackend();
   }
 
   loadUsersFromBackend() {
@@ -98,6 +100,19 @@ export class ManageUsersComponent implements OnInit {
         console.error(err);
         toast.error(err.error?.error || 'Error de conexión con el servidor al cargar usuarios.');
         this.isLoading.set(false);
+      },
+    });
+  }
+
+  loadStatsFromBackend() {
+    this.adminUsersService.getDashboardStats().subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.stats.set(res.data);
+        }
+      },
+      error: (err) => {
+        console.error('Error al cargar estadísticas:', err);
       },
     });
   }
@@ -131,7 +146,7 @@ export class ManageUsersComponent implements OnInit {
       const matchesSearch =
         u.name.toLowerCase().includes(query) || u.email.toLowerCase().includes(query);
       const matchesRole = filter === 'Todos' || u.role === filter.toLowerCase();
-      const userStatus = u.isBanned ? "Baneado" : "Activo";
+      const userStatus = u.isBanned ? 'Baneado' : 'Activo';
       const matchesStatus = statusFilter === 'Todos' || userStatus === statusFilter;
 
       let matchesPeriod = true;
@@ -165,11 +180,12 @@ export class ManageUsersComponent implements OnInit {
     }
   }
 
-  // Dynamic Metrics computed reactively via Signals!
-  totalUsers = computed(() => this.users().length);
-  activeUsers = computed(() => this.users().filter((u) => !u.isBanned).length);
-  profesoresCount = computed(() => this.users().filter((u) => u.role === 'profesor').length);
-  bannedUsers = computed(() => this.users().filter((u) => u.isBanned).length);
+  // Dynamic Metrics computed reactively via Signals (using backend stats payload)!
+  totalUsers = computed(() => this.stats()?.totalUsers ?? 0);
+  activeUsers = computed(() => this.stats()?.activeUsers ?? 0);
+  profesoresCount = computed(() => this.stats()?.profesoresCount ?? 0);
+  bannedUsers = computed(() => this.stats()?.bannedUsers ?? 0);
+  monthlyGrowth = computed(() => this.stats()?.monthlyGrowth ?? 0);
 
   activeRatio = computed(() => {
     const total = this.totalUsers();
@@ -252,15 +268,15 @@ export class ManageUsersComponent implements OnInit {
         loading: 'Actualizando usuario en el servidor...',
         success: (res: any) => {
           if (res.success && res.data) {
-            this.users.update((list) =>
-              list.map((u) => (u.id === currentId ? res.data : u)),
-            );
+            this.users.update((list) => list.map((u) => (u.id === currentId ? res.data : u)));
+            this.loadStatsFromBackend();
             this.isEditModalOpen.set(false);
             return 'Usuario actualizado correctamente';
           }
           throw new Error(res.message || 'Error al actualizar.');
         },
-        error: (err: any) => err?.message || err?.error?.error || 'No se pudo actualizar el usuario.',
+        error: (err: any) =>
+          err?.message || err?.error?.error || 'No se pudo actualizar el usuario.',
       },
     );
   }
@@ -299,6 +315,7 @@ export class ManageUsersComponent implements OnInit {
         success: (res: any) => {
           if (res.success && res.data) {
             this.users.update((list) => [res.data, ...list]);
+            this.loadStatsFromBackend();
             this.isCreateModalOpen.set(false);
             return `Usuario ${res.data.name} registrado con éxito`;
           }
@@ -315,8 +332,9 @@ export class ManageUsersComponent implements OnInit {
       success: (res: any) => {
         if (res.success && res.data) {
           this.users.update((list) =>
-            list.map((u) => (u.id === user.id ? { ...u, isBanned: res.data.isBanned} : u)),
+            list.map((u) => (u.id === user.id ? { ...u, isBanned: res.data.isBanned } : u)),
           );
+          this.loadStatsFromBackend();
           return res.data.isBanned
             ? `El usuario ${user.name} ha sido suspendido.`
             : `El acceso de ${user.name} ha sido habilitado.`;
@@ -331,16 +349,8 @@ export class ManageUsersComponent implements OnInit {
     toast.promise(firstValueFrom(this.adminUsersService.resendVerification(user.id)), {
       loading: 'Reenviando correo de verificación...',
       success: () => `Correo de verificación reenviado con éxito a ${user.email}.`,
-      error: (err: any) => err?.message || err?.error?.error || 'No se pudo reenviar el correo de verificación.',
+      error: (err: any) =>
+        err?.message || err?.error?.error || 'No se pudo reenviar el correo de verificación.',
     });
-  }
-
-  getInitials(name: string): string {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .slice(0, 2)
-      .join('')
-      .toUpperCase();
   }
 }

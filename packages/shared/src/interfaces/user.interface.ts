@@ -33,16 +33,21 @@ export interface IAdminSession {
   userAgent: string;
   createdAt: Date | string;
   expiresAt: Date | string;
+  isExpired: boolean;
 }
 
 export interface IAdminUserProfile {
-  user: IBetterAuthUser & {
-    isBanned: boolean;
-    career?: string;
-    semester?: string;
-    description?: string;
-    createdAt: Date | string;
+  user: IUserResponse & {
     updatedAt: Date | string;
   };
   sessions: IAdminSession[];
 }
+
+export interface IUserDashboardStats {
+  totalUsers: number;
+  activeUsers: number;
+  monthlyGrowth: number;
+  profesoresCount: number;
+  bannedUsers: number;
+}
+

@@ -62,10 +62,15 @@
         <div class="mt-5 space-y-2">
         <div class="flex justify-between items-center text-xs font-bold text-gray-400">
             <span>Crecimiento mensual</span>
-            <span class="text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded font-bold">+12.4%</span>
+            <span class="text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded font-bold"
+            >{{ monthlyGrowth() >= 0 ? '+' : '' }}{{ monthlyGrowth() }}%</span
+            >
         </div>
         <div class="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
-            <div class="h-full bg-gray-900 rounded-full" style="width: 100%"></div>
+            <div
+            class="h-full bg-gray-900 rounded-full transition-all duration-700"
+            [style.width.%]="monthlyGrowth() > 0 ? (monthlyGrowth() > 100 ? 100 : monthlyGrowth()) : 0"
+            ></div>
         </div>
         </div>
     </div>
@@ -520,51 +525,6 @@
                       stroke-linejoin="round"
                       stroke-width="2"
                       d="M3 19v-8.93a2 2 0 01.89-1.664l8-5.333a2 2 0 012.22 0l8 5.333A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-2.25-1.5a2 2 0 00-2.22 0l-2.25 1.5"
-                      ></path>
-                  </svg>
-                  </button>
-
-                  <!-- Toggle Ban Button -->
-                  <button
-                  (click)="toggleUserStatus(user)"
-                  [title]="!user.isBanned ? 'Suspender usuario' : 'Habilitar acceso'"
-                  class="transition-colors p-1.5 rounded-lg cursor-pointer inline-flex items-center justify-center border border-transparent"
-                  [class.text-gray-400]="true"
-                  [class.hover:text-punch-red-650]="!user.isBanned"
-                  [class.hover:bg-punch-red-50/50]="!user.isBanned"
-                  [class.hover:border-punch-red-100]="!user.isBanned"
-                  [class.hover:text-green-650]="user.isBanned"
-                  [class.hover:bg-green-50/50]="user.isBanned"
-                  [class.hover:border-green-100]="user.isBanned"
-                  >
-                  <!-- If active, show ban lock -->
-                  <svg
-                      *ngIf="!user.isBanned"
-                      class="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                  >
-                      <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                      ></path>
-                  </svg>
-                  <!-- If banned, show lock open -->
-                  <svg
-                      *ngIf="user.isBanned"
-                      class="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                  >
-                      <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"
                       ></path>
                   </svg>
                   </button>

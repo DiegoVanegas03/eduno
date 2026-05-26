@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AvatarComponent } from '@shared/components/avatar/avatar.component';
+import { RoleTranslatePipe } from '@shared/pipes/role-translate.pipe';
 import { AdminUsersService } from '@core/services/admin-users/admin-users.service';
 import { IAdminUserProfile } from '@eduno/shared';
 import { toast } from 'ngx-sonner';
@@ -10,7 +11,7 @@ import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-user-profile',
   standalone: true,
-  imports: [CommonModule, RouterLink, AvatarComponent],
+  imports: [CommonModule, RouterLink, AvatarComponent, RoleTranslatePipe],
   templateUrl: './user-profile.component.html',
 })
 export class UserProfileComponent implements OnInit {
@@ -21,13 +22,6 @@ export class UserProfileComponent implements OnInit {
   profileData = signal<IAdminUserProfile | null>(null);
   isLoading = signal<boolean>(true);
   errorMessage = signal<string | null>(null);
-
-  roleLabels: Record<string, string> = {
-    alumno: 'Alumno',
-    profesor: 'Profesor',
-    moderador: 'Moderador',
-    admin: 'Administrador',
-  };
 
   ngOnInit() {
     this.route.paramMap.subscribe((params) => {
@@ -172,7 +166,7 @@ export class UserProfileComponent implements OnInit {
    */
   copyToClipboard(text: string, label: string) {
     navigator.clipboard.writeText(text).then(() => {
-      toast.success(`${label} copiado al portapapeles.`);
+      toast.info(`${label} copiado al portapapeles.`);
     });
   }
 }

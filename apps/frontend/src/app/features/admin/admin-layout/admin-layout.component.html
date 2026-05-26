@@ -19,13 +19,13 @@
 
     <!-- Sidebar Header -->
     <div class="h-20 flex items-center px-5 border-b border-gray-100 justify-between">
-      <div class="flex items-center gap-3 overflow-hidden" *ngIf="!isSidebarCollapsed()">
+      <a routerLink="/" class="flex items-center gap-3 overflow-hidden cursor-pointer no-underline group" *ngIf="!isSidebarCollapsed()">
+        <app-logo cssClass="w-9 h-9 text-cerulean-600 transition-transform duration-200 group-hover:scale-105"></app-logo>
+        <span class="font-bold text-base text-oxford-navy-950 tracking-tight transition-colors duration-200 group-hover:text-cerulean-600">Eduno Admin</span>
+      </a>
+      <a routerLink="/" class="flex items-center justify-center w-full cursor-pointer transition-transform duration-200 hover:scale-105" *ngIf="isSidebarCollapsed()">
         <app-logo cssClass="w-9 h-9 text-cerulean-600"></app-logo>
-        <span class="font-bold text-base text-oxford-navy-950 tracking-tight">Eduno Admin</span>
-      </div>
-      <div class="flex items-center justify-center w-full" *ngIf="isSidebarCollapsed()">
-        <app-logo cssClass="w-9 h-9 text-cerulean-600"></app-logo>
-      </div>
+      </a>
     </div>
 
     <!-- Navigation -->

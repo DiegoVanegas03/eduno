@@ -2,10 +2,11 @@ import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { MongoClient } from "mongodb";
 import { USER_ROLES, IUserBase } from "@eduno/shared";
-import { customSession } from "better-auth/plugins";
+import { customSession, admin } from "better-auth/plugins";
 import { createAuthMiddleware } from "better-auth/api";
 
 import { getProfilePictureUrl } from "@/utils/minio-upload";
+import { ac, roles } from "./permissions";
 
 // Re-use the same MONGO_URI used by Mongoose so we don't open a second pool.
 const mongoUri = process.env.MONGO_URI || "mongodb://localhost:27017/eduno";
@@ -29,10 +30,18 @@ export const auth = betterAuth({
   // ---------- Trusted origins ----------
   trustedOrigins: [process.env.FRONTEND_URL || "http://localhost:4200"],
 
+  // ---------- Advanced ----------
+  advanced: {
+    ipAddress: {
+      ipAddressHeaders: ["x-forwarded-for", "x-real-ip"],
+    },
+  },
+
   // ---------- Email / Password ----------
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,
+    autoSignIn: false,
   },
 
   // ---------- User Schema ----------
@@ -41,6 +50,7 @@ export const auth = betterAuth({
       role: {
         type: "string",
         defaultValue: USER_ROLES.ALUMNO,
+        input:false
       },
       career: {
         type: "string",
@@ -57,6 +67,7 @@ export const auth = betterAuth({
       isBanned: {
         type: "boolean",
         defaultValue: false,
+        input:false
       },
     },
     changeEmail: {
@@ -80,6 +91,11 @@ export const auth = betterAuth({
 
   // ---------- Plugins ----------
   plugins: [
+    admin({
+      ac,
+      roles,
+      adminRoles: [USER_ROLES.ADMIN, USER_ROLES.MODERADOR],
+    }),
     customSession(async ({ session, user }) => {
       // Cast para que TypeScript reconozca los campos adicionales
       const extendedUser = user as typeof user & IUserBase;

@@ -13,6 +13,8 @@ import {
   IUpdateUserDTO,
   IAdminUserProfile,
   IUserResponse,
+  IUserDashboardStats,
+  getInitialLetter,
 } from "@eduno/shared";
 import {
   uploadBufferToMinio,
@@ -25,24 +27,22 @@ import {
   UnauthorizedError,
   NotFoundError,
   InternalServerError,
+  BadRequestError,
+  AppError,
 } from "@/utils/app-error";
 import mongoose from "mongoose";
 import User from "@/models/user.model";
 
 export const updateProfile = asyncHandler(
-  async (req: Request, res: Response<IApiResponse<IBetterAuthUser>>) => {
+  async (
+    req: Request<any, any, IUpdateProfileDTO>,
+    res: Response<IApiResponse<IBetterAuthUser>>,
+  ) => {
     const user = req.user;
 
     if (!user) throw new UnauthorizedError();
 
-    const {
-      name,
-      email,
-      career,
-      semester,
-      description,
-      image,
-    }: IUpdateProfileDTO = req.body;
+    const { name, email, career, semester, description, image } = req.body;
 
     logger.debug(`[updateProfile] Body recibido para: ${email || user.email}`);
 
@@ -95,36 +95,92 @@ export const updateProfile = asyncHandler(
 );
 
 export const updatePassword = asyncHandler(
-  async (req: Request, res: Response<IApiResponse<void>>) => {
+  async (
+    req: Request<any, any, IUpdatePasswordDTO>,
+    res: Response<IApiResponse<void>>,
+  ) => {
     const user = req.user;
 
     if (!user) throw new UnauthorizedError();
 
-    const { currentPassword, newPassword }: IUpdatePasswordDTO = req.body;
+    const { currentPassword, newPassword } = req.body;
 
     logger.debug(
-      `[updatePassword] Actualizando contraseña para: ${user.email}`,
+      `[updatePassword] Evaluando y actualizando contraseña para: ${user.email}`,
     );
 
-    await auth.api.changePassword({
-      headers: fromNodeHeaders(req.headers),
-      body: { currentPassword, newPassword, revokeOtherSessions: false },
-    });
+    // 1. Determinar si el usuario tiene una contraseña configurada buscando su cuenta "credential" en la colección "account"
+    const accountCollection = mongoose.connection.db?.collection("account");
+    let hasPassword = false;
+    if (accountCollection) {
+      const credentialAccount = await accountCollection.findOne({
+        userId: new mongoose.Types.ObjectId(user.id),
+        providerId: "credential",
+      });
+
+      hasPassword = !!credentialAccount;
+    }
+
+    // 2. Ejecutar la actualización según el caso
+    try {
+      if (hasPassword) {
+        // Cuenta con contraseña preexistente -> Requiere contraseña actual para cambiarla
+        if (!currentPassword) {
+          throw new BadRequestError(
+            "La contraseña actual es requerida para realizar el cambio.",
+          );
+        }
+
+        await auth.api.changePassword({
+          headers: fromNodeHeaders(req.headers),
+          body: { currentPassword, newPassword, revokeOtherSessions: false },
+        });
+      } else {
+        // Cuenta creada por OAuth (Google/Microsoft) sin contraseña -> Establece la contraseña por primera vez
+        await auth.api.setPassword({
+          headers: fromNodeHeaders(req.headers),
+          body: { newPassword },
+        });
+      }
+    } catch (error: any) {
+      logger.warn(
+        `[updatePassword] Error al actualizar la contraseña para ${user.email}: ${error.message}`,
+      );
+
+      // Si ya es un AppError (como el BadRequestError de arriba), volverlo a lanzar directamente
+      if (error instanceof AppError) {
+        throw error;
+      }
+
+      // Mapear errores de Better Auth o retornar un mensaje amigable
+      const errorMsg =
+        error.message === "INVALID_PASSWORD" || error.status === 400
+          ? "La contraseña actual es incorrecta o no cumple con los requisitos de Better Auth."
+          : error.message ||
+            "Error al procesar la actualización de la contraseña.";
+
+      throw new BadRequestError(errorMsg);
+    }
 
     return res.json({
       success: true,
-      message: "Contraseña actualizada correctamente",
+      message: hasPassword
+        ? "Contraseña actualizada correctamente"
+        : "Contraseña establecida con éxito para tu cuenta",
     });
   },
 );
 
 export const deleteAccount = asyncHandler(
-  async (req: Request, res: Response<IApiResponse<void>>) => {
+  async (
+    req: Request<any, any, IDeleteAccountSchema>,
+    res: Response<IApiResponse<void>>,
+  ) => {
     const user = req.user;
 
     if (!user) throw new UnauthorizedError();
 
-    const { password }: IDeleteAccountSchema = req.body;
+    const { password } = req.body;
 
     logger.info(`[deleteAccount] Eliminando cuenta para: ${user.email}`);
 
@@ -165,21 +221,31 @@ export const getUserProfileForAdmin = asyncHandler(
       throw new NotFoundError("Usuario no encontrado");
     }
 
-    // Obtener sesiones activas de la colección 'session' en MongoDB
-    const sessionCollection = mongoose.connection.db?.collection("session");
-    let sessions: any[] = [];
-    if (sessionCollection) {
-      sessions = await sessionCollection.find({ userId: id }).toArray();
-    }
+    // Obtener sesiones activas a través de Better Auth Admin API
+    const sessionResult = await auth.api.listUserSessions({
+      headers: fromNodeHeaders(req.headers),
+      body: {
+        userId: id,
+      },
+    });
+    const sessions = sessionResult?.sessions || [];
 
-    // Formatear sesiones
-    const formattedSessions = sessions.map((s) => ({
-      id: s.id || s._id.toString(),
-      ipAddress: s.ipAddress || "Desconocida",
-      userAgent: s.userAgent || "Desconocido",
-      createdAt: s.createdAt,
-      expiresAt: s.expiresAt,
-    }));
+    const now = new Date().getTime();
+
+    // Formatear sesiones (usando s.token como ID en la UI para revocar sin alterar la firma del REST)
+    const formattedSessions = sessions
+      .map((s) => ({
+        id: s.token,
+        ipAddress: s.ipAddress || "Desconocida",
+        userAgent: s.userAgent || "Desconocido",
+        createdAt: s.createdAt,
+        expiresAt: s.expiresAt,
+        isExpired: new Date(s.expiresAt).getTime() < now,
+      }))
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
 
     return res.json({
       success: true,
@@ -187,6 +253,7 @@ export const getUserProfileForAdmin = asyncHandler(
         user: {
           id: user._id.toString(),
           name: user.name,
+          initialLetter: getInitialLetter(user.name),
           email: user.email,
           role: user.role,
           emailVerified: user.emailVerified,
@@ -213,24 +280,32 @@ export const toggleUserBanStatus = asyncHandler(
       throw new NotFoundError("Usuario no encontrado");
     }
 
-    // Cambiar estado de baneo
-    user.isBanned = !user.isBanned;
+    // Cambiar estado de baneo en Better Auth Admin API
+    if (user.isBanned) {
+      // Habilitar acceso de nuevo
+      await auth.api.unbanUser({
+        headers: fromNodeHeaders(req.headers),
+        body: {
+          userId: id,
+        },
+      });
+      user.isBanned = false;
+    } else {
+      // Suspender acceso y revocar de forma inmediata todas sus sesiones
+      await auth.api.banUser({
+        headers: fromNodeHeaders(req.headers),
+        body: {
+          userId: id,
+        },
+      });
+      user.isBanned = true;
+    }
+
     await user.save();
 
     logger.info(
       `[toggleUserBanStatus] Usuario ${user.email} baneo cambiado a: ${user.isBanned}`,
     );
-
-    // Si fue baneado, revocar de forma inmediata todas sus sesiones en Better-Auth/MongoDB
-    if (user.isBanned) {
-      const sessionCollection = mongoose.connection.db?.collection("session");
-      if (sessionCollection) {
-        const result = await sessionCollection.deleteMany({ userId: id });
-        logger.info(
-          `[toggleUserBanStatus] Revocadas ${result.deletedCount} sesiones activas para el usuario suspendido ${user.email}`,
-        );
-      }
-    }
 
     return res.json({
       success: true,
@@ -275,30 +350,16 @@ export const revokeUserSession = asyncHandler(
   async (req: Request, res: Response<IApiResponse<void>>) => {
     const { id, sessionId } = req.params as IUserSessionParams;
 
-    const sessionCollection = mongoose.connection.db?.collection("session");
-    if (!sessionCollection) {
-      throw new InternalServerError("Error de conexión a la base de datos");
-    }
-
-    let query: any = { userId: id };
-    try {
-      query.$or = [
-        { id: sessionId },
-        { _id: new mongoose.Types.ObjectId(sessionId) },
-      ];
-    } catch {
-      query.id = sessionId;
-    }
-
-    const result = await sessionCollection.deleteOne(query);
-
-    if (result.deletedCount === 0) {
-      // Intentar eliminar por campo 'id' de texto simple si falla el query anterior
-      await sessionCollection.deleteOne({ userId: id, id: sessionId });
-    }
+    // sessionId en la URL contiene el sessionToken que enviamos desde getUserProfileForAdmin
+    await auth.api.revokeUserSession({
+      headers: fromNodeHeaders(req.headers),
+      body: {
+        sessionToken: sessionId,
+      },
+    });
 
     logger.info(
-      `[revokeUserSession] Sesión ${sessionId} revocada para usuario ${id}`,
+      `[revokeUserSession] Sesión revocada con token para el usuario ${id}`,
     );
 
     return res.json({
@@ -369,12 +430,7 @@ export const getUsersForAdmin = asyncHandler(
         semester: u.semester || "",
         description: u.description || "",
         createdAt: u.createdAt,
-        initialLetter: u.name
-          .split(" ")
-          .map((n) => n[0])
-          .slice(0, 2)
-          .join("")
-          .toUpperCase(),
+        initialLetter: getInitialLetter(u.name),
         image: getProfilePictureUrl(u.image),
       })),
     });
@@ -395,16 +451,19 @@ export const createUserForAdmin = asyncHandler(
       });
     }
 
-    // 1. Crear el usuario y sus credenciales en Better-Auth con todos los campos adicionales
-    const signUpResult = await auth.api.signUpEmail({
+    // 1. Crear el usuario y sus credenciales en Better-Auth con todos los campos adicionales usando la API administrativa
+    const signUpResult = await auth.api.createUser({
+      headers: fromNodeHeaders(req.headers),
       body: {
         email: email.toLowerCase(),
         password: password,
         name,
         role: role || "alumno",
-        career: career || "",
-        semester: semester || "",
-        description: description || "",
+        data: {
+          career: career || "",
+          semester: semester || "",
+          description: description || "",
+        },
       },
     });
 
@@ -426,6 +485,15 @@ export const createUserForAdmin = asyncHandler(
       );
     }
 
+    // Ensure no active session is generated for the new user upon administrative creation
+    const sessionCollection = mongoose.connection.db?.collection("session");
+    if (sessionCollection) {
+      await sessionCollection.deleteMany({ userId: newUser.id });
+      logger.info(
+        `[createUserForAdmin] Sesiones de autologin eliminadas preventivamente para: ${email}`,
+      );
+    }
+
     const extendedUser = newUser;
 
     return res.json({
@@ -433,12 +501,7 @@ export const createUserForAdmin = asyncHandler(
       message: `Usuario ${name} registrado con éxito`,
       data: {
         ...extendedUser,
-        initialLetter: (extendedUser.name || "")
-          .split(" ")
-          .map((n: string) => n[0])
-          .slice(0, 2)
-          .join("")
-          .toUpperCase(),
+        initialLetter: getInitialLetter(extendedUser.name),
         image: getProfilePictureUrl(extendedUser.image),
       },
     });
@@ -494,12 +557,7 @@ export const updateUserForAdmin = asyncHandler(
         semester: user.semester || "",
         description: user.description || "",
         createdAt: user.createdAt,
-        initialLetter: user.name
-          .split(" ")
-          .map((n) => n[0])
-          .slice(0, 2)
-          .join("")
-          .toUpperCase(),
+        initialLetter: getInitialLetter(user.name),
         image: getProfilePictureUrl(user.image),
       },
     });
@@ -510,15 +568,18 @@ export const deleteUserForAdmin = asyncHandler(
   async (req: Request, res: Response<IApiResponse<void>>) => {
     const { id } = req.params as IUserIdParams;
 
+    // Eliminar credenciales y sesiones asociadas de Better-Auth
+    await auth.api.removeUser({
+      headers: fromNodeHeaders(req.headers),
+      body: {
+        userId: id,
+      },
+    });
+
+    // Asegurar eliminación del documento en Mongoose
     const user = await User.findByIdAndDelete(id);
     if (!user) {
       throw new NotFoundError("Usuario no encontrado");
-    }
-
-    // Revocar todas sus sesiones de la colección 'session'
-    const sessionCollection = mongoose.connection.db?.collection("session");
-    if (sessionCollection) {
-      await sessionCollection.deleteMany({ userId: id });
     }
 
     logger.info(
@@ -529,6 +590,73 @@ export const deleteUserForAdmin = asyncHandler(
       success: true,
       message:
         "Usuario eliminado de forma permanente y todas sus sesiones revocadas.",
+    });
+  },
+);
+
+export const getUserDashboardStats = asyncHandler(
+  async (req: Request, res: Response<IApiResponse<IUserDashboardStats>>) => {
+    const totalUsers = await User.countDocuments();
+    const bannedUsers = await User.countDocuments({ isBanned: true });
+    const profesoresCount = await User.countDocuments({ role: "profesor" });
+
+    // Active Users from session collection (non-expired)
+    const sessionCollection = mongoose.connection.db?.collection("session");
+    const activeSessions = sessionCollection
+      ? await sessionCollection
+          .find({ expiresAt: { $gt: new Date() } })
+          .toArray()
+      : [];
+    const uniqueActiveUserIds = new Set(
+      activeSessions.map((s) => s.userId.toString()),
+    );
+    const activeUsers = uniqueActiveUserIds.size;
+
+    // Monthly growth (Month to Date compared to same day last month)
+    const now = new Date();
+    const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfPreviousMonth = new Date(
+      now.getFullYear(),
+      now.getMonth() - 1,
+      1,
+    );
+    const sameTimePreviousMonth = new Date(
+      now.getFullYear(),
+      now.getMonth() - 1,
+      now.getDate(),
+      now.getHours(),
+      now.getMinutes(),
+      now.getSeconds(),
+    );
+
+    const currentMonthCount = await User.countDocuments({
+      createdAt: { $gte: startOfCurrentMonth, $lte: now },
+    });
+
+    const previousMonthCount = await User.countDocuments({
+      createdAt: { $gte: startOfPreviousMonth, $lte: sameTimePreviousMonth },
+    });
+
+    let monthlyGrowth = 0;
+    if (previousMonthCount > 0) {
+      monthlyGrowth =
+        Math.round(
+          ((currentMonthCount - previousMonthCount) / previousMonthCount) *
+            1000,
+        ) / 10;
+    } else if (currentMonthCount > 0) {
+      monthlyGrowth = 100;
+    }
+
+    return res.json({
+      success: true,
+      data: {
+        totalUsers,
+        activeUsers,
+        monthlyGrowth,
+        profesoresCount,
+        bannedUsers,
+      },
     });
   },
 );

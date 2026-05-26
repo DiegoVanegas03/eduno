@@ -29,13 +29,20 @@ export type IUpdateUserDTO = z.infer<typeof updateUserBodySchema>;
 
 export type IUpdatePasswordDTO = z.infer<typeof updateBodyPasswordSchema>;
 
-export const updateBodyPasswordSchema = z.object({
-  currentPassword: z.string().min(1, "La contraseña actual es requerida"),
-  newPassword: z.string().min(1, "La nueva contraseña es requerida"),
-  confirmPassword: z
-    .string()
-    .min(1, "La confirmación de la contraseña es requerida"),
-});
+export const updateBodyPasswordSchema = z
+  .object({
+    currentPassword: z.string().optional(),
+    newPassword: z
+      .string()
+      .min(6, "La nueva contraseña debe tener al menos 6 caracteres"),
+    confirmPassword: z
+      .string()
+      .min(1, "La confirmación de la contraseña es requerida"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Las contraseñas no coinciden",
+    path: ["confirmPassword"],
+  });
 
 export const deleteAccountSchema = z.object({
   password: z
@@ -64,7 +71,7 @@ export type IUserSessionParams = z.infer<typeof userSessionParamsSchema>;
 
 export const createUserBodySchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
-  email: z.string().email("Formato de email inválido"),
+  email: z.email("Formato de email inválido"),
   role: z.enum(rolesTuple).optional(),
   career: z.string().optional(),
   semester: z.string().optional(),

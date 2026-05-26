@@ -18,6 +18,7 @@ import { GlobalErrorHandler } from "./utils/app-error";
 import { stream } from "./utils/logger";
 
 const app: Application = express();
+app.set("trust proxy", true);
 
 // ── Logger HTTP ──────────────────────────────────────────────────────────────
 app.use(
@@ -49,7 +50,16 @@ app.get("/", (_req: Request, res: Response) => {
 //   GET  /api/auth/get-session
 //   GET  /api/auth/sign-in/social  (Google, Microsoft)
 //   GET  /api/auth/callback/:provider
-app.all("/api/auth/*", toNodeHandler(auth));
+app.all(
+  "/api/auth/*",
+  (req, res, next) => {
+    const ip = req.ip || req.socket.remoteAddress || "";
+    req.headers["x-real-ip"] = ip;
+    req.headers["x-forwarded-for"] = ip;
+    next();
+  },
+  toNodeHandler(auth),
+);
 
 // ── API routes ────────────────────────────────────────────────────────────────
 app.use(express.json());

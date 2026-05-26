@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { IApiResponse, IAdminUserProfile, IUserResponse, ICreateUserDTO, IUpdateUserDTO } from '@eduno/shared';
+import { IApiResponse, IAdminUserProfile, IUserResponse, ICreateUserDTO, IUpdateUserDTO, IUserDashboardStats } from '@eduno/shared';
 
 @Injectable({
   providedIn: 'root',
@@ -74,5 +74,12 @@ export class AdminUsersService {
    */
   deleteUser(id: string): Observable<IApiResponse<void>> {
     return this.http.delete<IApiResponse<void>>(`/api/users/${id}`);
+  }
+
+  /**
+   * Obtiene las estadísticas generales (KPIs) de los usuarios para el dashboard administrativo
+   */
+  getDashboardStats(): Observable<IApiResponse<IUserDashboardStats>> {
+    return this.http.get<IApiResponse<IUserDashboardStats>>('/api/users/stats');
   }
 }

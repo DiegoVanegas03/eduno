@@ -11,8 +11,10 @@ import {
   updateUserForAdmin,
   deleteUserForAdmin,
   resendVerificationEmail,
+  getUserDashboardStats,
 } from "@/controllers/user.controller";
-import { isAuthenticated, authorize } from "@/middleware/auth.middleware";
+import { isAuthenticated } from "@/middleware/auth.middleware";
+import { requirePermission } from "@/middleware/permission.middleware";
 import { validate } from "@/middleware/validate.middleware";
 import multer from "multer";
 import {
@@ -33,71 +35,88 @@ router.patch(
   isAuthenticated,
   upload.single("image"),
   validate(updateProfileSchema),
-  updateProfile
+  updateProfile,
 );
 
-router.patch("/password", isAuthenticated, validate(updatePasswordSchema), updatePassword);
+router.patch(
+  "/password",
+  isAuthenticated,
+  validate(updatePasswordSchema),
+  updatePassword,
+);
 
 // DELETE /api/users/account — permanently removes the account after password verification
-router.delete("/account", isAuthenticated, validate(backendDeleteAccountSchema), deleteAccount);
+router.delete(
+  "/account",
+  isAuthenticated,
+  validate(backendDeleteAccountSchema),
+  deleteAccount,
+);
 
-// Admin-only & Moderator-only user profile / sessions / ban management
+// Admin-only & Moderator-only user profile / sessions / ban management (Permission-Based Access Control)
 router.get(
   "/",
   isAuthenticated,
-  authorize("admin", "moderador"),
+  requirePermission("user", "read"),
   getUsersForAdmin,
 );
 router.post(
   "/",
   isAuthenticated,
-  authorize("admin"),
+  requirePermission("user", "create"),
   validate(adminCreateUserSchema),
   createUserForAdmin,
 );
 router.patch(
   "/:id",
   isAuthenticated,
-  authorize("admin"),
+  requirePermission("user", "update"),
   validate(adminUpdateUserSchema),
   updateUserForAdmin,
 );
 router.delete(
   "/:id",
   isAuthenticated,
-  authorize("admin"),
+  requirePermission("user", "delete"),
   validate(adminUserParamsSchema),
   deleteUserForAdmin,
 );
 
 router.get(
+  "/stats",
+  isAuthenticated,
+  requirePermission("user", "read"),
+  getUserDashboardStats,
+);
+
+router.get(
   "/:id",
   isAuthenticated,
-  authorize("admin", "moderador"),
+  requirePermission("user", "read"),
+  requirePermission("session", "read"),
   validate(adminUserParamsSchema),
   getUserProfileForAdmin,
 );
 router.patch(
   "/:id/ban",
   isAuthenticated,
-  authorize("admin"),
+  requirePermission("user", "ban"),
   validate(adminUserParamsSchema),
   toggleUserBanStatus,
 );
 router.post(
   "/:id/resend-verification",
   isAuthenticated,
-  authorize("admin"),
+  requirePermission("user", "update"),
   validate(adminUserParamsSchema),
   resendVerificationEmail,
 );
 router.delete(
   "/:id/sessions/:sessionId",
   isAuthenticated,
-  authorize("admin"),
+  requirePermission("session", "delete"),
   validate(adminSessionParamsSchema),
   revokeUserSession,
 );
 
 export default router;
-
