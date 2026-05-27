@@ -13,11 +13,6 @@ const scheduleSchema = new Schema<IScheduleDocument>(
       required: [true, "El código de la materia es obligatorio"],
       trim: true,
     },
-    courseName: {
-      type: String,
-      required: [true, "El nombre de la materia es obligatorio"],
-      trim: true,
-    },
     group: {
       type: Number,
       required: [true, "El grupo es obligatorio"],
@@ -46,6 +41,11 @@ const scheduleSchema = new Schema<IScheduleDocument>(
       type: String,
       required: [true, "El nombre del profesor es obligatorio"],
       trim: true,
+    },
+    professorId: {
+      type: Schema.Types.ObjectId,
+      ref: "Professor",
+      index: true,
     },
     building: {
       type: String,

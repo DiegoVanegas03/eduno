@@ -191,12 +191,32 @@
 
   <!-- ¿Eres un profesor? -->
   <section id="teacher" class="pt-6 pb-2 scroll-mt-32">
-    <div class="bg-red-50/30 border border-red-100 rounded-3xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+    <!-- Active verification state -->
+    <div *ngIf="profileData().role === 'profesor'" class="bg-green-50/40 border border-green-150 rounded-3xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div class="flex-1 text-center sm:text-left">
+        <div class="flex items-center justify-center sm:justify-start gap-2.5 mb-2">
+          <h2 class="font-bold text-green-700 text-xl">Perfil de Profesor Verificado</h2>
+          <span class="px-2 py-0.5 text-[9px] bg-green-100 border border-green-200 text-green-700 font-extrabold rounded-md uppercase tracking-wider">Activo</span>
+        </div>
+        <p class="text-gray-500 text-sm leading-relaxed max-w-md">Tu cuenta ha sido elevada a Profesor. Tienes acceso prioritario y herramientas exclusivas para la gestión académica y reportes.</p>
+      </div>
+      <div class="p-3 bg-green-50 border border-green-100 text-green-600 rounded-2xl">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+      </div>
+    </div>
+
+    <!-- Student verification request invitation state -->
+    <div *ngIf="profileData().role !== 'profesor'" class="bg-red-50/30 border border-red-100 rounded-3xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
       <div class="flex-1 text-center sm:text-left">
         <h2 class="font-bold text-red-600 text-xl mb-2">¿Eres un profesor?</h2>
         <p class="text-gray-500 text-sm leading-relaxed max-w-sm">Solicita tu cambio a profesor para acceder a herramientas exclusivas para creadores.</p>
       </div>
-      <button class="bg-red-600 text-white px-8 py-3.5 rounded-xl font-bold text-sm shadow-md shadow-red-500/20 hover:bg-red-700 transition-all cursor-pointer whitespace-nowrap active:scale-95">
+      <button 
+        (click)="openTeacherVerificationModal()"
+        class="bg-red-600 hover:bg-red-700 text-white px-8 py-3.5 rounded-xl font-bold text-sm shadow-md shadow-red-500/20 transition-all cursor-pointer whitespace-nowrap active:scale-95"
+      >
         Solicitar verificación
       </button>
     </div>
@@ -217,9 +237,130 @@
         <!-- Efecto de brillo (shining) -->
         <div class="absolute inset-0 bg-linear-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-[shine_2s_infinite]"></div>
       </button>
-    
     </div>
   }
+</div>
+
+<!-- ============================================== -->
+<!-- TEACHER VINCULATION MODAL (AUTOSUGGEST SEARCH) -->
+<div 
+  *ngIf="isVerifyTeacherModalOpen()"
+  class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-oxford-navy-950/45 backdrop-blur-xs animate-in fade-in duration-200"
+>
+  <div class="bg-white rounded-3xl border border-gray-150 shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+    <!-- Header -->
+    <div class="p-6 border-b border-gray-100 bg-gray-50/50">
+      <h3 class="text-base font-extrabold text-oxford-navy-950 tracking-tight flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+        Verificación de Cuenta Docente
+      </h3>
+      <p class="text-xs text-gray-500 mt-1 font-semibold">Busca tu perfil registrado en la base de datos de la UASLP</p>
+    </div>
+
+    <!-- Body -->
+    <div class="p-6 space-y-4 relative">
+      <div class="flex flex-col gap-1.5 relative">
+        <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Nombre Completo del Profesor</label>
+        
+        <div class="relative w-full">
+          <input 
+            type="text" 
+            [(ngModel)]="teacherSearchQuery"
+            (input)="searchScrapedProfessors()"
+            placeholder="Comienza a escribir tu nombre..."
+            class="px-3.5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 focus:bg-white w-full font-semibold transition-all text-gray-800"
+          />
+          
+          <!-- Autosuggest Dropdown List -->
+          <div 
+            *ngIf="scrapedProfessorsList().length > 0"
+            class="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-150 rounded-xl shadow-xl z-50 max-h-48 overflow-y-auto divide-y divide-gray-100"
+          >
+            <button 
+              *ngFor="let prof of scrapedProfessorsList()"
+              (click)="selectProfessorForLink(prof)"
+              class="w-full text-left px-4 py-3 text-xs hover:bg-red-50/30 text-gray-700 font-bold transition-all flex items-center justify-between"
+            >
+              <span>{{ prof.name }}</span>
+              <span *ngIf="prof.isVerificado" class="text-[9px] px-1.5 py-0.5 bg-gray-100 text-gray-400 rounded-md font-extrabold uppercase shrink-0">Ocupado</span>
+              <span *ngIf="!prof.isVerificado" class="text-[9px] px-1.5 py-0.5 bg-green-50 text-green-600 rounded-md font-extrabold uppercase shrink-0">Disponible</span>
+            </button>
+          </div>
+        </div>
+        
+        <p class="text-[10px] text-gray-400 font-semibold mt-1">Escribe al menos 3 letras para iniciar la búsqueda en tiempo real.</p>
+      </div>
+
+      <!-- Comprobante Upload picker -->
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Documento Comprobatorio (Imagen de Credencial o Talón)</label>
+        
+        <div class="flex items-center justify-center w-full">
+          <label 
+            class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-250 border-dashed rounded-2xl cursor-pointer bg-gray-50/50 hover:bg-gray-50/80 transition-all relative overflow-hidden"
+          >
+            <div class="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4" *ngIf="!selectedComprobanteFile()">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <p class="text-xs font-bold text-gray-650">Presiona para cargar imagen comprobante</p>
+              <p class="text-[9px] text-gray-400 font-semibold mt-1">Soporta PNG, JPG o JPEG (Máx. 5MB)</p>
+            </div>
+            
+            <!-- File selected state -->
+            <div class="flex items-center gap-3 px-6 py-4 w-full" *ngIf="selectedComprobanteFile()">
+              <div class="p-3 bg-red-50 text-red-500 rounded-xl border border-red-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-black text-oxford-navy-950 truncate">{{ selectedComprobanteFile()?.name }}</p>
+                <p class="text-[10px] text-gray-400 font-bold uppercase mt-0.5">Tamaño: {{ (selectedComprobanteFile()?.size || 0) / 1024 / 1024 | number:'1.1-2' }} MB</p>
+              </div>
+            </div>
+            
+            <input 
+              type="file" 
+              class="hidden" 
+              accept="image/*"
+              (change)="onComprobanteFileSelected($event)"
+            />
+          </label>
+        </div>
+      </div>
+
+      <!-- Warning note -->
+      <div class="p-4 bg-amber-50/50 border border-amber-150 rounded-2xl text-[11px] text-amber-700 font-semibold leading-relaxed flex items-start gap-2.5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <span>
+          Esta acción vinculará tu cuenta académica permanente a este perfil docente y es de carácter irreversible. Se validará contra las cátedras vigentes.
+        </span>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="p-6 border-t border-gray-100 flex justify-end gap-2.5 bg-gray-50/50">
+      <button 
+        (click)="isVerifyTeacherModalOpen.set(false)"
+        [disabled]="isVerifyingTeacher()"
+        class="px-4 py-2 border border-gray-200 hover:bg-gray-100 text-gray-500 text-xs font-bold rounded-xl transition-colors cursor-pointer disabled:opacity-50"
+      >
+        Cancelar
+      </button>
+      <button 
+        (click)="submitTeacherVerification()"
+        [disabled]="isVerifyingTeacher() || !selectedProfessorIdForLink() || !selectedComprobanteFile()"
+        class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+      >
+        {{ isVerifyingTeacher() ? 'Enviando...' : 'Confirmar Verificación' }}
+      </button>
+    </div>
+  </div>
 </div>
 } @else {
   <div class="flex flex-col items-center justify-center py-20 gap-4">

@@ -1,0 +1,331 @@
+<div class="px-1 lg:px-4 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
+  
+  <!-- Back Navigation Header -->
+  <div class="flex items-center gap-3">
+    <a 
+      routerLink="/admin/manage-professors" 
+      class="p-2 border border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-500 hover:text-gray-900 rounded-xl transition-all cursor-pointer inline-flex items-center justify-center"
+      title="Volver al catálogo de profesores"
+    >
+      <svg class="w-4 h-4 stroke-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+    </a>
+    <div>
+      <h2 class="text-lg font-bold text-oxford-navy-950 tracking-tight flex items-center gap-2">
+        <span>Ficha de Detalle Docente</span>
+        <span class="text-xs text-gray-400 font-medium font-mono">ID: #{{ professorId() }}</span>
+      </h2>
+      <p class="text-xs text-gray-400 font-medium">Expediente curricular y concentración de carga académica en el periodo lectivo</p>
+    </div>
+  </div>
+
+  @if(isLoading()) {
+    <div class="bg-white rounded-2xl border border-gray-150 p-12 flex flex-col items-center justify-center space-y-4">
+      <div class="w-8 h-8 border-2 border-gray-200 border-t-oxford-navy-600 rounded-full animate-spin"></div>
+      <p class="text-xs text-gray-400 font-medium">Cargando base de datos e historial de clases del docente...</p>
+    </div>
+  } @else if(errorMessage()) {
+    <!-- Error State -->
+    <div class="bg-white rounded-2xl border border-red-150 p-8 text-center max-w-xl mx-auto space-y-4 animate-in fade-in zoom-in-95">
+      <div class="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-oxford-navy-950">No se pudo cargar el perfil</h3>
+        <p class="text-xs text-gray-400 font-medium mt-1">{{ errorMessage() }}</p>
+      </div>
+      <button 
+        (click)="fetchProfessorDetail(professorId())" 
+        class="px-4 py-2 border border-gray-200 hover:border-gray-300 text-xs font-semibold rounded-xl text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+      >
+        Reintentar Consulta
+      </button>
+    </div>
+  } @else if(professorData()) {
+    <!-- Main Content -->
+    <div class="space-y-6">
+      
+      <!-- Premium Glassmorphic Profile Card -->
+      <div class="bg-white rounded-2xl border border-gray-150 shadow-xs p-6 md:p-8 flex flex-col md:flex-row gap-6 items-center md:items-start relative overflow-hidden">
+        
+        <!-- Big Initial Placeholder representing Scraped Profile Avatar -->
+        <div class="w-20 h-20 rounded-2xl bg-oxford-navy-950 text-white font-black text-3xl flex items-center justify-center shrink-0 shadow-md shadow-oxford-navy-950/15 animate-in zoom-in duration-300">
+          {{ professorData()!.name.substring(0, 1).toUpperCase() }}
+        </div>
+
+        <!-- Info Section -->
+        <div class="flex-1 space-y-4 w-full text-center md:text-left">
+          
+          <div class="space-y-1.5">
+            <div class="flex flex-col md:flex-row md:items-center gap-3 justify-center md:justify-start">
+              <h1 class="text-2xl font-bold text-oxford-navy-950 tracking-tight leading-none">{{ professorData()!.name }}</h1>
+              
+              <!-- Verification Badge -->
+              <span 
+                *ngIf="professorData()!.isVerificado"
+                class="px-2.5 py-0.5 text-[9px] bg-green-50 border border-green-200 text-green-700 font-extrabold rounded-md uppercase tracking-wider inline-flex items-center gap-1.5 shrink-0"
+              >
+                <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                Verificado / Cuenta Activa
+              </span>
+              <span 
+                *ngIf="!professorData()!.isVerificado"
+                class="px-2.5 py-0.5 text-[9px] bg-gray-550/10 border border-gray-200 text-gray-400 font-extrabold rounded-md uppercase tracking-wider inline-flex items-center gap-1.5 shrink-0"
+              >
+                Perfil no Enlazado
+              </span>
+            </div>
+
+            <!-- Email Display -->
+            <div class="flex items-center justify-center md:justify-start gap-1 text-gray-400 text-xs font-semibold">
+              <span>{{ professorData()!.email || 'Correo electrónico no configurado' }}</span>
+              <button 
+                *ngIf="professorData()!.email"
+                (click)="copyToClipboard(professorData()!.email!, 'Correo')" 
+                title="Copiar correo"
+                class="p-1 text-gray-400 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-all cursor-pointer"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Description / Curriculum details -->
+          <div class="bg-gray-50/50 border border-gray-100 rounded-xl p-4 text-left max-w-2xl">
+            <p class="text-[9px] font-bold text-gray-450 uppercase tracking-wider">Descripción del Perfil</p>
+            <p class="text-xs text-gray-600 leading-relaxed font-semibold mt-1 italic">
+              "{{ professorData()!.descripcionPerfil || professorData()!.descripcionAbreviada || 'Este perfil fue importado automáticamente a través del scraper institucional y no cuenta con biografías ampliadas.' }}"
+            </p>
+          </div>
+
+          <!-- Academic and Review statistics -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-4 border-t border-gray-150 text-left">
+            <div>
+              <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Calificación UASLP</p>
+              <p class="text-xs font-bold text-oxford-navy-950 mt-1 flex items-center gap-1.5">
+                <span class="px-2 py-0.5 bg-amber-50 border border-amber-100 text-amber-700 font-extrabold rounded-md text-[11px]">
+                  ★ {{ professorData()!.calificacion | number:'1.1-1' }}
+                </span>
+              </p>
+            </div>
+            <div>
+              <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Reseñas Realizadas</p>
+              <p class="text-xs font-extrabold text-oxford-navy-950 mt-1.5 pl-0.5">
+                {{ professorData()!.numResenas }} opiniones
+              </p>
+            </div>
+            <div>
+              <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Última Modificación</p>
+              <p class="text-xs font-semibold text-gray-500 mt-1.5 pl-0.5">
+                {{ professorData()!.updatedAt | date:'mediumDate' }}
+              </p>
+            </div>
+            <div>
+              <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Vínculo de Plataforma</p>
+              <p class="text-xs font-bold mt-1.5 pl-0.5 text-gray-600">
+                {{ professorData()!.userId ? 'Enlazado a cuenta #' + professorData()!.userId?.substring(0, 8) : 'Sin cuenta enlazada' }}
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Academic Statistics Widgets Row -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Widget 1: Unique Subjects -->
+        <div class="bg-white rounded-2xl border border-gray-150 p-5 shadow-2xs flex items-center gap-4 animate-in fade-in duration-300">
+          <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-[9px] font-extrabold text-gray-400 uppercase tracking-wider">Materias Únicas</p>
+            <h3 class="text-lg font-black text-oxford-navy-950 leading-tight mt-0.5">{{ uniqueSubjectsCount() }}</h3>
+          </div>
+        </div>
+
+        <!-- Widget 2: Unique Groups -->
+        <div class="bg-white rounded-2xl border border-gray-150 p-5 shadow-2xs flex items-center gap-4 animate-in fade-in duration-400">
+          <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-[9px] font-extrabold text-gray-400 uppercase tracking-wider">Grupos Asignados</p>
+            <h3 class="text-lg font-black text-oxford-navy-950 leading-tight mt-0.5">{{ totalGroupsCount() }}</h3>
+          </div>
+        </div>
+
+        <!-- Widget 3: Unique Classrooms -->
+        <div class="bg-white rounded-2xl border border-gray-150 p-5 shadow-2xs flex items-center gap-4 animate-in fade-in duration-500">
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-[9px] font-extrabold text-gray-400 uppercase tracking-wider">Salones Distintos</p>
+            <h3 class="text-lg font-black text-oxford-navy-950 leading-tight mt-0.5">{{ uniqueClassrooms().length }}</h3>
+          </div>
+        </div>
+
+        <!-- Widget 4: Active Class Sessions per week -->
+        <div class="bg-white rounded-2xl border border-gray-150 p-5 shadow-2xs flex items-center gap-4 animate-in fade-in duration-600">
+          <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-[9px] font-extrabold text-gray-400 uppercase tracking-wider">Bloques Semanales</p>
+            <h3 class="text-lg font-black text-oxford-navy-950 leading-tight mt-0.5">{{ totalWeeklySessions() }} clases</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Concentrado de Horarios / Materias Table -->
+      <div class="bg-white rounded-2xl border border-gray-150 shadow-2xs overflow-hidden">
+        <div class="p-6 border-b border-gray-150 bg-gray-50/30 flex justify-between items-center">
+          <div>
+            <h3 class="text-sm font-extrabold text-oxford-navy-950 tracking-tight uppercase">Concentrado Académico Semanal</h3>
+            <p class="text-[11px] text-gray-400 font-semibold mt-0.5">Schedules, aulas, salones e índices de ocupación escolar vinculados al docente</p>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-gray-150 bg-gray-50/50 text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">
+                <th class="px-6 py-4">Asignatura (Materia)</th>
+                <th class="px-6 py-4 text-center">Grupo</th>
+                <th class="px-6 py-4">Tipo</th>
+                <th class="px-6 py-4">Horario Lectivo</th>
+                <th class="px-6 py-4">Ubicación (Salón/Edificio)</th>
+                <th class="px-6 py-4">Nivel de Ocupación</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 text-xs">
+              
+              <!-- Empty state table schedules -->
+              <tr *ngIf="schedules().length === 0">
+                <td colspan="6" class="px-6 py-16 text-center">
+                  <div class="flex flex-col items-center justify-center max-w-sm mx-auto">
+                    <div class="p-3 bg-gray-50 border border-gray-150 text-gray-400 rounded-2xl mb-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <h4 class="text-xs font-extrabold text-oxford-navy-950">Sin Carga Lectiva Registrada</h4>
+                    <p class="text-[11px] text-gray-400 font-semibold mt-1">Este profesor no cuenta con clases, horarios o asignaturas vinculadas en este periodo.</p>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Schedules Rows -->
+              <tr 
+                *ngFor="let s of schedules()"
+                class="hover:bg-gray-50/30 transition-colors animate-in fade-in"
+              >
+                <!-- Course details -->
+                <td class="px-6 py-4">
+                  <div class="flex flex-col gap-0.5">
+                    <span class="font-extrabold text-oxford-navy-950 text-sm leading-tight">{{ s.courseName || 'Asignatura Scrapeada sin Nombre' }}</span>
+                    <span class="text-[10px] text-gray-450 font-bold font-mono">Clave: {{ s.courseCode }}</span>
+                  </div>
+                </td>
+
+                <!-- Group -->
+                <td class="px-6 py-4 text-center font-black text-gray-750">
+                  Grupo {{ s.group }}
+                </td>
+
+                <!-- Type -->
+                <td class="px-6 py-4">
+                  <span 
+                    class="px-2 py-0.5 text-[9px] rounded-md font-bold uppercase tracking-wider border"
+                    [class.bg-blue-50]="s.type.toLowerCase() === 'teoría' || s.type.toLowerCase() === 't'"
+                    [class.text-blue-600]="s.type.toLowerCase() === 'teoría' || s.type.toLowerCase() === 't'"
+                    [class.border-blue-150]="s.type.toLowerCase() === 'teoría' || s.type.toLowerCase() === 't'"
+                    [class.bg-purple-50]="s.type.toLowerCase() !== 'teoría' && s.type.toLowerCase() !== 't'"
+                    [class.text-purple-600]="s.type.toLowerCase() !== 'teoría' && s.type.toLowerCase() !== 't'"
+                    [class.border-purple-150]="s.type.toLowerCase() !== 'teoría' && s.type.toLowerCase() !== 't'"
+                  >
+                    {{ s.type || 'Teoría' }}
+                  </span>
+                </td>
+
+                <!-- Time Block and days bubble list -->
+                <td class="px-6 py-4 space-y-1.5">
+                  <div class="text-[11px] font-bold text-oxford-navy-950 flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {{ s.timeBlock }}
+                  </div>
+                  <!-- Days bubbles -->
+                  <div class="flex gap-1">
+                    <span 
+                      *ngFor="let d of getDayInitials(s.days)"
+                      [class.bg-oxford-navy-950]="d.active"
+                      [class.text-white]="d.active"
+                      [class.border-oxford-navy-950]="d.active"
+                      [class.bg-gray-50]="!d.active"
+                      [class.text-gray-300]="!d.active"
+                      [class.border-gray-150]="!d.active"
+                      class="w-6.5 h-6.5 rounded-lg border text-[9px] font-black flex items-center justify-center transition-colors shadow-2xs"
+                      [title]="d.active ? 'Clase activa este día' : 'Día libre'"
+                    >
+                      {{ d.name.substring(0, 1) }}
+                    </span>
+                  </div>
+                </td>
+
+                <!-- Classroom Location -->
+                <td class="px-6 py-4">
+                  <div class="flex flex-col gap-0.5">
+                    <span class="font-extrabold text-oxford-navy-900 leading-tight">Aula {{ s.classroom || 'TBD' }}</span>
+                    <span class="text-[10px] text-gray-450 font-semibold">{{ s.building || 'Edificio por definir' }}</span>
+                  </div>
+                </td>
+
+                <!-- Capacity / Occupancy Level -->
+                <td class="px-6 py-4 space-y-1 max-w-[140px]">
+                  <div class="flex items-center justify-between text-[10px] font-bold">
+                    <span [class.text-red-500]="s.occupancy >= 90" [class.text-orange-500]="s.occupancy >= 70 && s.occupancy < 90" [class.text-green-500]="s.occupancy < 70">
+                      {{ s.occupancy }}%
+                    </span>
+                    <span class="text-gray-400">Capacidad</span>
+                  </div>
+                  <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden border border-gray-150">
+                    <div 
+                      class="h-full rounded-full transition-all duration-500"
+                      [style.width.%]="s.occupancy"
+                      [class.bg-red-500]="s.occupancy >= 90"
+                      [class.bg-orange-400]="s.occupancy >= 70 && s.occupancy < 90"
+                      [class.bg-green-500]="s.occupancy < 70"
+                    ></div>
+                  </div>
+                </td>
+
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div *ngIf="schedules().length > 0" class="px-6 py-4 bg-gray-50/50 border-t border-gray-150 text-[10px] text-gray-450 font-bold uppercase tracking-wide">
+          Carga lectiva calculada y concentrada sobre el periodo actual de la UASLP.
+        </div>
+      </div>
+
+    </div>
+  }
+
+</div>

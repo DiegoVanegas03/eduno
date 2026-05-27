@@ -33,6 +33,21 @@ export const adminRoutes: Routes = [
           import('./study-plan-viewer/study-plan-viewer.component').then((m) => m.StudyPlanViewerComponent),
       },
       {
+        path: 'manage-schedules',
+        loadComponent: () =>
+          import('./manage-schedules/manage-schedules.component').then((m) => m.ManageSchedulesComponent),
+      },
+      {
+        path: 'manage-professors',
+        loadComponent: () =>
+          import('./manage-professors/manage-professors.component').then((m) => m.ManageProfessorsComponent),
+      },
+      {
+        path: 'manage-professors/:id',
+        loadComponent: () =>
+          import('./professor-profile/professor-profile.component').then((m) => m.ProfessorProfileComponent),
+      },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full',

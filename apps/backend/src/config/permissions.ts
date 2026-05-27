@@ -3,20 +3,15 @@ import { defaultStatements, adminAc } from "better-auth/plugins/admin/access";
 
 // Centralized permissions statement for dynamic type inference
 export const permissionsStatement = {
-  user: [
-    ...defaultStatements.user,
-    "read"
-  ],
-  session: [
-    ...defaultStatements.session,
-    "read"
-  ],
+  user: [...defaultStatements.user, "read"],
+  session: [...defaultStatements.session, "read"],
   scraper: ["execute", "save"],
   comment: ["create", "delete"],
   rating: ["create"],
   file: ["upload", "download"],
   career: ["create", "read", "update", "delete"],
-  studyPlan: ["create", "read", "update", "delete"],
+  studyPlan: ["create", "read", "update", "delete", "scraper"],
+  schedule: ["create", "read", "update", "delete", "scraper"],
 } as const;
 
 export type Resource = keyof typeof permissionsStatement;
@@ -26,31 +21,27 @@ export const ac = createAccessControl(permissionsStatement);
 
 const adminRole = ac.newRole({
   ...adminAc.statements,
-  user: [
-    ...adminAc.statements.user,
-    "read"
-  ],
-  session: [
-    ...adminAc.statements.session,
-    "read"
-  ],
+  user: [...adminAc.statements.user, "read"],
+  session: [...adminAc.statements.session, "read"],
   scraper: ["execute", "save"],
   comment: ["create", "delete"],
   rating: ["create"],
   file: ["upload", "download"],
   career: ["create", "read", "update", "delete"],
-  studyPlan: ["create", "read", "update", "delete"],
+  studyPlan: ["create", "read", "update", "delete", "scraper"],
+  schedule: ["create", "read", "update", "delete", "scraper"],
 });
 
 const moderadorRole = ac.newRole({
   user: ["get", "list", "read"],
   session: ["list", "read"],
   scraper: ["execute"], // Puede ejecutar scraping pero no guardar en base de datos
-  comment: ["delete"],  // Moderador puede borrar comentarios inapropiados
+  comment: ["delete"], // Moderador puede borrar comentarios inapropiados
   rating: [],
   file: ["download"],
   career: ["read"],
   studyPlan: ["read"],
+  schedule: ["read", "update", "scraper"],
 });
 
 const profesorRole = ac.newRole({
@@ -59,6 +50,7 @@ const profesorRole = ac.newRole({
   file: ["upload", "download"],
   career: ["read"],
   studyPlan: ["read"],
+  schedule: ["read"],
 });
 
 const alumnoRole = ac.newRole({
@@ -67,6 +59,7 @@ const alumnoRole = ac.newRole({
   file: ["upload", "download"],
   career: ["read"],
   studyPlan: ["read"],
+  schedule: ["read"],
 });
 
 export const roles = {

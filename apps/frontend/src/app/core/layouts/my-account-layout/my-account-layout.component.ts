@@ -1,5 +1,5 @@
 import { Component, signal, inject, computed } from '@angular/core';
-import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
+import { RouterOutlet, Router, NavigationEnd, RouterLink } from '@angular/router';
 import { FooterComponent } from '@app/shared/components/footer/footer.component';
 import { BreadcrumbComponent } from '@app/shared/components/breadcrumb/breadcrumb.component';
 import { AsideSettingsNavigationComponent } from '@app/core/components/aside-settings-navigation/aside-settings-navigation.component';
@@ -13,6 +13,7 @@ import { filter, map } from 'rxjs/operators';
   standalone: true,
   imports: [
     RouterOutlet,
+    RouterLink,
     FooterComponent,
     BreadcrumbComponent,
     AsideSettingsNavigationComponent,

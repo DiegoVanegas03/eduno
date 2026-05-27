@@ -1,0 +1,724 @@
+<div class="px-1 lg:px-4 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
+  <!-- Header Area -->
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-gray-150 shadow-xs">
+    <div>
+      <h2 class="text-xl font-extrabold text-oxford-navy-950 tracking-tight">Administración de Horarios</h2>
+      <p class="text-xs text-gray-550 mt-1 font-semibold">Configura, edita y sincroniza los horarios y aulas asignadas para el periodo escolar</p>
+    </div>
+    <div class="flex gap-2.5 w-full md:w-auto">
+      <button 
+        (click)="openSyncModal()"
+        class="flex-1 md:flex-initial px-4 py-2.5 bg-white border border-gray-200 hover:border-gray-300 text-gray-700 text-xs font-bold rounded-xl transition-all cursor-pointer inline-flex items-center justify-center gap-2 shadow-2xs disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+        </svg>
+        Sincronizar Scraper
+      </button>
+      <button 
+        (click)="openCreateModal()"
+        [disabled]="!selectedAreaFilter()"
+        class="flex-1 md:flex-initial px-4 py-2.5 bg-oxford-navy-950 hover:bg-oxford-navy-900 text-white text-xs font-bold rounded-xl transition-all cursor-pointer inline-flex items-center justify-center gap-2 shadow-md shadow-oxford-navy-950/10 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Agregar Horario
+      </button>
+    </div>
+  </div>
+
+  <!-- Search & Filter Controls -->
+  <div class="bg-white p-6 rounded-2xl border border-gray-150 shadow-2xs space-y-4">
+    <h3 class="text-xs font-extrabold text-oxford-navy-900 uppercase tracking-wider mb-2">Filtros de Búsqueda</h3>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Period Selector -->
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Periodo Académico</label>
+        <select 
+          [(ngModel)]="selectedPeriodFilter"
+          class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 focus:bg-white w-full transition-all text-gray-800 font-bold cursor-pointer"
+        >
+          <option value="">Selecciona Periodo</option>
+          <option *ngFor="let p of periods()" [value]="p">{{ p }}</option>
+        </select>
+      </div>
+
+      <!-- Area Selector -->
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Área Académica</label>
+        <select 
+          [(ngModel)]="selectedAreaFilter"
+          class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 focus:bg-white w-full transition-all text-gray-800 font-bold cursor-pointer"
+        >
+          <option value="">Todas las Áreas</option>
+          <option *ngFor="let area of availableAreas()" [value]="area.code">{{ area.name }} (Área {{ area.code }})</option>
+        </select>
+      </div>
+
+      <!-- Course Name Input -->
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Nombre de Materia</label>
+        <input 
+          type="text" 
+          [(ngModel)]="searchCourseName"
+          placeholder="Buscar por nombre..."
+          class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 focus:bg-white w-full transition-all text-gray-800 font-semibold"
+        />
+      </div>
+
+      <!-- Professor Search -->
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Profesor / Catedrático</label>
+        <input 
+          type="text" 
+          [(ngModel)]="searchProfessor"
+          placeholder="Nombre del docente..."
+          class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 focus:bg-white w-full transition-all text-gray-800 font-semibold"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Schedules Tabular Layout -->
+  <div class="bg-white rounded-2xl border border-gray-150 shadow-2xs overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-gray-150 bg-gray-50/50 text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">
+            <th class="px-6 py-4">Materia / Clave</th>
+            <th class="px-6 py-4 text-center">Grupo / Tipo</th>
+            <th class="px-6 py-4">Profesor</th>
+            <th class="px-6 py-4 text-center">Días de Clase</th>
+            <th class="px-6 py-4">Horario / Aula</th>
+            <th class="px-6 py-4">Ocupación</th>
+            <th class="px-6 py-4 text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 text-xs">
+          <!-- Loading skeleton -->
+          <tr *ngIf="isLoading()">
+            <td colspan="7" class="px-6 py-20 text-center text-gray-400">
+              <div class="inline-block w-6 h-6 border-3 border-gray-200 border-t-oxford-navy-950 rounded-full animate-spin"></div>
+              <p class="mt-2 text-[10px] font-bold tracking-wider text-gray-400 uppercase">Cargando Horarios...</p>
+            </td>
+          </tr>
+
+          <!-- Data row -->
+          <ng-container *ngIf="!isLoading()">
+            <tr 
+              *ngFor="let s of schedules()"
+              class="hover:bg-gray-50/30 transition-colors group"
+            >
+              <td class="px-6 py-4">
+                <div class="flex flex-col gap-0.5 max-w-xs">
+                  <span class="font-extrabold text-oxford-navy-950 text-sm leading-tight tracking-tight">{{ s.courseName }}</span>
+                  <div class="flex items-center gap-1.5 mt-0.5">
+                    <span class="px-1.5 py-0.5 text-[9px] bg-blue-50 text-blue-700 border border-blue-150 rounded font-bold uppercase">Clave: {{ s.courseCode }}</span>
+                    <span class="text-[10px] text-gray-450 font-semibold uppercase">{{ s.period }}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <div class="flex flex-col items-center gap-1">
+                  <span class="px-2 py-0.5 text-xs bg-gray-100 text-gray-700 font-extrabold rounded-lg">Gpo {{ s.group }}</span>
+                  <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{{ s.type }}</span>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <span class="font-bold text-gray-750 text-sm block max-w-xs truncate" [title]="s.professor">
+                  {{ s.professor || 'Profesor por Asignar' }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <div class="inline-flex gap-1 bg-gray-50 p-1 rounded-xl border border-gray-150">
+                  <span 
+                    *ngFor="let dayName of ['L', 'M', 'M', 'J', 'V', 'S']; let idx = index"
+                    class="w-5 h-5 rounded-lg flex items-center justify-center text-[9px] font-black tracking-tighter"
+                    [class.bg-oxford-navy-950]="s.days[idx] === 1"
+                    [class.text-white]="s.days[idx] === 1"
+                    [class.text-gray-350]="s.days[idx] !== 1"
+                  >
+                    {{ dayName }}
+                  </span>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex flex-col gap-0.5">
+                  <span class="font-extrabold text-gray-800">{{ s.timeBlock }}</span>
+                  <span class="text-[10px] text-gray-400 font-bold uppercase mt-0.5">Edificio {{ s.building }} — Aula {{ s.classroom }}</span>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex flex-col gap-1 w-24">
+                  <div class="flex justify-between text-[10px] font-extrabold">
+                    <span 
+                      [class.text-green-600]="s.occupancy < 50"
+                      [class.text-amber-600]="s.occupancy >= 50 && s.occupancy <= 80"
+                      [class.text-red-600]="s.occupancy > 80"
+                    >
+                      {{ s.occupancy }}%
+                    </span>
+                    <span class="text-gray-400">Capacidad</span>
+                  </div>
+                  <div class="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div 
+                      class="h-full rounded-full transition-all duration-500"
+                      [style.width.%]="s.occupancy"
+                      [class.bg-green-500]="s.occupancy < 50"
+                      [class.bg-amber-500]="s.occupancy >= 50 && s.occupancy <= 80"
+                      [class.bg-red-500]="s.occupancy > 80"
+                    ></div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-right">
+                <div class="flex items-center justify-end gap-1">
+                  <button 
+                    (click)="openEditModal(s)"
+                    [disabled]="!selectedAreaFilter()"
+                    title="Editar Horario"
+                    class="text-gray-400 hover:text-gray-900 transition-colors p-1.5 hover:bg-gray-50 border border-transparent hover:border-gray-250 rounded-lg cursor-pointer inline-flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed disabled:pointer-events-none"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </button>
+                  <button 
+                    (click)="deleteSchedule(s)"
+                    [disabled]="!selectedAreaFilter()"
+                    title="Eliminar Horario"
+                    class="text-gray-400 hover:text-red-600 transition-colors p-1.5 hover:bg-red-50/50 border border-transparent hover:border-red-100 rounded-lg cursor-pointer inline-flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed disabled:pointer-events-none"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Empty State when no Area is selected -->
+            <tr *ngIf="!selectedAreaFilter()">
+              <td colspan="7" class="px-6 py-16 text-center">
+                <div class="flex flex-col items-center justify-center max-w-sm mx-auto">
+                  <div class="p-3 bg-amber-50 border border-amber-150 text-amber-500 rounded-2xl mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
+                  <h3 class="text-sm font-extrabold text-oxford-navy-950">Selecciona un Área Académica</h3>
+                  <p class="text-xs text-gray-400 font-semibold mt-1">Por favor, selecciona un área en los filtros para poder gestionar, agregar o sincronizar horarios.</p>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Empty State (standard) -->
+            <tr *ngIf="selectedAreaFilter() && schedules().length === 0">
+              <td colspan="7" class="px-6 py-16 text-center">
+                <div class="flex flex-col items-center justify-center max-w-sm mx-auto">
+                  <div class="p-3 bg-gray-50 border border-gray-150 text-gray-400 rounded-2xl mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                  </div>
+                  <h3 class="text-sm font-extrabold text-oxford-navy-950">Sin Horarios Guardados</h3>
+                  <p class="text-xs text-gray-400 font-semibold mt-1">No se encontraron registros de horarios para los filtros seleccionados o el periodo especificado.</p>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Footer -->
+    <div *ngIf="selectedAreaFilter() && schedules().length > 0" class="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 bg-gray-50/50 border-t border-gray-150">
+      <div class="text-xs text-gray-550 font-semibold">
+        Mostrando <span class="font-extrabold text-oxford-navy-950">{{ schedules().length }}</span> de <span class="font-extrabold text-oxford-navy-950">{{ totalItems() }}</span> registros
+      </div>
+      
+      <div class="flex items-center bg-oxford-navy-950 p-1.5 rounded-xl shadow-sm">
+        <!-- Prev Page -->
+        <button 
+          (click)="prevPage()"
+          [disabled]="currentPage() === 1"
+          class="w-8 h-8 flex items-center justify-center text-white/70 hover:text-white transition-all cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed disabled:pointer-events-none font-bold text-sm"
+          title="Anterior"
+        >
+          «
+        </button>
+
+        <!-- Page Numbers with Ellipsis -->
+        <div class="flex items-center">
+          <ng-container *ngFor="let item of paginationItems()">
+            <!-- Page Number Button -->
+            <button 
+              *ngIf="item !== '...'"
+              (click)="goToPage(item)"
+              [class.bg-white]="currentPage() === item"
+              [class.text-oxford-navy-950]="currentPage() === item"
+              [class.scale-105]="currentPage() === item"
+              [class.shadow-xs]="currentPage() === item"
+              [class.text-white/80]="currentPage() !== item"
+              [class.hover:text-white]="currentPage() !== item"
+              [class.hover:bg-white/10]="currentPage() !== item"
+              class="w-8 h-8 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center justify-center mx-0.5"
+            >
+              {{ item }}
+            </button>
+            
+            <!-- Ellipsis Spacer -->
+            <span 
+              *ngIf="item === '...'"
+              class="w-8 h-8 flex items-center justify-center text-xs font-bold text-white/40 select-none cursor-default"
+            >
+              ...
+            </span>
+          </ng-container>
+        </div>
+
+        <!-- Next Page -->
+        <button 
+          (click)="nextPage()"
+          [disabled]="currentPage() === totalPages()"
+          class="w-8 h-8 flex items-center justify-center text-white/70 hover:text-white transition-all cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed disabled:pointer-events-none font-bold text-sm"
+          title="Siguiente"
+        >
+          »
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== -->
+<!-- CREATE HORARIO MODAL -->
+<div 
+  *ngIf="isCreateModalOpen()"
+  class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-oxford-navy-950/45 backdrop-blur-xs animate-in fade-in duration-200"
+>
+  <div class="bg-white rounded-3xl border border-gray-150 shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+    <!-- Header -->
+    <div class="p-6 border-b border-gray-100 bg-gray-50/50">
+      <h3 class="text-lg font-extrabold text-oxford-navy-950 tracking-tight">Agregar Nuevo Horario Manual</h3>
+      <p class="text-xs text-gray-500 mt-1 font-semibold">Registra una cátedra con su bloque, grupo y aula asignada</p>
+    </div>
+
+    <!-- Body -->
+    <div class="p-6 max-h-[70vh] overflow-y-auto space-y-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Career Selector -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Carrera Académica</label>
+          <select 
+            [(ngModel)]="formCareerId"
+            (change)="onFormCareerChange(formCareerId)"
+            class="px-3 py-2.5 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-bold cursor-pointer"
+          >
+            <option *ngFor="let c of careers()" [value]="c.id">{{ c.name }}</option>
+          </select>
+        </div>
+
+        <!-- Course Selector (Dynamic based on selected career) -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Materia / Asignatura</label>
+          <select 
+            [(ngModel)]="formCourseCode"
+            [disabled]="isLoadingCourses()"
+            class="px-3 py-2.5 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-bold cursor-pointer disabled:opacity-50"
+          >
+            <option value="">Selecciona materia...</option>
+            <option *ngFor="let course of formCourses()" [value]="course.code">
+              {{ course.code }} - {{ course.name }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Group -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Grupo de Alumnos</label>
+          <input 
+            type="number" 
+            [(ngModel)]="formGroup"
+            min="1"
+            class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-semibold"
+          />
+        </div>
+
+        <!-- Course Type -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Tipo de Clase</label>
+          <select 
+            [(ngModel)]="formType"
+            class="px-3 py-2.5 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-bold cursor-pointer"
+          >
+            <option value="T">Teoría</option>
+            <option value="L">Laboratorio</option>
+          </select>
+        </div>
+
+        <!-- Time Block -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Horario / Bloque</label>
+          <input 
+            type="text" 
+            [(ngModel)]="formTimeBlock"
+            placeholder="Ej: 07:00-09:00"
+            class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-semibold"
+          />
+        </div>
+
+        <!-- Period -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Periodo Escolar</label>
+          <input 
+            type="text" 
+            [(ngModel)]="formPeriod"
+            placeholder="Ej: 2026-I"
+            class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-semibold"
+          />
+        </div>
+      </div>
+
+      <!-- Days of the week selection -->
+      <div class="flex flex-col gap-2">
+        <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Días de Clase Semanales</label>
+        <div class="flex gap-2.5 bg-gray-50 p-2.5 rounded-2xl border border-gray-150 justify-around">
+          <button 
+            *ngFor="let dayName of ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']; let idx = index"
+            type="button"
+            (click)="toggleDay(idx)"
+            class="px-3.5 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer border"
+            [class.bg-oxford-navy-950]="formDays[idx]"
+            [class.border-oxford-navy-950]="formDays[idx]"
+            [class.text-white]="formDays[idx]"
+            [class.bg-white]="!formDays[idx]"
+            [class.text-gray-500]="!formDays[idx]"
+            [class.border-gray-200]="!formDays[idx]"
+          >
+            {{ dayName }}
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <!-- Professor -->
+        <div class="flex flex-col gap-1.5 sm:col-span-2">
+          <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Catedrático / Profesor</label>
+          <input 
+            type="text" 
+            [(ngModel)]="formProfessor"
+            placeholder="Nombre completo..."
+            class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-semibold"
+          />
+        </div>
+
+        <!-- Occupancy -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Porcentaje de Ocupación</label>
+          <input 
+            type="number" 
+            [(ngModel)]="formOccupancy"
+            min="0"
+            max="100"
+            class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-semibold"
+          />
+        </div>
+
+        <!-- Building -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Edificio</label>
+          <input 
+            type="text" 
+            [(ngModel)]="formBuilding"
+            placeholder="Ej: I"
+            class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-semibold"
+          />
+        </div>
+
+        <!-- Classroom -->
+        <div class="flex flex-col gap-1.5 sm:col-span-2">
+          <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Aula / Salón</label>
+          <input 
+            type="text" 
+            [(ngModel)]="formClassroom"
+            placeholder="Ej: I-05"
+            class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-semibold"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="p-6 border-t border-gray-100 flex justify-end gap-2.5 bg-gray-50/50">
+      <button 
+        (click)="isCreateModalOpen.set(false)"
+        class="px-4 py-2 border border-gray-200 hover:bg-gray-100 text-gray-500 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+      >
+        Cancelar
+      </button>
+      <button 
+        (click)="createSchedule()"
+        class="px-4 py-2 bg-oxford-navy-950 hover:bg-oxford-navy-900 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
+      >
+        Crear Horario
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== -->
+<!-- EDIT HORARIO MODAL -->
+<div 
+  *ngIf="isEditModalOpen()"
+  class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-oxford-navy-950/45 backdrop-blur-xs animate-in fade-in duration-200"
+>
+  <div class="bg-white rounded-3xl border border-gray-150 shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+    <!-- Header -->
+    <div class="p-6 border-b border-gray-100 bg-gray-50/50">
+      <h3 class="text-lg font-extrabold text-oxford-navy-950 tracking-tight">Editar Datos del Horario</h3>
+      <p class="text-xs text-gray-550 mt-1 font-semibold">Modifica los detalles correspondientes al curso y aula</p>
+    </div>
+
+    <!-- Body -->
+    <div class="p-6 max-h-[70vh] overflow-y-auto space-y-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Career Selector -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Carrera Académica</label>
+          <select 
+            [(ngModel)]="formCareerId"
+            (change)="onFormCareerChange(formCareerId)"
+            class="px-3 py-2.5 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-bold cursor-pointer"
+          >
+            <option *ngFor="let c of careers()" [value]="c.id">{{ c.name }}</option>
+          </select>
+        </div>
+
+        <!-- Course Selector -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Materia / Asignatura</label>
+          <select 
+            [(ngModel)]="formCourseCode"
+            [disabled]="isLoadingCourses()"
+            class="px-3 py-2.5 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-bold cursor-pointer disabled:opacity-50"
+          >
+            <option value="">Selecciona materia...</option>
+            <option *ngFor="let course of formCourses()" [value]="course.code">
+              {{ course.code }} - {{ course.name }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Group -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Grupo de Alumnos</label>
+          <input 
+            type="number" 
+            [(ngModel)]="formGroup"
+            min="1"
+            class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-semibold"
+          />
+        </div>
+
+        <!-- Course Type -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Tipo de Clase</label>
+          <select 
+            [(ngModel)]="formType"
+            class="px-3 py-2.5 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-bold cursor-pointer"
+          >
+            <option value="T">Teoría</option>
+            <option value="L">Laboratorio</option>
+          </select>
+        </div>
+
+        <!-- Time Block -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Horario / Bloque</label>
+          <input 
+            type="text" 
+            [(ngModel)]="formTimeBlock"
+            placeholder="Ej: 07:00-09:00"
+            class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-semibold"
+          />
+        </div>
+
+        <!-- Period -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Periodo Escolar</label>
+          <input 
+            type="text" 
+            [(ngModel)]="formPeriod"
+            placeholder="Ej: 2026-I"
+            class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-semibold"
+          />
+        </div>
+      </div>
+
+      <!-- Days of the week selection -->
+      <div class="flex flex-col gap-2">
+        <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Días de Clase Semanales</label>
+        <div class="flex gap-2.5 bg-gray-50 p-2.5 rounded-2xl border border-gray-150 justify-around">
+          <button 
+            *ngFor="let dayName of ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']; let idx = index"
+            type="button"
+            (click)="toggleDay(idx)"
+            class="px-3.5 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer border"
+            [class.bg-oxford-navy-950]="formDays[idx]"
+            [class.border-oxford-navy-950]="formDays[idx]"
+            [class.text-white]="formDays[idx]"
+            [class.bg-white]="!formDays[idx]"
+            [class.text-gray-500]="!formDays[idx]"
+            [class.border-gray-200]="!formDays[idx]"
+          >
+            {{ dayName }}
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <!-- Professor -->
+        <div class="flex flex-col gap-1.5 sm:col-span-2">
+          <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Catedrático / Profesor</label>
+          <input 
+            type="text" 
+            [(ngModel)]="formProfessor"
+            placeholder="Nombre completo..."
+            class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-semibold"
+          />
+        </div>
+
+        <!-- Occupancy -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Porcentaje de Ocupación</label>
+          <input 
+            type="number" 
+            [(ngModel)]="formOccupancy"
+            min="0"
+            max="100"
+            class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-semibold"
+          />
+        </div>
+
+        <!-- Building -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Edificio</label>
+          <input 
+            type="text" 
+            [(ngModel)]="formBuilding"
+            placeholder="Ej: I"
+            class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-semibold"
+          />
+        </div>
+
+        <!-- Classroom -->
+        <div class="flex flex-col gap-1.5 sm:col-span-2">
+          <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Aula / Salón</label>
+          <input 
+            type="text" 
+            [(ngModel)]="formClassroom"
+            placeholder="Ej: I-05"
+            class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-semibold"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="p-6 border-t border-gray-100 flex justify-end gap-2.5 bg-gray-50/50">
+      <button 
+        (click)="isEditModalOpen.set(false)"
+        class="px-4 py-2 border border-gray-200 hover:bg-gray-100 text-gray-500 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+      >
+        Cancelar
+      </button>
+      <button 
+        (click)="saveScheduleEdit()"
+        class="px-4 py-2 bg-oxford-navy-950 hover:bg-oxford-navy-900 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
+      >
+        Guardar Cambios
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== -->
+<!-- SYNC SCRAPER MODAL -->
+<div 
+  *ngIf="isSyncModalOpen()"
+  class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-oxford-navy-950/45 backdrop-blur-xs animate-in fade-in duration-200"
+>
+  <div class="bg-white rounded-3xl border border-gray-150 shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+    <!-- Header -->
+    <div class="p-6 border-b border-gray-100 bg-gray-50/50">
+      <h3 class="text-base font-extrabold text-oxford-navy-950 tracking-tight flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+        </svg>
+        Sincronizar Scraper Playwright
+      </h3>
+      <p class="text-xs text-gray-500 mt-1 font-semibold">Ejecuta el scraper automático de la UASLP para importar horarios</p>
+    </div>
+
+    <!-- Body -->
+    <div class="p-6 space-y-4">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Área Académica a Extraer</label>
+        <select 
+          [(ngModel)]="syncAreaCode"
+          class="px-3 py-2.5 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-bold cursor-pointer"
+        >
+          <option 
+            *ngFor="let area of availableAreas()" 
+            [value]="area.code" 
+            [disabled]="area.code === 8"
+          >
+            {{ area.name }} (Área {{ area.code }}) {{ area.code === 8 ? '— No Disponible' : '' }}
+          </option>
+        </select>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Periodo Escolar de Sincronización</label>
+        <input 
+          type="text" 
+          [(ngModel)]="syncPeriod"
+          placeholder="Ej: 2026-I"
+          class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-semibold"
+        />
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="p-6 border-t border-gray-100 flex justify-end gap-2.5 bg-gray-50/50">
+      <button 
+        (click)="isSyncModalOpen.set(false)"
+        [disabled]="isSyncing()"
+        class="px-4 py-2 border border-gray-200 hover:bg-gray-100 text-gray-500 text-xs font-bold rounded-xl transition-colors cursor-pointer disabled:opacity-50"
+      >
+        Cancelar
+      </button>
+      <button 
+        (click)="triggerScrapeSync()"
+        [disabled]="isSyncing()"
+        class="px-4 py-2 bg-oxford-navy-950 hover:bg-oxford-navy-900 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer inline-flex items-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
+      >
+        <svg 
+          *ngIf="isSyncing()" 
+          xmlns="http://www.w3.org/2000/svg" 
+          fill="none" 
+          viewBox="0 0 24 24" 
+          stroke-width="2.5" 
+          stroke="currentColor" 
+          class="h-3.5 w-3.5 animate-spin"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+        </svg>
+        {{ isSyncing() ? 'Sincronizando...' : 'Iniciar Sincronización' }}
+      </button>
+    </div>
+  </div>
+</div>

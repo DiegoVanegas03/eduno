@@ -9,10 +9,12 @@ import {
 import { MyAccountService, ProfileData } from '@core/services/auth/my-account.service';
 import { ModalService } from '@shared/services/modal.service';
 import { toast } from 'ngx-sonner';
+import { firstValueFrom } from 'rxjs';
 import { USER_ROLES, ICareer } from '@eduno/shared';
 import { AuthService } from '@core/services/auth/auth.service';
 import { AvatarComponent } from '@shared/components/avatar/avatar.component';
 import { AdminCareersService } from '@core/services/admin-careers/admin-careers.service';
+import { ProfessorAdminService } from '@core/services/professor-admin/professor-admin.service';
 
 @Component({
   selector: 'app-settings',
@@ -31,6 +33,7 @@ export class SettingsComponent {
   private modalService = inject(ModalService);
   private authService = inject(AuthService);
   private adminCareersService = inject(AdminCareersService);
+  private professorAdminService = inject(ProfessorAdminService);
 
   initialData: ProfileData | null = null;
   isLoading = signal(true);
@@ -274,5 +277,91 @@ export class SettingsComponent {
     }
     this.editModes.set({});
     this.imageFile = null;
+  }
+
+  // Professor Verification Modal & Autocomplete State Signals
+  isVerifyTeacherModalOpen = signal(false);
+  teacherSearchQuery = signal('');
+  scrapedProfessorsList = signal<any[]>([]);
+  selectedProfessorIdForLink = signal<string>('');
+  isVerifyingTeacher = signal(false);
+
+  openTeacherVerificationModal() {
+    this.teacherSearchQuery.set('');
+    this.scrapedProfessorsList.set([]);
+    this.selectedProfessorIdForLink.set('');
+    this.isVerifyTeacherModalOpen.set(true);
+  }
+
+  searchScrapedProfessors() {
+    const q = this.teacherSearchQuery().trim();
+    if (!q || q.length < 3) {
+      this.scrapedProfessorsList.set([]);
+      return;
+    }
+    this.professorAdminService.getProfessors({ search: q, limit: 10 }).subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.scrapedProfessorsList.set(res.data);
+        }
+      },
+      error: (err) => console.error('Error al buscar profesores:', err),
+    });
+  }
+
+  selectProfessorForLink(prof: any) {
+    this.selectedProfessorIdForLink.set(prof.id);
+    this.teacherSearchQuery.set(prof.name);
+    // Clear list to close dropdown
+    this.scrapedProfessorsList.set([]);
+  }
+
+  // Selected comprobante file state
+  selectedComprobanteFile = signal<File | null>(null);
+
+  onComprobanteFileSelected(event: any) {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        toast.error('Por favor, selecciona un archivo de imagen válido (JPEG, PNG).');
+        return;
+      }
+      this.selectedComprobanteFile.set(file);
+      toast.success(`Archivo comprobante "${file.name}" cargado.`);
+    }
+  }
+
+  submitTeacherVerification() {
+    const professorId = this.selectedProfessorIdForLink();
+    const file = this.selectedComprobanteFile();
+
+    if (!professorId) {
+      toast.error('Por favor, busca y selecciona tu perfil de profesor de la lista de resultados.');
+      return;
+    }
+
+    if (!file) {
+      toast.error('Por favor, selecciona un comprobante o documento de identidad en formato de imagen.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('professorId', professorId);
+    formData.append('documento', file);
+
+    this.isVerifyingTeacher.set(true);
+    toast.promise(firstValueFrom(this.professorAdminService.requestTeacherVerification(formData)), {
+      loading: 'Enviando tu comprobante e iniciando solicitud de verificación docente...',
+      success: (res: any) => {
+        this.isVerifyingTeacher.set(false);
+        this.isVerifyTeacherModalOpen.set(false);
+        this.selectedComprobanteFile.set(null);
+        return '¡Solicitud enviada! Un administrador revisará tu comprobante pronto.';
+      },
+      error: (err: any) => {
+        this.isVerifyingTeacher.set(false);
+        return err.error?.error || err.error?.message || 'No se pudo enviar la solicitud de verificación.';
+      },
+    });
   }
 }

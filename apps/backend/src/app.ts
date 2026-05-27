@@ -14,6 +14,7 @@ import scraperRoutes from "./routes/scraper.routes";
 import scheduleRoutes from "./routes/schedule.routes";
 import careerRoutes from "./routes/career.routes";
 import studyPlanRoutes from "./routes/study-plan.routes";
+import professorRoutes from "./routes/professor.routes";
 
 // Utils
 import { GlobalErrorHandler } from "./utils/app-error";
@@ -72,6 +73,7 @@ app.use("/api/scraper", scraperRoutes);
 app.use("/api/schedules", scheduleRoutes);
 app.use("/api/careers", careerRoutes);
 app.use("/api/study-plans", studyPlanRoutes);
+app.use("/api/professors", professorRoutes);
 
 // ── Global error handler ───────────────────────────────────────────────────
 app.use(GlobalErrorHandler);

@@ -1,12 +1,13 @@
 export interface ISchedule {
   id?: string;
   courseCode: string;
-  courseName: string;
+  courseName?: string;
   group: number;
   type: string;
   timeBlock: string;
   days: number[];
   professor: string;
+  professorId?: string;
   building: string;
   classroom: string;
   occupancy: number; // Porcentaje de ocupación (0 a 100)
@@ -19,7 +20,9 @@ export interface ISchedule {
 export interface IScheduleFilters {
   period?: string;
   areaCode?: number;
-  courseCode?: string;
+  courseName?: string;
   professor?: string;
   group?: number;
+  page?: number;
+  limit?: number;
 }
