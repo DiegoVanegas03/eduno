@@ -97,6 +97,8 @@
       </app-editable-field>
       <app-editable-field
         label="Carrera"
+        type="select"
+        [options]="careerOptions()"
         [value]="profileData().career"
         (valueChange)="updateField('career', $event)"
         [isEditable]="editModes()['career']"

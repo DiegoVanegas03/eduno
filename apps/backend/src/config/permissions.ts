@@ -15,6 +15,8 @@ export const permissionsStatement = {
   comment: ["create", "delete"],
   rating: ["create"],
   file: ["upload", "download"],
+  career: ["create", "read", "update", "delete"],
+  studyPlan: ["create", "read", "update", "delete"],
 } as const;
 
 export type Resource = keyof typeof permissionsStatement;
@@ -36,6 +38,8 @@ const adminRole = ac.newRole({
   comment: ["create", "delete"],
   rating: ["create"],
   file: ["upload", "download"],
+  career: ["create", "read", "update", "delete"],
+  studyPlan: ["create", "read", "update", "delete"],
 });
 
 const moderadorRole = ac.newRole({
@@ -45,18 +49,24 @@ const moderadorRole = ac.newRole({
   comment: ["delete"],  // Moderador puede borrar comentarios inapropiados
   rating: [],
   file: ["download"],
+  career: ["read"],
+  studyPlan: ["read"],
 });
 
 const profesorRole = ac.newRole({
   comment: ["create"],
   rating: ["create"],
   file: ["upload", "download"],
+  career: ["read"],
+  studyPlan: ["read"],
 });
 
 const alumnoRole = ac.newRole({
   comment: ["create"],
   rating: ["create"],
   file: ["upload", "download"],
+  career: ["read"],
+  studyPlan: ["read"],
 });
 
 export const roles = {

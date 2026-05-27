@@ -6,7 +6,8 @@ import { AvatarComponent } from '@shared/components/avatar/avatar.component';
 import { AdminUsersService } from '@core/services/admin-users/admin-users.service';
 import { toast } from 'ngx-sonner';
 import { firstValueFrom } from 'rxjs';
-import { IUserResponse, UserRole, IUserDashboardStats } from '@eduno/shared';
+import { IUserResponse, UserRole, IUserDashboardStats, ICareer } from '@eduno/shared';
+import { AdminCareersService } from '@core/services/admin-careers/admin-careers.service';
 
 @Component({
   selector: 'app-manage-users',
@@ -19,8 +20,10 @@ export class ManageUsersComponent implements OnInit {
   router = inject(Router);
   route = inject(ActivatedRoute);
   adminUsersService = inject(AdminUsersService);
+  adminCareersService = inject(AdminCareersService);
 
   users = signal<IUserResponse[]>([]);
+  careers = signal<ICareer[]>([]);
   isLoading = signal<boolean>(true);
   stats = signal<IUserDashboardStats | null>(null);
 
@@ -83,6 +86,20 @@ export class ManageUsersComponent implements OnInit {
   ngOnInit() {
     this.loadUsersFromBackend();
     this.loadStatsFromBackend();
+    this.loadCareers();
+  }
+
+  loadCareers() {
+    this.adminCareersService.getCareers().subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.careers.set(res.data);
+        }
+      },
+      error: (err) => {
+        console.error('Error al cargar carreras:', err);
+      },
+    });
   }
 
   loadUsersFromBackend() {
@@ -214,6 +231,7 @@ export class ManageUsersComponent implements OnInit {
   editCareer = '';
   editSemester = '';
   editDescription = '';
+  editSemesterOptions: number[] = [];
 
   // Create Form Fields
   createName = '';
@@ -223,6 +241,33 @@ export class ManageUsersComponent implements OnInit {
   createCareer = '';
   createSemester = '';
   createDescription = '';
+  createSemesterOptions: number[] = [];
+
+  onEditCareerChange() {
+    const career = this.careers().find(c => c.name === this.editCareer);
+    const maxSemesters = career ? career.semesters : 10;
+    this.editSemesterOptions = Array.from({ length: maxSemesters }, (_, i) => i + 1);
+    
+    if (this.editSemester) {
+      const currentSem = parseInt(this.editSemester, 10);
+      if (!isNaN(currentSem) && currentSem > maxSemesters) {
+        this.editSemester = '';
+      }
+    }
+  }
+
+  onCreateCareerChange() {
+    const career = this.careers().find(c => c.name === this.createCareer);
+    const maxSemesters = career ? career.semesters : 10;
+    this.createSemesterOptions = Array.from({ length: maxSemesters }, (_, i) => i + 1);
+    
+    if (this.createSemester) {
+      const currentSem = parseInt(this.createSemester, 10);
+      if (!isNaN(currentSem) && currentSem > maxSemesters) {
+        this.createSemester = '';
+      }
+    }
+  }
 
   generateRandomPassword() {
     const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
@@ -241,6 +286,7 @@ export class ManageUsersComponent implements OnInit {
     this.editCareer = user.career || '';
     this.editSemester = user.semester || '';
     this.editDescription = user.description || '';
+    this.onEditCareerChange();
     this.isEditModalOpen.set(true);
   }
 
@@ -288,6 +334,7 @@ export class ManageUsersComponent implements OnInit {
     this.createCareer = '';
     this.createSemester = '';
     this.createDescription = '';
+    this.onCreateCareerChange();
     this.generateRandomPassword();
     this.isCreateModalOpen.set(true);
   }

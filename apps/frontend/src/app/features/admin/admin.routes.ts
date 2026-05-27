@@ -23,6 +23,16 @@ export const adminRoutes: Routes = [
           import('./user-profile/user-profile.component').then((m) => m.UserProfileComponent),
       },
       {
+        path: 'manage-careers',
+        loadComponent: () =>
+          import('./manage-careers/manage-careers.component').then((m) => m.ManageCareersComponent),
+      },
+      {
+        path: 'manage-careers/study-plan/:id',
+        loadComponent: () =>
+          import('./study-plan-viewer/study-plan-viewer.component').then((m) => m.StudyPlanViewerComponent),
+      },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full',

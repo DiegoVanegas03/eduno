@@ -646,12 +646,16 @@
             <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide"
             >Carrera</label
             >
-            <input
-            type="text"
+            <select
             [(ngModel)]="editCareer"
-            placeholder="Carrera académica..."
-            class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full transition-colors text-gray-800 font-semibold"
-            />
+            (ngModelChange)="onEditCareerChange()"
+            class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full transition-colors text-gray-800 font-bold cursor-pointer"
+            >
+              <option value="">Ninguna</option>
+              <option *ngFor="let career of careers()" [value]="career.name">
+                {{ career.name }}
+              </option>
+            </select>
         </div>
 
         <div class="flex flex-col gap-1.5">
@@ -662,17 +666,10 @@
             [(ngModel)]="editSemester"
             class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full transition-colors text-gray-800 font-bold cursor-pointer"
             >
-            <option value="">Ninguno</option>
-            <option value="1">1er Semestre</option>
-            <option value="2">2do Semestre</option>
-            <option value="3">3er Semestre</option>
-            <option value="4">4to Semestre</option>
-            <option value="5">5to Semestre</option>
-            <option value="6">6to Semestre</option>
-            <option value="7">7mo Semestre</option>
-            <option value="8">8vo Semestre</option>
-            <option value="9">9no Semestre</option>
-            <option value="10">10mo Semestre</option>
+              <option value="">Ninguno</option>
+              <option *ngFor="let sem of editSemesterOptions" [value]="sem">
+                {{ sem }}° Semestre
+              </option>
             </select>
         </div>
 
@@ -800,12 +797,16 @@
             <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide"
             >Carrera</label
             >
-            <input
-            type="text"
+            <select
             [(ngModel)]="createCareer"
-            placeholder="Carrera académica..."
-            class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full transition-colors text-gray-800 font-semibold"
-            />
+            (ngModelChange)="onCreateCareerChange()"
+            class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full transition-colors text-gray-800 font-bold cursor-pointer"
+            >
+              <option value="">Ninguna</option>
+              <option *ngFor="let career of careers()" [value]="career.name">
+                {{ career.name }}
+              </option>
+            </select>
         </div>
 
         <div class="flex flex-col gap-1.5">
@@ -816,17 +817,10 @@
             [(ngModel)]="createSemester"
             class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full transition-colors text-gray-800 font-bold cursor-pointer"
             >
-            <option value="">Ninguno</option>
-            <option value="1">1er Semestre</option>
-            <option value="2">2do Semestre</option>
-            <option value="3">3er Semestre</option>
-            <option value="4">4to Semestre</option>
-            <option value="5">5to Semestre</option>
-            <option value="6">6to Semestre</option>
-            <option value="7">7mo Semestre</option>
-            <option value="8">8vo Semestre</option>
-            <option value="9">9no Semestre</option>
-            <option value="10">10mo Semestre</option>
+              <option value="">Ninguno</option>
+              <option *ngFor="let sem of createSemesterOptions" [value]="sem">
+                {{ sem }}° Semestre
+              </option>
             </select>
         </div>
 

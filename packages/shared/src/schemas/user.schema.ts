@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { rolesTuple } from "../constants/roles.constants";
+import { mongoIdSchema } from "../constants/database.constants";
 
 export const updateProfileBodySchema = z.object({
   name: z
@@ -51,10 +52,6 @@ export const deleteAccountSchema = z.object({
 });
 
 export type IDeleteAccountSchema = z.infer<typeof deleteAccountSchema>;
-
-export const mongoIdSchema = z
-  .string()
-  .regex(/^[0-9a-fA-F]{24}$/, "ID inválido");
 
 export const userParamsSchema = z.object({
   id: mongoIdSchema,

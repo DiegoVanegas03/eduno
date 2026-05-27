@@ -9,9 +9,10 @@ import {
 import { MyAccountService, ProfileData } from '@core/services/auth/my-account.service';
 import { ModalService } from '@shared/services/modal.service';
 import { toast } from 'ngx-sonner';
-import { USER_ROLES } from '@eduno/shared';
+import { USER_ROLES, ICareer } from '@eduno/shared';
 import { AuthService } from '@core/services/auth/auth.service';
 import { AvatarComponent } from '@shared/components/avatar/avatar.component';
+import { AdminCareersService } from '@core/services/admin-careers/admin-careers.service';
 
 @Component({
   selector: 'app-settings',
@@ -29,9 +30,18 @@ export class SettingsComponent {
   private myAccountService = inject(MyAccountService);
   private modalService = inject(ModalService);
   private authService = inject(AuthService);
+  private adminCareersService = inject(AdminCareersService);
 
   initialData: ProfileData | null = null;
   isLoading = signal(true);
+
+  careers = signal<ICareer[]>([]);
+  careerOptions = computed<{ label: string; value: string }[]>(() => {
+    return this.careers().map((c) => ({
+      label: c.name,
+      value: c.name,
+    }));
+  });
 
   profileData = signal<ProfileData>({
     id: '',
@@ -68,13 +78,44 @@ export class SettingsComponent {
   });
 
   constructor() {
-    // Escucha cambios en la carrera para actualizar los semestres disponibles
+    // Cargar carreras desde la base de datos
+    this.adminCareersService.getCareers().subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.careers.set(res.data);
+        }
+      },
+      error: (err) => console.error('Error al cargar carreras en settings:', err),
+    });
+
+    // Escucha cambios en la carrera para actualizar los semestres disponibles basándose en la base de datos real
     effect(() => {
-      const career = this.profileData().career;
-      if (career) {
-        this.myAccountService.getSemesterOptions(career).subscribe((options) => {
-          this.semesterOptions.set(options);
-        });
+      const careerName = this.profileData().career;
+      const careersList = this.careers();
+      if (careersList.length > 0) {
+        const selectedCareer = careersList.find(
+          (c) => c.name.toLowerCase() === careerName.toLowerCase(),
+        );
+        const maxSemesters = selectedCareer ? selectedCareer.semesters : 10;
+
+        const options = Array.from({ length: maxSemesters }, (_, i) => ({
+          label: `${i + 1}° Semestre`,
+          value: String(i + 1),
+        }));
+        this.semesterOptions.set(options);
+
+        // Si el semestre actual excede el límite de la carrera seleccionada, se resetea a vacío
+        const currentSem = parseInt(this.profileData().semester, 10);
+        if (!isNaN(currentSem) && currentSem > maxSemesters) {
+          this.updateField('semester', '');
+        }
+      } else if (careerName) {
+        // Fallback temporal mientras cargan las carreras
+        const options = Array.from({ length: 10 }, (_, i) => ({
+          label: `${i + 1}° Semestre`,
+          value: String(i + 1),
+        }));
+        this.semesterOptions.set(options);
       }
     });
 

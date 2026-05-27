@@ -53,6 +53,20 @@
         </svg>
         <span class="whitespace-nowrap transition-all duration-200 font-medium group-[.text-oxford-navy-950]:font-semibold" [class.opacity-0]="isSidebarCollapsed()" [class.w-0]="isSidebarCollapsed()">Usuarios</span>
       </a>
+
+      <a 
+        routerLink="manage-careers" 
+        routerLinkActive="bg-gray-50 border-l-3 border-cerulean-600 text-oxford-navy-950 font-bold" 
+        class="flex items-center gap-3.5 px-4 py-3 rounded-r-xl text-gray-400 hover:bg-gray-50/50 hover:text-gray-900 border-l-3 border-transparent transition-all duration-150 group relative"
+        [title]="isSidebarCollapsed() ? 'Carreras' : ''"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 transition-all duration-200 group-hover:text-cerulean-600 group-[.text-oxford-navy-950]:text-cerulean-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14v7" />
+        </svg>
+        <span class="whitespace-nowrap transition-all duration-200 font-medium group-[.text-oxford-navy-950]:font-semibold" [class.opacity-0]="isSidebarCollapsed()" [class.w-0]="isSidebarCollapsed()">Carreras</span>
+      </a>
     </nav>
     
     <!-- Sidebar Footer with User Card -->

@@ -1,6 +1,18 @@
 import { chromium } from "playwright";
+import { IStudyPlanStructure, ISemesterPlan, IEmphasisArea, ICoursePlan } from "@eduno/shared";
 
-export interface MateriaPlan {
+const PLANS: { career: string; url: string }[] = [
+  {
+    career: "Sistemas Inteligentes",
+    url: "https://infocomp.ingenieria.uaslp.mx/cominf/public/principal/sistemasinteligentes/pe",
+  },
+  {
+    career: "Ingeniería en Computación",
+    url: "https://infocomp.ingenieria.uaslp.mx/cominf/public/principal/icomputacion/pe",
+  },
+];
+
+interface RawCourseData {
   clave: string;
   nombre: string;
   ht: string;
@@ -11,41 +23,27 @@ export interface MateriaPlan {
   tipo: string;
 }
 
-export interface SemestrePlan {
+interface RawSemesterData {
   semestre: number;
-  materias: MateriaPlan[];
-  canInscribeEnfasis: boolean;
+  materias: RawCourseData[];
 }
 
-export interface AreaEnfasis {
+interface RawEmphasisArea {
   nombre: string;
-  materias: MateriaPlan[];
+  materias: RawCourseData[];
 }
 
-export interface PlanEstudios {
-  carrera: string;
-  url: string;
-  semestres: SemestrePlan[];
-  areasEnfasis: AreaEnfasis[];
+interface RawPlanData {
+  semestres: RawSemesterData[];
+  areasEnfasis: RawEmphasisArea[];
 }
-
-const PLANS: { carrera: string; url: string }[] = [
-  {
-    carrera: "Sistemas Inteligentes",
-    url: "https://infocomp.ingenieria.uaslp.mx/cominf/public/principal/sistemasinteligentes/pe",
-  },
-  {
-    carrera: "Ingeniería en Computación",
-    url: "https://infocomp.ingenieria.uaslp.mx/cominf/public/principal/icomputacion/pe",
-  },
-];
 
 export async function scrapePlanEstudios(
   planUrl?: string,
   planCarrera?: string,
-): Promise<PlanEstudios> {
+): Promise<IStudyPlanStructure> {
   const target = planUrl
-    ? { carrera: planCarrera ?? "", url: planUrl }
+    ? { career: planCarrera ?? "", url: planUrl }
     : PLANS[0];
 
   const browser = await chromium.launch({ headless: true });
@@ -53,11 +51,6 @@ export async function scrapePlanEstudios(
 
   try {
     await page.goto(target.url, { waitUntil: "networkidle" });
-
-    interface RawPlanData {
-      semestres: Omit<SemestrePlan, "canInscribeEnfasis">[];
-      areasEnfasis: AreaEnfasis[];
-    }
 
     const planData = (await page.evaluate(`
       (function () {
@@ -216,26 +209,42 @@ export async function scrapePlanEstudios(
       }
     }
 
-    const semestres: SemestrePlan[] = planData.semestres.map((sem, i) => ({
-      ...sem,
-      canInscribeEnfasis: enfasisIndex >= 0 && i >= enfasisIndex,
+    // Map course data into English structures
+    const mapCourse = (c: RawCourseData): ICoursePlan => ({
+      code: c.clave,
+      name: c.nombre,
+      theoryHours: c.ht,
+      practicalHours: c.hp,
+      credits: c.creditos,
+      cacei: c.cacei,
+      prerequisites: c.prerequisitos,
+      type: c.tipo,
+    });
+
+    const semesters: ISemesterPlan[] = planData.semestres.map((sem, i) => ({
+      semester: sem.semestre,
+      courses: sem.materias.map(mapCourse),
+      canInscribeEmphasis: enfasisIndex >= 0 && i >= enfasisIndex,
+    }));
+
+    const emphasisAreas: IEmphasisArea[] = planData.areasEnfasis.map((area) => ({
+      name: area.nombre,
+      courses: area.materias.map(mapCourse),
     }));
 
     return {
-      carrera: target.carrera,
-      url: target.url,
-      semestres,
-      areasEnfasis: planData.areasEnfasis,
+      semesters,
+      emphasisAreas,
     };
   } finally {
     await browser.close();
   }
 }
 
-export async function scrapeAllPlans(): Promise<PlanEstudios[]> {
-  const results: PlanEstudios[] = [];
+export async function scrapeAllPlans(): Promise<IStudyPlanStructure[]> {
+  const results: IStudyPlanStructure[] = [];
   for (const plan of PLANS) {
-    results.push(await scrapePlanEstudios(plan.url, plan.carrera));
+    results.push(await scrapePlanEstudios(plan.url, plan.career));
   }
   return results;
 }
