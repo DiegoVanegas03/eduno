@@ -39,6 +39,11 @@ export const authRoutes: Routes = [
           import('./security/security.component').then((m) => m.SecurityComponent),
       },
       {
+        path: 'uploads',
+        loadComponent: () =>
+          import('./uploads/uploads.component').then((m) => m.UploadsComponent),
+      },
+      {
         path: '',
         redirectTo: 'settings',
         pathMatch: 'full',

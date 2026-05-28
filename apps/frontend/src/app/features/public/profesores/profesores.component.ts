@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { Profesor } from '@core/models/profesor.model';
 import { ACADEMIC_AREAS } from '@eduno/shared';
 import { ProfesorCardComponent } from '@shared/components/profesor-card/profesor-card.component';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-profesores',
@@ -41,6 +43,8 @@ export class ProfesoresComponent implements OnInit {
     name
   }));
 
+  private searchSubject = new Subject<string>();
+
   constructor() {
     this.route.queryParams.subscribe((params) => {
       this.searchQuery.set(params['q'] || '');
@@ -49,6 +53,16 @@ export class ProfesoresComponent implements OnInit {
       this.currentPage.set(Number(params['page']) || 1);
       
       this.loadProfesores();
+    });
+
+    // Debounce search input typing to avoid layout shift, input lag, and scroll jumps
+    this.searchSubject.pipe(
+      debounceTime(350),
+      distinctUntilChanged()
+    ).subscribe((query) => {
+      this.searchQuery.set(query);
+      this.currentPage.set(1);
+      this.updateUrl();
     });
   }
 
@@ -129,6 +143,7 @@ export class ProfesoresComponent implements OnInit {
   });
 
   updateUrl() {
+    const scrollPos = window.scrollY;
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
@@ -138,7 +153,17 @@ export class ProfesoresComponent implements OnInit {
         page: this.currentPage() > 1 ? this.currentPage() : null,
       },
       queryParamsHandling: 'merge',
+      replaceUrl: true
+    }).then(() => {
+      // Maintain exact scroll position to prevent jumping when filters or search apply
+      setTimeout(() => {
+        window.scrollTo(0, scrollPos);
+      });
     });
+  }
+
+  onSearchChange(value: string) {
+    this.searchSubject.next(value);
   }
 
   applyFilters() {

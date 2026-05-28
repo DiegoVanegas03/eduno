@@ -15,6 +15,7 @@ import { AuthService } from '@core/services/auth/auth.service';
 import { AvatarComponent } from '@shared/components/avatar/avatar.component';
 import { AdminCareersService } from '@core/services/admin-careers/admin-careers.service';
 import { ProfessorAdminService } from '@core/services/professor-admin/professor-admin.service';
+import { UserFilesService } from '@core/services/user-files/user-files.service';
 
 @Component({
   selector: 'app-settings',
@@ -34,6 +35,7 @@ export class SettingsComponent {
   private authService = inject(AuthService);
   private adminCareersService = inject(AdminCareersService);
   private professorAdminService = inject(ProfessorAdminService);
+  private userFilesService = inject(UserFilesService);
 
   initialData: ProfileData | null = null;
   isLoading = signal(true);
@@ -122,7 +124,7 @@ export class SettingsComponent {
       }
     });
 
-    // Sincroniza los datos del usuario con los campos locales y los mocks
+    // Sincroniza los datos del usuario con los campos locales
     effect(() => {
       const user = this.authService.currentUser();
       if (user) {
@@ -132,12 +134,11 @@ export class SettingsComponent {
           career: user.career || '',
           semester: user.semester || '',
           description: user.description || '',
-          // Mocks locales para lo que aún no está en el backend
-          downloadsLeft: 4,
-          maxDownloads: 5,
-          lastDownloadDate: '21 de abril del 2026',
-          totalUploads: 1,
-          connectedAccounts: [], // Se llenará desde el endpoint
+          downloadsLeft: this.profileData()?.id === user.id ? this.profileData().downloadsLeft : 0,
+          maxDownloads: this.profileData()?.id === user.id ? this.profileData().maxDownloads : 5,
+          lastDownloadDate: this.profileData()?.id === user.id ? this.profileData().lastDownloadDate : null,
+          totalUploads: this.profileData()?.id === user.id ? this.profileData().totalUploads : 0,
+          connectedAccounts: this.profileData()?.id === user.id ? this.profileData().connectedAccounts : [],
         };
 
         if (!this.initialData || this.initialData.id !== user.id) {
@@ -149,6 +150,35 @@ export class SettingsComponent {
           this.isLoading.set(false);
         }
       }
+    });
+
+    // Consulta de estadísticas reales de descargas
+    this.userFilesService.getDownloadStats().subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          const stats = res.data;
+          this.profileData.update((data) => ({
+            ...data,
+            downloadsLeft: stats.downloadsLeft,
+            maxDownloads: stats.maxDownloads,
+            totalUploads: stats.totalUploads,
+            lastDownloadDate: stats.lastDownloadDate
+              ? new Date(stats.lastDownloadDate).toLocaleDateString('es-ES', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                })
+              : null,
+          }));
+          if (this.initialData) {
+            this.initialData.downloadsLeft = stats.downloadsLeft;
+            this.initialData.maxDownloads = stats.maxDownloads;
+            this.initialData.totalUploads = stats.totalUploads;
+            this.initialData.lastDownloadDate = stats.lastDownloadDate ? String(stats.lastDownloadDate) : null;
+          }
+        }
+      },
+      error: (err) => console.error('Error al cargar estadísticas de descargas:', err),
     });
 
     // Consulta de cuentas vinculadas reales

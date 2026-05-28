@@ -33,6 +33,8 @@ import {
 } from "@/utils/app-error";
 import mongoose from "mongoose";
 import User from "@/models/user.model";
+import { FileModel } from "@/models/file.model";
+import UserDownload from "@/models/user-download.model";
 
 export const updateProfile = asyncHandler(
   async (
@@ -730,6 +732,32 @@ export const getUserDashboardStats = asyncHandler(
         monthlyGrowth,
         profesoresCount,
         bannedUsers,
+      },
+    });
+  },
+);
+
+export const getDownloadStats = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = req.user;
+    if (!user) throw new UnauthorizedError();
+
+    const approvedCount = await FileModel.countDocuments({ uploaderId: user.id, status: "approved" });
+    const totalUploads = await FileModel.countDocuments({ uploaderId: user.id });
+    const consumedCount = await UserDownload.countDocuments({ userId: user.id });
+
+    const maxDownloads = approvedCount * 5;
+    const downloadsLeft = Math.max(0, maxDownloads - consumedCount);
+
+    const lastDownload = await UserDownload.findOne({ userId: user.id }).sort({ downloadedAt: -1 });
+
+    return res.json({
+      success: true,
+      data: {
+        downloadsLeft,
+        maxDownloads,
+        totalUploads,
+        lastDownloadDate: lastDownload ? lastDownload.downloadedAt : null,
       },
     });
   },

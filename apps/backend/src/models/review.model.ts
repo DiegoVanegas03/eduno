@@ -6,6 +6,8 @@ export interface IReviewDocument extends Document, Omit<IReview, "id" | "profess
   userId: mongoose.Types.ObjectId;
   likes: mongoose.Types.ObjectId[];
   dislikes: mongoose.Types.ObjectId[];
+  materiaId: string;
+  isEdited: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -29,6 +31,16 @@ const reviewSchema = new Schema<IReviewDocument>(
       required: [true, "La calificación es obligatoria"],
       min: [0, "La calificación mínima es 0"],
       max: [5, "La calificación máxima es 5"],
+    },
+    materiaId: {
+      type: String,
+      required: [true, "El ID de la materia es obligatorio"],
+      trim: true,
+      index: true,
+    },
+    isEdited: {
+      type: Boolean,
+      default: false,
     },
     comment: {
       type: String,

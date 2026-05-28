@@ -28,7 +28,7 @@
         
         <div class="flex-1 text-center md:text-left relative z-10">
           <div class="flex items-center justify-center md:justify-start gap-2 mb-2">
-            <h1 class="text-3xl md:text-4xl font-extrabold text-oxford-navy-900 tracking-tight">{{ p.nombre  | titlecase }}</h1>
+            <h1 class="text-3xl font-extrabold text-oxford-navy-900 tracking-tight">{{ p.nombre  | titlecase }}</h1>
             @if (p.isVerificado) {
               <div class="bg-cerulean-500 text-white rounded-full p-1 shadow-sm flex items-center justify-center" title="Perfil Verificado">
                 <svg class="w-4 h-4 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
@@ -57,7 +57,7 @@
       </div>
 
       <!-- Sección para Calificar -->
-      <h2 class="text-2xl font-bold text-oxford-navy-900 mb-6">Califica y comparte tu opinión</h2>
+      <h2 id="reviewFormContainer" class="text-2xl font-bold text-oxford-navy-900 mb-6">Califica y comparte tu opinión</h2>
       <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-cerulean-100 mb-12">
         
         @if (!isAuthenticated()) {
@@ -76,36 +76,97 @@
             </p>
             <app-button variant="primary" size="sm">Iniciar Sesión</app-button>
           </div>
+        } @else if (!isAlumno()) {
+          <!-- Estado No Alumno -->
+          <div class="bg-cerulean-50/50 border border-cerulean-200 rounded-2xl p-8 flex flex-col items-center justify-center text-center">
+            <div class="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center text-amber-500 mb-3">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <h3 class="text-base font-bold text-oxford-navy-900 mb-1">Solo los alumnos pueden opinar</h3>
+            <p class="text-xs text-oxford-navy-500 max-w-sm">
+              Tu cuenta tiene el rol de <strong>{{ authService.currentUser()?.role | titlecase }}</strong>. Únicamente los Alumnos pueden calificar a los profesores para garantizar la veracidad de las opiniones.
+            </p>
+          </div>
         } @else {
-          <!-- Estado Autenticado -->
+          <!-- Estado Autenticado Alumno -->
           <div class="flex flex-col md:flex-row gap-6">
             <app-avatar [user]="authService.currentUser()" size="lg" />
             <div class="flex-1 w-full relative">
+              
+              <!-- Alerta si ya opinó sobre todas las materias -->
+              @if (hasReviewedAllMaterias()) {
+                <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 flex items-start gap-3">
+                  <svg class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <div>
+                    <h4 class="text-sm font-bold text-amber-900">¡Calificaciones completas!</h4>
+                    <p class="text-xs text-amber-700 leading-relaxed">
+                      Ya has opinado sobre todas las materias de este profesor. Si deseas modificar alguna de tus opiniones, selecciona la materia abajo en el formulario para editar tus estrellas y comentarios.
+                    </p>
+                  </div>
+                </div>
+              }
+
               <div class="mb-4">
                 <span class="text-sm font-bold text-oxford-navy-700 block mb-2">¿Cómo calificarías al profesor?</span>
                 <div class="flex gap-2 text-oxford-navy-200 cursor-pointer">
-                  <!-- Estrellas Interactivas (Visual Mock) -->
-                  <svg class="w-8 h-8 hover:text-honeydew-500 fill-current transition-colors" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                  <svg class="w-8 h-8 hover:text-honeydew-500 fill-current transition-colors" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                  <svg class="w-8 h-8 hover:text-honeydew-500 fill-current transition-colors" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                  <svg class="w-8 h-8 hover:text-honeydew-500 fill-current transition-colors" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                  <svg class="w-8 h-8 hover:text-honeydew-500 fill-current transition-colors" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                  @for (star of [1, 2, 3, 4, 5]; track star) {
+                    <svg 
+                      (click)="selectedRating.set(star)"
+                      (mouseenter)="hoveredRating.set(star)"
+                      (mouseleave)="hoveredRating.set(0)"
+                      [class.text-amber-400]="star <= (hoveredRating() || selectedRating())"
+                      [class.text-oxford-navy-200]="star > (hoveredRating() || selectedRating())"
+                      class="w-8 h-8 fill-current transition-colors" 
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                    </svg>
+                  }
                 </div>
               </div>
               
-              <textarea 
-                rows="3" 
-                class="w-full bg-cerulean-50/50 border border-cerulean-100 rounded-2xl p-4 text-oxford-navy-900 placeholder-oxford-navy-400 focus:outline-none focus:ring-2 focus:ring-cerulean-400 focus:bg-white transition-all resize-none shadow-inner"
-                placeholder="Escribe tu opinión sobre la clase, su método de enseñanza, etc..."></textarea>
+              <div class="relative">
+                <textarea 
+                  #commentBox
+                  (input)="commentText.set(commentBox.value)"
+                  [value]="commentText()"
+                  maxlength="500"
+                  rows="3" 
+                  class="w-full bg-cerulean-50/50 border border-cerulean-100 rounded-2xl p-4 pb-10 text-oxford-navy-900 placeholder-oxford-navy-400 focus:outline-none focus:ring-2 focus:ring-cerulean-400 focus:bg-white transition-all resize-none shadow-inner"
+                  placeholder="Escribe tu opinión sobre la clase, su método de enseñanza, etc..."></textarea>
+                <div 
+                  class="absolute bottom-3 right-4 text-xs font-semibold select-none transition-colors duration-200"
+                  [class.text-oxford-navy-400]="commentText().length < 400"
+                  [class.text-amber-500]="commentText().length >= 400 && commentText().length < 480"
+                  [class.text-punch-red-500]="commentText().length >= 480"
+                >
+                  {{ commentText().length }} / 500
+                </div>
+              </div>
               
               <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 gap-4">
-                <select class="bg-cerulean-50 border border-cerulean-100 text-oxford-navy-600 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cerulean-400 cursor-pointer w-full sm:w-auto">
+                <select 
+                  #materiaSelect
+                  (change)="onMateriaChange(materiaSelect.value)"
+                  [value]="selectedMateria()"
+                  class="bg-cerulean-50 border border-cerulean-100 text-oxford-navy-600 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cerulean-400 cursor-pointer w-full sm:w-auto"
+                >
                   <option value="" disabled selected>Selecciona una Materia</option>
                   @for (materia of p.materias; track materia.id) {
                     <option [value]="materia.id">{{ materia.nombre }}</option>
                   }
                 </select>
-                <app-button [disabled]="!isAlumno()" variant="primary" size="md" class="w-full sm:w-auto">Publicar Opinión</app-button>
+                <app-button 
+                  (click)="submitReview()" 
+                  [disabled]="isSubmitting() || selectedRating() === 0 || !commentText().trim()" 
+                  variant="primary" 
+                  size="md" 
+                  class="w-full sm:w-auto"
+                >
+                  {{ editingReviewId() ? (isSubmitting() ? 'Guardando...' : 'Actualizar Opinión') : (isSubmitting() ? 'Publicando...' : 'Publicar Opinión') }}
+                </app-button>
               </div>
             </div>
           </div>
@@ -155,7 +216,7 @@
                         <div class="flex items-center gap-2 mb-1">
                           <svg class="w-4 h-4 text-{{getTheme(mI)}}-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                           <div class="inline-flex gap-0.5 bg-white p-0.5 rounded-lg border border-{{getTheme(mI)}}-100 shadow-2xs">
-                            @for (dayName of ['L', 'M', 'M', 'J', 'V', 'S']; track dayName; let idx = $index) {
+                            @for (dayName of ['L', 'M', 'M', 'J', 'V', 'S']; track $index; let idx = $index) {
                               <span 
                                 class="w-5 h-5 rounded-md flex items-center justify-center text-[9px] font-black tracking-tighter transition-all"
                                 [class.bg-oxford-navy-950]="$any(grupo.dias[idx]) === 1 || $any(grupo.dias[idx]) === '1'"
@@ -213,17 +274,17 @@
                   @if (materia.recursos.length > 0) {
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                       @for (recurso of getProcessedRecursos(materia.id, materia.recursos); track recurso.id) {
-                        <div class="flex items-center justify-between p-4 rounded-xl hover:bg-cerulean-50/50 transition-all group border border-cerulean-50 hover:border-cerulean-200">
-                          <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-white shadow-xs border border-cerulean-100">
+                        <div class="flex items-center justify-between p-4 rounded-xl hover:bg-cerulean-50/50 transition-all group border border-cerulean-50 hover:border-cerulean-200 min-w-0">
+                          <div class="flex items-center gap-3 min-w-0 flex-1">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-white shadow-xs border border-cerulean-100 shrink-0">
                               @if (recurso.isPdf) {
                                 <svg class="w-6 h-6 text-punch-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z M13 9V3.5L18.5 9H13z"></path></svg>
                               } @else {
                                 <svg class="w-6 h-6 text-cerulean-500" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z M13 9V3.5L18.5 9H13z"></path></svg>
                               }
                             </div>
-                            <div>
-                              <p class="text-sm font-semibold text-oxford-navy-900 group-hover:text-cerulean-600 transition-colors">{{ recurso.nombre }}</p>
+                            <div class="min-w-0 flex-1">
+                              <p class="text-sm font-semibold text-oxford-navy-900 group-hover:text-cerulean-600 transition-colors truncate" [title]="recurso.nombre">{{ recurso.nombre }}</p>
                               <div class="flex items-center text-[10px] text-oxford-navy-400 gap-1.5 mt-0.5">
                                 <span class="font-medium text-oxford-navy-500">{{ recurso.subidoPor }}</span>
                                 <span>•</span>
@@ -233,9 +294,28 @@
                               </div>
                             </div>
                           </div>
-                          <button class="w-8 h-8 rounded-full flex items-center justify-center text-cerulean-500 hover:bg-cerulean-100 opacity-0 group-hover:opacity-100 transition-all shadow-xs bg-white border border-cerulean-100" title="Descargar">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                          </button>
+                          <div class="flex items-center gap-2 shrink-0">
+                            <!-- Report Button -->
+                            <button 
+                              (click)="openReportModal(recurso.id, 'file')"
+                              class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all shadow-xs bg-white border border-gray-100" 
+                              title="Reportar apunte"
+                            >
+                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                              </svg>
+                            </button>
+                            <!-- Download Button -->
+                            <button 
+                              (click)="downloadFile(recurso.id, recurso.nombre)"
+                              class="w-8 h-8 rounded-full flex items-center justify-center text-cerulean-500 hover:bg-cerulean-100 transition-all shadow-xs bg-white border border-cerulean-100" 
+                              title="Descargar"
+                            >
+                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                              </svg>
+                            </button>
+                          </div>
                         </div>
                       }
                     </div>
@@ -264,7 +344,7 @@
                     }
 
                     <div class="mt-6 pt-4 border-t border-cerulean-50 flex justify-end">
-                      <app-button [disabled]="!isAlumno()" variant="secondary" size="sm" class="w-full sm:w-auto">
+                      <app-button (click)="openUploadModal(materia.id)" [disabled]="!isAlumno()" variant="secondary" size="sm" class="w-full sm:w-auto">
                         + Subir Recurso a la Materia
                       </app-button>
                     </div>
@@ -275,7 +355,7 @@
                       </div>
                       <p class="text-sm text-oxford-navy-600 font-bold mb-1">Repositorio vacío</p>
                       <p class="text-xs text-oxford-navy-400 mb-4">Sé el primero en aportar un recurso para esta materia</p>
-                      <app-button [disabled]="!isAlumno()" variant="secondary" size="sm">Aportar Recurso</app-button>
+                      <app-button (click)="openUploadModal(materia.id)" [disabled]="!isAlumno()" variant="secondary" size="sm">Aportar Recurso</app-button>
                     </div>
                   }
                 </div>
@@ -349,14 +429,26 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          @for (resena of p.resenas; track resena.id; let rI = $index) {
+          @for (resena of p.resenas; track resena.id) {
             <app-review-card 
-              [author]="resena.autor"
-              [timeAgo]="resena.tiempoAgo"
+              [reviewId]="resena.id"
+              [author]="resena.user?.name || 'Estudiante'"
+              [authorImage]="resena.user?.image"
+              [timeAgo]="(resena.createdAt | date:'mediumDate') || ''"
               [rating]="resena.rating"
-              [comment]="resena.comentario"
-              [subject]="resena.materia"
-              [colorTheme]="getTheme(rI)">
+              [comment]="resena.comment"
+              [subject]="resena.materiaNombre"
+              [isEdited]="resena.isEdited || false"
+              [isOwnReview]="isOwnReview(resena.userId)"
+              [likesCount]="resena.likes.length"
+              [dislikesCount]="resena.dislikes.length"
+              [hasLiked]="hasLikedReview(resena.likes)"
+              [hasDisliked]="hasDislikedReview(resena.dislikes)"
+              (onLike)="likeReview(resena.id)"
+              (onDislike)="dislikeReview(resena.id)"
+              (onDelete)="deleteReview(resena.id)"
+              (onEdit)="editReviewFromCard(resena)"
+              (onReport)="openReportModal(resena.id)">
             </app-review-card>
           }
         </div>
@@ -370,3 +462,146 @@
 
   </div>
 </div>
+
+<!-- Modal de Reportes de Abuso -->
+@if (isReportModalOpen()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-oxford-navy-950/40 backdrop-blur-xs" (click)="closeReportModal()"></div>
+    
+    <!-- Modal Content -->
+    <div class="relative bg-white w-full max-w-md rounded-3xl p-6 shadow-xl border border-cerulean-100 animate-fade-in z-10">
+      <h3 class="text-lg font-bold text-oxford-navy-900 mb-4">Reportar opinión</h3>
+      <p class="text-xs text-oxford-navy-500 mb-6">
+        Si consideras que este comentario infringe nuestras normas comunitarias o contiene información abusiva, repórtalo para que un administrador lo revise.
+      </p>
+
+      <!-- Formulario -->
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-oxford-navy-800 mb-1.5">Motivo del reporte</label>
+          <select 
+            [value]="reportReason()" 
+            (change)="reportReason.set($any($event.target).value)"
+            class="w-full text-sm rounded-xl border border-cerulean-100 p-3 bg-white focus:outline-none focus:ring-2 focus:ring-cerulean-500 text-oxford-navy-900"
+          >
+            <option value="spam">Spam o contenido comercial</option>
+            <option value="abuse">Acoso, amenazas o comportamiento abusivo</option>
+            <option value="inappropriate_content">Contenido inapropiado u ofensivo</option>
+            <option value="copyright">Infracción de derechos de autor</option>
+            <option value="other">Otro motivo</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-oxford-navy-800 mb-1.5">Descripción detallada</label>
+          <textarea 
+            [value]="reportDescription()"
+            (input)="reportDescription.set($any($event.target).value)"
+            rows="4"
+            placeholder="Explica detalladamente por qué reportas este comentario..."
+            class="w-full text-sm rounded-xl border border-cerulean-100 p-3 bg-white focus:outline-none focus:ring-2 focus:ring-cerulean-500 text-oxford-navy-900 resize-none"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="flex justify-end gap-3 mt-6">
+        <app-button 
+          variant="ghost" 
+          size="sm" 
+          [disabled]="isSubmittingReport()" 
+          (click)="closeReportModal()"
+        >
+          Cancelar
+        </app-button>
+        
+        <app-button 
+          variant="primary" 
+          size="sm" 
+          [disabled]="isSubmittingReport()"
+          (click)="submitReport()"
+        >
+          {{ isSubmittingReport() ? 'Enviando...' : 'Reportar' }}
+        </app-button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal de Carga de Apuntes (Aportar Apunte) -->
+@if (isUploadModalOpen()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-oxford-navy-950/45 backdrop-blur-xs animate-in fade-in duration-200" (click)="closeUploadModal()"></div>
+    
+    <!-- Modal Content -->
+    <div class="relative bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl border border-cerulean-100 animate-in zoom-in-95 duration-200 z-10 overflow-hidden">
+      <!-- Decoración superior -->
+      <div class="absolute top-0 left-0 w-full h-1.5 bg-linear-to-r from-cerulean-500 to-punch-red-500"></div>
+
+      <div class="flex justify-between items-center mb-4 pt-1">
+        <h3 class="text-lg font-extrabold text-oxford-navy-900">Aportar apunte académico</h3>
+        <button (click)="closeUploadModal()" class="text-gray-400 hover:text-red-500 p-1.5 rounded-full hover:bg-red-50 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <p class="text-xs text-gray-500 leading-relaxed mb-6 font-normal">
+        Sube material de estudio para esta materia (resúmenes, guías, etc.). Se verificará contra virus y, una vez aprobado, ganarás <strong class="text-red-600">5 descargas</strong>.
+      </p>
+
+      <!-- Drag & Drop / Seleccionar archivo -->
+      <div class="space-y-6">
+        <div class="flex flex-col items-center justify-center border-2 border-dashed border-cerulean-200 hover:border-cerulean-400 rounded-2xl p-6 bg-cerulean-50/20 text-center relative transition-all duration-300">
+          <input 
+            type="file" 
+            (change)="onFileSelected($event)" 
+            accept=".pdf,.doc,.docx,image/*" 
+            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+          />
+          <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-cerulean-500 mb-3 shadow-2xs border border-cerulean-100">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+          </div>
+          
+          @if (selectedFile()) {
+            <span class="text-sm font-bold text-oxford-navy-800 truncate max-w-xs mb-1">{{ selectedFile()?.name }}</span>
+            <span class="text-xs text-gray-400 font-medium">Click o arrastra para cambiar de archivo</span>
+          } @else {
+            <span class="text-sm font-extrabold text-oxford-navy-700 mb-1">Selecciona o arrastra tu archivo</span>
+            <span class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">PDF, Word o imágenes (Máx. 20MB)</span>
+          }
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="flex justify-end gap-3 mt-8 pt-4 border-t border-gray-50">
+        <app-button 
+          variant="ghost" 
+          size="sm" 
+          [disabled]="isUploading()" 
+          (click)="closeUploadModal()"
+        >
+          Cancelar
+        </app-button>
+        
+        <app-button 
+          variant="primary" 
+          size="sm" 
+          [disabled]="isUploading() || !selectedFile()"
+          (click)="submitUpload()"
+        >
+          <span class="flex items-center gap-1.5">
+            @if (isUploading()) {
+              <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+              Subiendo...
+            } @else {
+              Aportar Apunte
+            }
+          </span>
+        </app-button>
+      </div>
+    </div>
+  </div>
+}
+

@@ -14,6 +14,7 @@ import {
   deleteUserForAdmin,
   resendVerificationEmail,
   getUserDashboardStats,
+  getDownloadStats,
 } from "@/controllers/user.controller";
 import { isAuthenticated } from "@/middleware/auth.middleware";
 import { requirePermission } from "@/middleware/permission.middleware";
@@ -66,6 +67,12 @@ router.delete(
   "/sessions/:sessionId",
   isAuthenticated,
   revokeMySession,
+);
+
+router.get(
+  "/download-stats",
+  isAuthenticated,
+  getDownloadStats,
 );
 
 // Admin-only & Moderator-only user profile / sessions / ban management (Permission-Based Access Control)

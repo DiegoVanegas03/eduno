@@ -48,6 +48,11 @@ export const adminRoutes: Routes = [
           import('./professor-profile/professor-profile.component').then((m) => m.ProfessorProfileComponent),
       },
       {
+        path: 'manage-files',
+        loadComponent: () =>
+          import('./manage-files/manage-files.component').then((m) => m.ManageFilesComponent),
+      },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full',

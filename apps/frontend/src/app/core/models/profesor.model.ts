@@ -48,17 +48,10 @@ export interface HistorialMateria {
   fechaInicio: string; // Cuándo comenzó a impartirla
 }
 
-export interface Resena {
-  id: string | number;
-  autor: string;
-  tiempoAgo: string;
-  rating: number; // Ej: 4, 5
-  comentario: string;
-  materia: string;
-}
+import { IReview } from '@eduno/shared';
 
 export interface ProfesorDetalle extends Profesor {
   materias: Materia[];
   materiasPasadas: HistorialMateria[];
-  resenas: Resena[];
+  resenas: IReview[];
 }

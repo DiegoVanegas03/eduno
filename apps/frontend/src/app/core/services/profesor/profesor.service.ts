@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
-import { IApiResponse, IPaginatedResponse, IProfessor } from '@eduno/shared';
+import { IApiResponse, IPaginatedResponse, IProfessor, IReview } from '@eduno/shared';
 import { Profesor, ProfesorDetalle } from '@core/models/profesor.model';
 
 @Injectable({
@@ -83,7 +83,7 @@ export class ProfesorService {
               clave: s.courseCode,
               gruposCount: 0,
               grupos: [],
-              recursos: [],
+              recursos: p.recursos?.[key] || [],
             };
           }
 
@@ -99,13 +99,24 @@ export class ProfesorService {
           materiasMap[key].gruposCount++;
         });
 
-        const reviews = (p.reviews || []).map((r: any) => ({
+        const reviews: IReview[] = (p.reviews || []).map((r: any) => ({
           id: r.id,
-          autor: r.user?.name || 'Estudiante',
-          tiempoAgo: 'Reciente',
+          professorId: r.professorId,
+          userId: r.userId,
           rating: r.rating,
-          comentario: r.comment,
-          materia: 'Clase',
+          comment: r.comment,
+          likes: r.likes || [],
+          dislikes: r.dislikes || [],
+          netLikes: r.netLikes || 0,
+          materiaId: r.materiaId,
+          materiaNombre: r.materiaNombre,
+          isEdited: r.isEdited || false,
+          user: {
+            name: r.user?.name || 'Estudiante',
+            image: r.user?.image || '',
+          },
+          createdAt: r.createdAt,
+          updatedAt: r.updatedAt,
         }));
 
         const detail: ProfesorDetalle = {
@@ -130,5 +141,43 @@ export class ProfesorService {
         };
       })
     );
+  }
+
+  createReview(professorId: string, rating: number, comment: string, materiaId: string): Observable<IApiResponse<unknown>> {
+    return this.http.post<IApiResponse<unknown>>(`/api/professors/${professorId}/reviews`, {
+      professorId,
+      rating,
+      comment,
+      materiaId,
+    });
+  }
+
+  updateReview(reviewId: string, rating: number, comment: string, materiaId?: string): Observable<IApiResponse<unknown>> {
+    return this.http.put<IApiResponse<unknown>>(`/api/professors/reviews/${reviewId}`, {
+      rating,
+      comment,
+      materiaId,
+    });
+  }
+
+  likeReview(reviewId: string): Observable<IApiResponse<unknown>> {
+    return this.http.post<IApiResponse<unknown>>(`/api/professors/reviews/${reviewId}/like`, {});
+  }
+
+  dislikeReview(reviewId: string): Observable<IApiResponse<unknown>> {
+    return this.http.post<IApiResponse<unknown>>(`/api/professors/reviews/${reviewId}/dislike`, {});
+  }
+
+  deleteReview(reviewId: string): Observable<IApiResponse<void>> {
+    return this.http.delete<IApiResponse<void>>(`/api/professors/reviews/${reviewId}`);
+  }
+
+  reportReview(reviewId: string, reasonType: string, description: string): Observable<IApiResponse<unknown>> {
+    return this.http.post<IApiResponse<unknown>>(`/api/professors/reports/create`, {
+      targetType: 'review',
+      targetId: reviewId,
+      reasonType,
+      description,
+    });
   }
 }

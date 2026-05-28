@@ -25,25 +25,6 @@
       <!-- Barra de Filtros -->
       <div class="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-cerulean-100 mb-8 flex flex-col md:flex-row gap-4 items-end">
         
-        <!-- Filtro: Materia -->
-        <div class="flex-1 w-full relative">
-          <label class="block text-xs font-bold text-oxford-navy-500 uppercase tracking-wider mb-2">Materia</label>
-          <div class="relative">
-            <select 
-              [(ngModel)]="selectedMateria" 
-              class="appearance-none w-full bg-cerulean-50 border border-cerulean-100 text-oxford-navy-900 rounded-xl pl-4 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cerulean-400 cursor-pointer transition-shadow"
-            >
-              <option value="todas">Todas las materias</option>
-              @for (mat of p.materias; track mat.id) {
-                <option [value]="mat.nombre">{{ mat.nombre }}</option>
-              }
-            </select>
-            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-oxford-navy-400">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            </div>
-          </div>
-        </div>
-
         <!-- Filtro: Calificación -->
         <div class="flex-1 w-full relative">
           <label class="block text-xs font-bold text-oxford-navy-500 uppercase tracking-wider mb-2">Calificación</label>
@@ -97,12 +78,24 @@
         <div class="grid grid-cols-1 gap-6">
           @for (resena of filteredResenas(); track resena.id; let i = $index) {
             <app-review-card 
-              [author]="resena.autor"
-              [timeAgo]="resena.tiempoAgo"
+              [reviewId]="resena.id"
+              [author]="resena.user?.name || 'Estudiante'"
+              [authorImage]="resena.user?.image"
+              [timeAgo]="(resena.createdAt | date:'mediumDate') || ''"
               [rating]="resena.rating"
-              [comment]="resena.comentario"
-              [subject]="resena.materia"
-              [colorTheme]="getTheme(i)">
+              [comment]="resena.comment"
+              [subject]="resena.materiaNombre"
+              [isEdited]="resena.isEdited || false"
+              [isOwnReview]="isOwnReview(resena.userId)"
+              [likesCount]="resena.likes.length"
+              [dislikesCount]="resena.dislikes.length"
+              [hasLiked]="hasLikedReview(resena.likes)"
+              [hasDisliked]="hasDislikedReview(resena.dislikes)"
+              (onLike)="likeReview(resena.id)"
+              (onDislike)="dislikeReview(resena.id)"
+              (onDelete)="deleteReview(resena.id)"
+              (onEdit)="editReviewFromCard(resena)"
+              (onReport)="openReportModal(resena.id)">
             </app-review-card>
           }
         </div>
@@ -132,3 +125,69 @@
 
   </div>
 </div>
+
+<!-- Modal de Reportes de Abuso -->
+@if (isReportModalOpen()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-oxford-navy-950/40 backdrop-blur-xs" (click)="closeReportModal()"></div>
+    
+    <!-- Modal Content -->
+    <div class="relative bg-white w-full max-w-md rounded-3xl p-6 shadow-xl border border-cerulean-100 animate-fade-in z-10">
+      <h3 class="text-lg font-bold text-oxford-navy-900 mb-4">Reportar opinión</h3>
+      <p class="text-xs text-oxford-navy-500 mb-6">
+        Si consideras que este comentario infringe nuestras normas comunitarias o contiene información abusiva, repórtalo para que un administrador lo revise.
+      </p>
+
+      <!-- Formulario -->
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-oxford-navy-800 mb-1.5">Motivo del reporte</label>
+          <select 
+            [value]="reportReason()" 
+            (change)="reportReason.set($any($event.target).value)"
+            class="w-full text-sm rounded-xl border border-cerulean-100 p-3 bg-white focus:outline-none focus:ring-2 focus:ring-cerulean-500 text-oxford-navy-900"
+          >
+            <option value="spam">Spam o contenido comercial</option>
+            <option value="abuse">Acoso, amenazas o comportamiento abusivo</option>
+            <option value="inappropriate_content">Contenido inapropiado u ofensivo</option>
+            <option value="copyright">Infracción de derechos de autor</option>
+            <option value="other">Otro motivo</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-oxford-navy-800 mb-1.5">Descripción detallada</label>
+          <textarea 
+            [value]="reportDescription()"
+            (input)="reportDescription.set($any($event.target).value)"
+            rows="4"
+            placeholder="Explica detalladamente por qué reportas este comentario..."
+            class="w-full text-sm rounded-xl border border-cerulean-100 p-3 bg-white focus:outline-none focus:ring-2 focus:ring-cerulean-500 text-oxford-navy-900 resize-none"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="flex justify-end gap-3 mt-6">
+        <app-button 
+          variant="ghost" 
+          size="sm" 
+          [disabled]="isSubmittingReport()" 
+          (click)="closeReportModal()"
+        >
+          Cancelar
+        </app-button>
+        
+        <app-button 
+          variant="primary" 
+          size="sm" 
+          [disabled]="isSubmittingReport()"
+          (click)="submitReport()"
+        >
+          {{ isSubmittingReport() ? 'Enviando...' : 'Reportar' }}
+        </app-button>
+      </div>
+    </div>
+  </div>
+}

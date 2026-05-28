@@ -67,7 +67,9 @@ services:
       mc anonymous set public local/documentos;
       mc mb --ignore-existing local/perfiles;
       mc anonymous set public local/perfiles;
-      echo '✅ Buckets documentos y perfiles listos';
+      mc mb --ignore-existing local/archivos;
+      mc anonymous set public local/archivos;
+      echo '✅ Buckets documentos, perfiles y archivos listos';
       exit 0;
       "
     networks:

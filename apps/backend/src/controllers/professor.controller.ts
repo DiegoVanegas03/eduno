@@ -121,6 +121,8 @@ export const listProfessors = asyncHandler(
 /**
  * Get detailed professor profile by ID, resolving their entire teaching schedule.
  */
+import { FileModel } from "@/models/file.model";
+
 export const getProfessorById = asyncHandler(
   async (
     req: Request,
@@ -144,6 +146,73 @@ export const getProfessorById = asyncHandler(
       .populate("userId", "name image")
       .sort({ netLikes: -1, createdAt: -1 });
 
+    const courseMap: Record<string, string> = {};
+    resolvedSchedules.forEach((s) => {
+      if (s.courseCode) {
+        courseMap[s.courseCode] = s.courseName || "Materia Académica";
+      }
+    });
+
+    // Fetch approved academic files for subjects taught by this professor
+    const courseCodes = Array.from(new Set(resolvedSchedules.map((s) => s.courseCode).filter(Boolean)));
+    const files = await FileModel.find({
+      materiaId: { $in: courseCodes },
+      status: "approved",
+    }).populate("uploaderId", "name");
+
+    const formatBytes = (bytes: number, decimals = 1): string => {
+      if (!bytes || bytes === 0) return "0 Bytes";
+      const k = 1024;
+      const dm = decimals < 0 ? 0 : decimals;
+      const sizes = ["Bytes", "KB", "MB", "GB"];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+    };
+
+    const filesByMateria: Record<string, any[]> = {};
+    courseCodes.forEach((code) => {
+      if (code) {
+        filesByMateria[code] = [];
+      }
+    });
+
+    files.forEach((file) => {
+      if (filesByMateria[file.materiaId]) {
+        filesByMateria[file.materiaId].push({
+          id: file._id.toString(),
+          nombre: file.originalName,
+          isPdf: file.mimetype.includes("pdf"),
+          subidoPor: (file.uploaderId as any)?.name || "Estudiante",
+          tamano: formatBytes(file.size),
+          fecha: file.uploadedAt.toISOString(),
+        });
+      }
+    });
+
+    const mappedReviews = reviews.map((r) => {
+      const rObj = r.toObject();
+      const usr = rObj.userId as any;
+      return {
+        id: rObj._id.toString(),
+        professorId: rObj.professorId.toString(),
+        userId: usr?._id?.toString() || "",
+        rating: rObj.rating,
+        comment: rObj.comment,
+        likes: (rObj.likes || []).map((l: any) => l.toString()),
+        dislikes: (rObj.dislikes || []).map((d: any) => d.toString()),
+        netLikes: rObj.netLikes,
+        materiaId: rObj.materiaId,
+        materiaNombre: courseMap[rObj.materiaId] || "Materia Académica",
+        isEdited: rObj.isEdited || false,
+        user: {
+          name: usr?.name || "Estudiante",
+          image: usr?.image ? getProfilePictureUrl(usr.image) : "",
+        },
+        createdAt: rObj.createdAt,
+        updatedAt: rObj.updatedAt,
+      };
+    });
+
     const enriched = await enrichProfessorDTO(doc);
 
     res.status(200).json({
@@ -151,7 +220,8 @@ export const getProfessorById = asyncHandler(
       data: {
         ...enriched,
         schedules: resolvedSchedules,
-        reviews,
+        reviews: mappedReviews,
+        recursos: filesByMateria,
       },
     });
   },

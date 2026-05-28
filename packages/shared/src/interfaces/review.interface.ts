@@ -7,6 +7,9 @@ export interface IReview {
   likes: string[]; // List of userIds who liked
   dislikes: string[]; // List of userIds who disliked
   netLikes: number;
+  materiaId?: string; // Stored subject ID (courseCode)
+  materiaNombre?: string; // Dynamically resolved subject name
+  isEdited?: boolean; // Indicates if review was edited by the author
   user?: {
     name: string;
     image?: string;
@@ -19,4 +22,5 @@ export interface ICreateReviewDTO {
   professorId: string;
   rating: number;
   comment: string;
+  materiaId: string; // Stored subject ID (courseCode)
 }

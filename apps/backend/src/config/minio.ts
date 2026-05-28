@@ -11,4 +11,5 @@ export const minioClient = new Minio.Client({
 export const BUCKETS = {
   DOCUMENTS: "documentos",
   PROFILES: "perfiles",
+  ARCHIVOS: "archivos",
 };

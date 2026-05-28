@@ -15,6 +15,8 @@ import {
   listReviewsByProfessor,
   likeReview,
   dislikeReview,
+  deleteReview,
+  updateReview,
 } from "@/controllers/review.controller";
 import {
   createReport,
@@ -131,6 +133,18 @@ router.post(
   "/reviews/:reviewId/dislike",
   isAuthenticated,
   dislikeReview
+);
+
+router.delete(
+  "/reviews/:reviewId",
+  isAuthenticated,
+  deleteReview
+);
+
+router.put(
+  "/reviews/:reviewId",
+  isAuthenticated,
+  updateReview
 );
 
 // --- Report Routes ---
