@@ -1,5 +1,5 @@
 export interface Profesor {
-  id: number;
+  id: string | number;
   nombre: string;
   titulo: string; // Ej: "Doctor", "Mtro."
   inicial: string; // Ej: "M", "S"
@@ -13,7 +13,7 @@ export interface Profesor {
 
 
 export interface Recurso {
-  id: number;
+  id: string | number;
   nombre: string;
   subidoPor: string;
   tamano: string;
@@ -22,7 +22,7 @@ export interface Recurso {
 }
 
 export interface Grupo {
-  id: number;
+  id: string | number;
   nombre: string; // Ej: "01", "04"
   dias: string[]; // Ej: ["Lunes", "Miércoles", "Viernes"]
   horario: string; // Ej: "07:00 - 09:00"
@@ -32,7 +32,7 @@ export interface Grupo {
 }
 
 export interface Materia {
-  id: number;
+  id: string | number;
   nombre: string;
   clave: string;
   gruposCount: number;
@@ -41,7 +41,7 @@ export interface Materia {
 }
 
 export interface HistorialMateria {
-  id: number;
+  id: string | number;
   nombre: string;
   clave: string;
   semestres: string[]; // Ej: ["2023-1", "2023-2"]
@@ -49,7 +49,7 @@ export interface HistorialMateria {
 }
 
 export interface Resena {
-  id: number;
+  id: string | number;
   autor: string;
   tiempoAgo: string;
   rating: number; // Ej: 4, 5

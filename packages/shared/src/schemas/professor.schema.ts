@@ -9,6 +9,7 @@ export type IProfessorIdParams = z.infer<typeof professorIdParamSchema>;
 
 export const listProfessorsQuerySchema = z.object({
   search: z.string().optional(),
+  areaCode: z.preprocess((val) => (val ? Number(val) : undefined), z.number().int().optional()),
   page: z.preprocess((val) => Number(val) || 1, z.number().min(1)).optional(),
   limit: z.preprocess((val) => Number(val) || 10, z.number().min(1).max(100)).optional(),
 });
@@ -25,8 +26,6 @@ export const createProfessorBodySchema = z.object({
   name: z.string().min(3, "El nombre del profesor debe tener al menos 3 caracteres"),
   email: z.string().email("Formato de email inválido").optional().or(z.literal("")),
   calificacion: z.number().min(0).max(5).optional(),
-  descripcionAbreviada: z.string().max(150, "La descripción abreviada no debe superar los 150 caracteres").optional(),
-  descripcionPerfil: z.string().max(1000, "La descripción de perfil no debe superar los 1000 caracteres").optional(),
 });
 
 export type ICreateProfessorBody = z.infer<typeof createProfessorBodySchema>;
@@ -35,10 +34,7 @@ export const updateProfessorBodySchema = z.object({
   name: z.string().min(3, "El nombre del profesor debe tener al menos 3 caracteres").optional(),
   email: z.string().email("Formato de email inválido").optional().or(z.literal("")),
   userId: mongoIdSchema.nullable().optional(),
-  isVerificado: z.boolean().optional(),
   calificacion: z.number().min(0).max(5).optional(),
-  descripcionAbreviada: z.string().max(150, "La descripción abreviada no debe superar los 150 caracteres").optional(),
-  descripcionPerfil: z.string().max(1000, "La descripción de perfil no debe superar los 1000 caracteres").optional(),
 });
 
 export type IUpdateProfessorBody = z.infer<typeof updateProfessorBodySchema>;

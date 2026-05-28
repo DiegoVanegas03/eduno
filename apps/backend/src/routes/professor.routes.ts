@@ -8,7 +8,19 @@ import {
   deleteProfessor,
   listVerificationRequests,
   processVerificationRequest,
+  getTrendingProfessors,
 } from "@/controllers/professor.controller";
+import {
+  createReview,
+  listReviewsByProfessor,
+  likeReview,
+  dislikeReview,
+} from "@/controllers/review.controller";
+import {
+  createReport,
+  listReports,
+  processReport,
+} from "@/controllers/report.controller";
 import { isAuthenticated } from "@/middleware/auth.middleware";
 import { requirePermission } from "@/middleware/permission.middleware";
 import { validate } from "@/middleware/validate.middleware";
@@ -27,17 +39,21 @@ import {
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
+// Trending professors route (Must be defined before /:id)
+router.get(
+  "/trending",
+  getTrendingProfessors
+);
+
 // Everyone authenticated can query/view professors
 router.get(
   "/",
-  isAuthenticated,
   validate(listProfessorsSchema),
   listProfessors
 );
 
 router.get(
   "/:id",
-  isAuthenticated,
   validate(getProfessorByIdSchema),
   getProfessorById
 );
@@ -91,6 +107,51 @@ router.delete(
   requirePermission("career", "delete"),
   validate(deleteProfessorSchema),
   deleteProfessor
+);
+
+// --- Review Routes ---
+router.post(
+  "/:id/reviews",
+  isAuthenticated,
+  createReview
+);
+
+router.get(
+  "/:id/reviews",
+  listReviewsByProfessor
+);
+
+router.post(
+  "/reviews/:reviewId/like",
+  isAuthenticated,
+  likeReview
+);
+
+router.post(
+  "/reviews/:reviewId/dislike",
+  isAuthenticated,
+  dislikeReview
+);
+
+// --- Report Routes ---
+router.post(
+  "/reports/create",
+  isAuthenticated,
+  createReport
+);
+
+router.get(
+  "/reports/list",
+  isAuthenticated,
+  requirePermission("user", "ban"),
+  listReports
+);
+
+router.patch(
+  "/reports/:id/process",
+  isAuthenticated,
+  requirePermission("user", "ban"),
+  processReport
 );
 
 export default router;

@@ -20,35 +20,75 @@ import {
   ISchedule,
 } from "@eduno/shared";
 
-// Helper to convert Mongoose document to clean DTO without internal database properties
-const toProfessorDTO = (doc: IProfessorDocument): IProfessor => {
+import Review from "@/models/review.model";
+
+// Helper to convert Mongoose document to clean DTO without internal database properties and resolving dynamic fields
+export const enrichProfessorDTO = async (doc: IProfessorDocument): Promise<IProfessor> => {
   const obj = doc.toObject();
+  const userId = obj.userId ? obj.userId.toString() : null;
+  const isVerificado = !!userId;
+
+  let descripcionPerfil = "";
+  if (userId) {
+    const linkedUser = await User.findById(userId);
+    if (linkedUser && linkedUser.description) {
+      descripcionPerfil = linkedUser.description;
+    }
+  }
+
+  // Get the most voted review (highest netLikes) for this professor
+  let descripcionAbreviada = "";
+  const topReview = await Review.findOne({ professorId: doc._id }).sort({ netLikes: -1, createdAt: -1 });
+  if (topReview) {
+    descripcionAbreviada = topReview.comment;
+  }
+
   return {
     id: obj._id.toString(),
     name: obj.name,
-    userId: obj.userId ? obj.userId.toString() : null,
-    isVerificado: obj.isVerificado || false,
+    userId,
+    isVerificado,
     email: obj.email || null,
     calificacion: obj.calificacion !== undefined ? obj.calificacion : 5.0,
     numResenas: obj.numResenas || 0,
-    descripcionAbreviada: obj.descripcionAbreviada || "",
-    descripcionPerfil: obj.descripcionPerfil || "",
+    descripcionAbreviada,
+    descripcionPerfil,
     createdAt: obj.createdAt,
     updatedAt: obj.updatedAt,
   };
 };
 
 /**
- * Retrieve a paginated list of professors, supporting case-insensitive name searches.
+ * Retrieve a paginated list of professors, supporting case-insensitive name searches and area filter.
  */
 export const listProfessors = asyncHandler(
   async (req: Request, res: Response<IPaginatedResponse<IProfessor[]>>) => {
-    const { search, page, limit } = req.query;
+    const { search, areaCode, page, limit } = req.query;
 
-    const filter: FilterQuery<IProfessorDocument> = {};
+    const filter: FilterQuery<IProfessorDocument> = {
+      name: { $ne: "Profesor por Asignar", $exists: true, $nin: ["", null] }
+    };
 
     if (search && typeof search === "string") {
-      filter.name = { $regex: search, $options: "i" };
+      filter.name = { 
+        $regex: search, 
+        $options: "i",
+        $ne: "Profesor por Asignar",
+        $exists: true,
+        $nin: ["", null]
+      };
+    }
+
+    if (areaCode !== undefined) {
+      const numericArea = Number(areaCode);
+      if (!isNaN(numericArea)) {
+        // Find unique professorIds from Schedule that belong to this areaCode
+        const schedules = await Schedule.find({ areaCode: numericArea });
+        const professorIds = Array.from(
+          new Set(schedules.map((s) => s.professorId?.toString()))
+        ).filter((id) => !!id);
+        filter._id = { $in: professorIds };
+      }
     }
 
     const pageNum = Math.max(1, Number(page) || 1);
@@ -61,7 +101,7 @@ export const listProfessors = asyncHandler(
       .skip(skipNum)
       .limit(limitNum);
 
-    const data = docs.map(toProfessorDTO);
+    const data = await Promise.all(docs.map(enrichProfessorDTO));
     const totalPages = Math.ceil(totalItems / limitNum);
 
     res.status(200).json({
@@ -84,7 +124,7 @@ export const listProfessors = asyncHandler(
 export const getProfessorById = asyncHandler(
   async (
     req: Request,
-    res: Response<IApiResponse<IProfessor & { schedules: ISchedule[] }>>,
+    res: Response<IApiResponse<any>>,
   ) => {
     const { id } = req.params;
 
@@ -100,11 +140,18 @@ export const getProfessorById = asyncHandler(
     });
     const resolvedSchedules = await resolveCourseNamesForSchedules(schedules);
 
+    const reviews = await Review.find({ professorId: doc._id })
+      .populate("userId", "name image")
+      .sort({ netLikes: -1, createdAt: -1 });
+
+    const enriched = await enrichProfessorDTO(doc);
+
     res.status(200).json({
       success: true,
       data: {
-        ...toProfessorDTO(doc),
+        ...enriched,
         schedules: resolvedSchedules,
+        reviews,
       },
     });
   },
@@ -256,7 +303,6 @@ export const processVerificationRequest = asyncHandler(
 
       // 1. Link professor to user
       prof.userId = vReq.userId.toString();
-      prof.isVerificado = true;
       await prof.save();
 
       // 2. Elevate user role locally in database
@@ -302,14 +348,14 @@ export const createProfessor = asyncHandler(
       name: body.name.trim(),
       email: body.email || null,
       calificacion: body.calificacion !== undefined ? body.calificacion : 5.0,
-      descripcionAbreviada: body.descripcionAbreviada || "",
-      descripcionPerfil: body.descripcionPerfil || "",
     });
+
+    const enriched = await enrichProfessorDTO(newDoc);
 
     res.status(201).json({
       success: true,
       message: "Perfil de profesor creado de forma exitosa",
-      data: toProfessorDTO(newDoc),
+      data: enriched,
     });
   },
 );
@@ -339,10 +385,7 @@ export const updateProfessor = asyncHandler(
     }
 
     if (body.email !== undefined) doc.email = body.email || null;
-    if (body.isVerificado !== undefined) doc.isVerificado = body.isVerificado;
     if (body.calificacion !== undefined) doc.calificacion = body.calificacion;
-    if (body.descripcionAbreviada !== undefined) doc.descripcionAbreviada = body.descripcionAbreviada;
-    if (body.descripcionPerfil !== undefined) doc.descripcionPerfil = body.descripcionPerfil;
 
     if (body.userId !== undefined) {
       doc.userId = body.userId || null;
@@ -350,10 +393,12 @@ export const updateProfessor = asyncHandler(
 
     await doc.save();
 
+    const enriched = await enrichProfessorDTO(doc);
+
     res.status(200).json({
       success: true,
       message: "Datos del profesor actualizados correctamente",
-      data: toProfessorDTO(doc),
+      data: enriched,
     });
   },
 );
@@ -378,4 +423,25 @@ export const deleteProfessor = asyncHandler(
       message: "Perfil de profesor eliminado correctamente de la base de datos.",
     });
   },
+);
+
+/**
+ * Retrieve the top trending professors (based on many reviews and high ratings).
+ */
+export const getTrendingProfessors = asyncHandler(
+  async (req: Request, res: Response<IApiResponse<IProfessor[]>>) => {
+    // Sort by numResenas desc, then by calificacion desc
+    const docs = await Professor.find({
+      name: { $ne: "Profesor por Asignar", $exists: true, $nin: ["", null] }
+    })
+      .sort({ numResenas: -1, calificacion: -1 })
+      .limit(6);
+
+    const data = await Promise.all(docs.map(enrichProfessorDTO));
+
+    res.status(200).json({
+      success: true,
+      data,
+    });
+  }
 );

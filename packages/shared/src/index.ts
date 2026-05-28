@@ -14,6 +14,8 @@ export * from './interfaces/career.interface';
 export * from './interfaces/study-plan.interface';
 export * from './interfaces/professor.interface';
 export * from './interfaces/professor-verification.interface';
+export * from './interfaces/review.interface';
+export * from './interfaces/report.interface';
 
 // Schemas & DTOs
 export * from './schemas/user.schema';

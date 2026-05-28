@@ -115,7 +115,7 @@ export class AuthService {
       );
   }
 
-  refreshToken(): Observable<any> {
+  refreshToken(): Observable<User> {
     return this.checkSession().pipe(
       map((user) => {
         if (!user) {

@@ -1,9 +1,9 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { ReviewCard } from '@core/components/review-card/review-card';
 import { ProfesorService } from '@core/services/profesor/profesor.service';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, map } from 'rxjs/operators';
 import { FormsModule } from '@angular/forms';
 import {
   BreadcrumbComponent,
@@ -22,7 +22,11 @@ export class ProfesorOpinionesComponent {
 
   profesor = toSignal(
     this.route.paramMap.pipe(
-      switchMap((params) => this.profesorService.getProfesorById(Number(params.get('id')))),
+      switchMap((params) =>
+        this.profesorService.getProfesorById(params.get('id') || '').pipe(
+          map((res) => res.data)
+        )
+      ),
     ),
   );
 
@@ -61,7 +65,7 @@ export class ProfesorOpinionesComponent {
           // Como los mocks de tiempoAgo son strings como "Hace 2 meses",
           // usaremos el ID como proxy de "más reciente" por propósitos mock.
           // En un escenario real usaríamos `Date`
-          return b.id - a.id;
+          return b.id.toString().localeCompare(a.id.toString());
       }
     });
 

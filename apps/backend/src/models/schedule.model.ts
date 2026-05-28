@@ -34,12 +34,13 @@ const scheduleSchema = new Schema<IScheduleDocument>(
         validator: function (v: number[]) {
           return Array.isArray(v) && v.length === 6;
         },
-        message: "Los días deben ser un arreglo de exactamente 6 elementos binarios.",
+        message:
+          "Los días deben ser un arreglo de exactamente 6 elementos binarios.",
       },
     },
     professor: {
       type: String,
-      required: [true, "El nombre del profesor es obligatorio"],
+      required: false,
       trim: true,
     },
     professorId: {
@@ -76,7 +77,7 @@ const scheduleSchema = new Schema<IScheduleDocument>(
   {
     timestamps: true,
     collection: "schedules",
-  }
+  },
 );
 
 // Indexes

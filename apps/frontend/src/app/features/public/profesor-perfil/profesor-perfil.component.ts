@@ -7,10 +7,9 @@ import { ButtonComponent } from '@shared/components/button/button.component';
 import { AuthService, USER_ROLES } from '@app/core/services/auth/auth.service';
 import { ProfesorService } from '@core/services/profesor/profesor.service';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, map } from 'rxjs/operators';
 import { BreadcrumbComponent } from '@shared/components/breadcrumb/breadcrumb.component';
-
-import { DaysFormatterPipe } from '@shared/pipes/days-formatter.pipe';
+import { AvatarComponent } from '@shared/components/avatar/avatar.component';
 
 @Component({
   selector: 'app-profesor-perfil',
@@ -23,7 +22,7 @@ import { DaysFormatterPipe } from '@shared/pipes/days-formatter.pipe';
     BreadcrumbComponent,
     DatePipe,
     CommonModule,
-    DaysFormatterPipe,
+    AvatarComponent,
   ],
 
   templateUrl: './profesor-perfil.component.html',
@@ -36,11 +35,15 @@ export class ProfesorPerfilComponent {
 
   profesor = toSignal(
     this.route.paramMap.pipe(
-      switchMap((params) => this.profesorService.getProfesorById(Number(params.get('id')))),
+      switchMap((params) =>
+        this.profesorService.getProfesorById(params.get('id') || '').pipe(
+          map((res) => res.data)
+        )
+      ),
     ),
   );
 
-  expandedMateriaId = signal<number | null>(1);
+  expandedMateriaId = signal<string | null>(null);
 
   initialLetter = computed(() => this.authService.currentUser()?.initialLetter);
   isAuthenticated = computed(() => this.authService.isLoggedIn());
@@ -50,20 +53,20 @@ export class ProfesorPerfilComponent {
 
   // Estados para paginación y ordenamiento por Materia ID
   // key: materiaId, value: page number o sort order ('asc' o 'desc')
-  materiaPage = signal<Record<number, number>>({});
-  materiaSortOrder = signal<Record<number, 'desc' | 'asc'>>({});
+  materiaPage = signal<Record<string, number>>({});
+  materiaSortOrder = signal<Record<string, 'desc' | 'asc'>>({});
   readonly ITEMS_PER_PAGE = 3;
 
-  toggleMateria(id: number) {
+  toggleMateria(id: any) {
     this.expandedMateriaId.set(this.expandedMateriaId() === id ? null : id);
   }
 
   // Métodos de Helper para la Vista de Recursos
-  getMateriaSortOrder(materiaId: number): 'desc' | 'asc' {
+  getMateriaSortOrder(materiaId: any): 'desc' | 'asc' {
     return this.materiaSortOrder()[materiaId] || 'desc'; // Por defecto, más recientes primero
   }
 
-  toggleMateriaSortOrder(materiaId: number) {
+  toggleMateriaSortOrder(materiaId: any) {
     const current = this.getMateriaSortOrder(materiaId);
     this.materiaSortOrder.update((orders) => ({
       ...orders,
@@ -73,18 +76,18 @@ export class ProfesorPerfilComponent {
     this.setMateriaPage(materiaId, 1);
   }
 
-  getMateriaPage(materiaId: number): number {
+  getMateriaPage(materiaId: any): number {
     return this.materiaPage()[materiaId] || 1;
   }
 
-  setMateriaPage(materiaId: number, page: number) {
+  setMateriaPage(materiaId: any, page: number) {
     this.materiaPage.update((pages) => ({
       ...pages,
       [materiaId]: page,
     }));
   }
 
-  getProcessedRecursos(materiaId: number, recursos: any[]) {
+  getProcessedRecursos(materiaId: any, recursos: any[]) {
     if (!recursos || recursos.length === 0) return [];
 
     // Clonar para no mutar original
@@ -110,7 +113,8 @@ export class ProfesorPerfilComponent {
     return Math.max(1, Math.ceil(recursos.length / this.ITEMS_PER_PAGE));
   }
 
-  getTheme(index: number = 0): 'cerulean' | 'punch-red' {
-    return index % 2 === 0 ? 'cerulean' : 'punch-red';
+  getTheme(index: any = 0): 'cerulean' | 'punch-red' {
+    const num = typeof index === 'number' ? index : (index ? index.toString().charCodeAt(0) : 0);
+    return num % 2 === 0 ? 'cerulean' : 'punch-red';
   }
 }

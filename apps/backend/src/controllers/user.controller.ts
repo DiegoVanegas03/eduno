@@ -15,6 +15,7 @@ import {
   IUserResponse,
   IUserDashboardStats,
   getInitialLetter,
+  IBetterAuthSession,
 } from "@eduno/shared";
 import {
   uploadBufferToMinio,
@@ -35,7 +36,7 @@ import User from "@/models/user.model";
 
 export const updateProfile = asyncHandler(
   async (
-    req: Request<any, any, IUpdateProfileDTO>,
+    req: Request<Record<string, string>, unknown, IUpdateProfileDTO>,
     res: Response<IApiResponse<IBetterAuthUser>>,
   ) => {
     const user = req.user;
@@ -96,7 +97,7 @@ export const updateProfile = asyncHandler(
 
 export const updatePassword = asyncHandler(
   async (
-    req: Request<any, any, IUpdatePasswordDTO>,
+    req: Request<Record<string, string>, unknown, IUpdatePasswordDTO>,
     res: Response<IApiResponse<void>>,
   ) => {
     const user = req.user;
@@ -142,14 +143,15 @@ export const updatePassword = asyncHandler(
           body: { newPassword },
         });
       }
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const error = err as Error & { status?: number };
       logger.warn(
         `[updatePassword] Error al actualizar la contraseña para ${user.email}: ${error.message}`,
       );
 
       // Si ya es un AppError (como el BadRequestError de arriba), volverlo a lanzar directamente
-      if (error instanceof AppError) {
-        throw error;
+      if (err instanceof AppError) {
+        throw err;
       }
 
       // Mapear errores de Better Auth o retornar un mensaje amigable
@@ -173,7 +175,7 @@ export const updatePassword = asyncHandler(
 
 export const deleteAccount = asyncHandler(
   async (
-    req: Request<any, any, IDeleteAccountSchema>,
+    req: Request<Record<string, string>, unknown, IDeleteAccountSchema>,
     res: Response<IApiResponse<void>>,
   ) => {
     const user = req.user;
@@ -182,31 +184,103 @@ export const deleteAccount = asyncHandler(
 
     const { password } = req.body;
 
-    logger.info(`[deleteAccount] Eliminando cuenta para: ${user.email}`);
-
     try {
-      await auth.api.signInEmail({
-        body: { email: user.email, password },
+      await auth.api.deleteUser({
         headers: fromNodeHeaders(req.headers),
+        body: { password },
       });
-    } catch {
-      logger.warn(`[deleteAccount] Contraseña incorrecta para: ${user.email}`);
-      return res.status(401).json({
-        success: false,
-        error: "La contraseña es incorrecta. No se puede eliminar la cuenta.",
-      });
+    } catch (err) {
+      logger.warn(`[deleteAccount] Error al eliminar la cuenta de ${user.email}:`, err);
+      if (err && typeof err === "object") {
+        const errorObj = err as Record<string, unknown>;
+        const status = errorObj.status;
+        const message = typeof errorObj.message === "string" ? errorObj.message : "";
+        const code = typeof errorObj.code === "string" ? errorObj.code : "";
+        if (
+          status === 401 ||
+          status === 400 ||
+          message.toLowerCase().includes("password") ||
+          message.toLowerCase().includes("credential") ||
+          code.includes("INVALID")
+        ) {
+          throw new BadRequestError("La contraseña proporcionada es incorrecta.");
+        }
+      }
+      throw err;
     }
-
-    await auth.api.deleteUser({
-      headers: fromNodeHeaders(req.headers),
-      body: { password },
-    });
 
     logger.info(`[deleteAccount] Cuenta eliminada exitosamente: ${user.email}`);
 
     return res.json({
       success: true,
       message: "Tu cuenta ha sido eliminada correctamente.",
+    });
+  },
+);
+
+export const getMySessions = asyncHandler(
+  async (req: Request, res: Response<IApiResponse<IBetterAuthSession[]>>) => {
+    const user = req.user;
+    if (!user) throw new UnauthorizedError();
+
+    const sessionResult = await auth.api.listUserSessions({
+      headers: fromNodeHeaders(req.headers),
+      body: {
+        userId: user.id,
+      },
+    });
+    const rawSessions = sessionResult?.sessions || [];
+    const sessions: IBetterAuthSession[] = rawSessions.map((s) => ({
+      id: s.id,
+      token: s.token,
+      userId: s.userId,
+      expiresAt: s.expiresAt instanceof Date ? s.expiresAt.toISOString() : String(s.expiresAt),
+      createdAt: s.createdAt instanceof Date ? s.createdAt.toISOString() : String(s.createdAt),
+      updatedAt: s.updatedAt instanceof Date ? s.updatedAt.toISOString() : String(s.updatedAt),
+      ipAddress: s.ipAddress ?? undefined,
+      userAgent: s.userAgent ?? undefined,
+    }));
+
+    return res.json({
+      success: true,
+      data: sessions,
+    });
+  },
+);
+
+export const revokeMySession = asyncHandler(
+  async (req: Request, res: Response<IApiResponse<void>>) => {
+    const user = req.user;
+    if (!user) throw new UnauthorizedError();
+
+    const { sessionId } = req.params;
+
+    // Verify first that this session belongs to the logged-in user
+    const sessionResult = await auth.api.listUserSessions({
+      headers: fromNodeHeaders(req.headers),
+      body: {
+        userId: user.id,
+      },
+    });
+    const sessions = sessionResult?.sessions || [];
+    const matchedSession = sessions.find((s) => s.token === sessionId || s.id === sessionId);
+
+    if (!matchedSession) {
+      throw new NotFoundError("Sesión no encontrada o no pertenece a tu cuenta.");
+    }
+
+    await auth.api.revokeUserSession({
+      headers: fromNodeHeaders(req.headers),
+      body: {
+        sessionToken: matchedSession.token,
+      },
+    });
+
+    logger.info(`[revokeMySession] Sesión revocada por el usuario: ${user.email}`);
+
+    return res.json({
+      success: true,
+      message: "La sesión ha sido revocada de forma exitosa.",
     });
   },
 );
@@ -373,7 +447,7 @@ export const getUsersForAdmin = asyncHandler(
   async (req: Request, res: Response<IApiResponse<IUserResponse[]>>) => {
     const { search, role, status, period, sort } = req.query;
 
-    const query: any = {};
+    const query: mongoose.FilterQuery<Record<string, unknown>> = {};
 
     // 1. Búsqueda por Nombre o Email (case-insensitive)
     if (search) {
@@ -408,7 +482,7 @@ export const getUsersForAdmin = asyncHandler(
     }
 
     // 5. Ordenamiento
-    let sortOption: any = { createdAt: -1 };
+    let sortOption: Record<string, 1 | -1> = { createdAt: -1 };
     if (sort === "asc") {
       sortOption = { createdAt: 1 };
     } else if (sort === "desc") {

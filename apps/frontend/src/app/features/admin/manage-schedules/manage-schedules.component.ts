@@ -31,6 +31,7 @@ export class ManageSchedulesComponent implements OnInit {
   selectedAreaFilter = signal<string>(''); // Matches area code as string
   searchProfessor = signal<string>('');
   searchCourseName = signal<string>('');
+  selectedTypeFilter = signal<string>('');
 
   // Pagination State Signals
   currentPage = signal<number>(1);
@@ -125,6 +126,7 @@ export class ManageSchedulesComponent implements OnInit {
     // Combine filter signals to reactively load schedules with debounce on search inputs
     const period$ = toObservable(this.selectedPeriodFilter);
     const areaCode$ = toObservable(this.selectedAreaCodeFilter);
+    const type$ = toObservable(this.selectedTypeFilter);
     const page$ = toObservable(this.currentPage);
     const limit$ = toObservable(this.itemsPerPage);
 
@@ -140,12 +142,13 @@ export class ManageSchedulesComponent implements OnInit {
     combineLatest([
       period$,
       areaCode$,
+      type$,
       debouncedCourseName$,
       debouncedProfessor$,
       page$,
       limit$
-    ]).subscribe(([period, areaCode, courseName, professor, page, limit]) => {
-      this.loadSchedulesFromBackend({ period, areaCode, courseName, professor, page, limit });
+    ]).subscribe(([period, areaCode, type, courseName, professor, page, limit]) => {
+      this.loadSchedulesFromBackend({ period, areaCode, type, courseName, professor, page, limit });
     });
   }
 
@@ -183,6 +186,7 @@ export class ManageSchedulesComponent implements OnInit {
   loadSchedulesFromBackend(filters: {
     period?: string;
     areaCode?: number;
+    type?: string;
     courseName?: string;
     professor?: string;
     page?: number;

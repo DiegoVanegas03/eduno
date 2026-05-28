@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
+import { IApiResponse } from '@eduno/shared';
 
 /**
  * Represents a single active session as returned by Better Auth.
@@ -45,16 +46,18 @@ export class SecurityService {
    * for the currently authenticated user (identified via the session cookie).
    */
   listSessions(): Observable<BetterAuthSession[]> {
-    return this.http.get<BetterAuthSession[]>('/auth/list-sessions');
+    return this.http.get<IApiResponse<BetterAuthSession[]>>('/users/sessions/list').pipe(
+      map((res) => res.data || [])
+    );
   }
 
   /**
-   * POST /api/auth/revoke-session
-   * Revokes a single session by its token.
-   * @param token - The session token to revoke (not the session id).
+   * DELETE /api/users/sessions/:sessionId
+   * Revokes a single session securely by its token/id.
+   * @param token - The session token to revoke.
    */
   revokeSession(token: string): Observable<{ success: boolean }> {
-    return this.http.post<{ success: boolean }>('/auth/revoke-session', { token });
+    return this.http.delete<{ success: boolean }>(`/users/sessions/${token}`);
   }
 
   /**

@@ -7,7 +7,7 @@ import { logger } from "./logger";
  * This eliminates the need for try/catch in every controller.
  */
 export const asyncHandler =
-  (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>): RequestHandler =>
+  (fn: (req: Request, res: Response, next: NextFunction) => Promise<unknown>): RequestHandler =>
   (req, res, next) => {
     Promise.resolve(fn(req, res, next)).catch((error) => {
       logger.error(`[asyncHandler] Error en controlador: ${error?.message || error}`);

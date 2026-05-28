@@ -1,11 +1,12 @@
 <div [class]="containerClass()">
-  @if (user()?.image) {
+  @if (avatarImage()) {
     <img 
-      [src]="user()?.image" 
-      [alt]="user()?.name" 
+      [src]="avatarImage()" 
+      [alt]="name() || user()?.name" 
       class="w-full h-full object-cover"
     />
   } @else {
-    <span>{{ user()?.initialLetter }}</span>
+    <span>{{ initials() }}</span>
   }
 </div>
+

@@ -28,13 +28,15 @@ export const requirePermission = <R extends Resource>(
       throw new ForbiddenError("Rol de usuario inválido o no registrado en el sistema AC.");
     }
 
-    // Call authorize directly on the Role object (using any to bypass TypeScript's union callable constraint)
-    const isAuthorized = (activeRole as any).authorize({
+    // Call authorize directly on the Role object (with correct interface types instead of any)
+    const authResult = (activeRole as unknown as {
+      authorize: (query: { resource: string; action: string }) => { success: boolean; error?: string };
+    }).authorize({
       resource: resource,
       action: action,
     });
 
-    if (!isAuthorized) {
+    if (!authResult || !authResult.success) {
       throw new ForbiddenError(
         `Permiso denegado: No tienes autorización para realizar '${action}' en el recurso '${resource}'.`
       );

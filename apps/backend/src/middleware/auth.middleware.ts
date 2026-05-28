@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { UserRole } from "@eduno/shared";
+import { UserRole, IBetterAuthUser } from "@eduno/shared";
 import { auth } from "../config/auth";
 import { fromNodeHeaders } from "better-auth/node";
 
@@ -12,8 +12,8 @@ export const isAuthenticated = async (req: Request, res: Response, next: NextFun
     return res.status(401).json({ success: false, message: "No autorizado. Sesión inválida o expirada." });
   }
 
-  // Cast user to include possible isBanned property
-  const user = session.user as any;
+  // Cast user to include possible isBanned property securely without using any
+  const user = session.user as unknown as IBetterAuthUser;
   if (user.isBanned) {
     return res.status(403).json({ success: false, message: "Tu cuenta ha sido suspendida/baneada." });
   }

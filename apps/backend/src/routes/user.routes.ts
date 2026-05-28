@@ -3,6 +3,8 @@ import {
   updatePassword,
   updateProfile,
   deleteAccount,
+  getMySessions,
+  revokeMySession,
   getUserProfileForAdmin,
   toggleUserBanStatus,
   revokeUserSession,
@@ -51,6 +53,19 @@ router.delete(
   isAuthenticated,
   validate(backendDeleteAccountSchema),
   deleteAccount,
+);
+
+// Sessions self-management (available to all logged-in roles: alumno, profesor, moderador)
+router.get(
+  "/sessions/list",
+  isAuthenticated,
+  getMySessions,
+);
+
+router.delete(
+  "/sessions/:sessionId",
+  isAuthenticated,
+  revokeMySession,
 );
 
 // Admin-only & Moderator-only user profile / sessions / ban management (Permission-Based Access Control)

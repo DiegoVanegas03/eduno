@@ -28,7 +28,7 @@ export class AdminLayoutComponent implements OnInit {
     if (typeof window !== 'undefined') {
       const isSmallScreen = window.innerWidth < 1024;
       const savedState = localStorage.getItem('admin_sidebar_collapsed');
-      
+
       if (isSmallScreen) {
         this.isSidebarCollapsed.set(true);
       } else if (savedState !== null) {

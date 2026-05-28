@@ -21,6 +21,7 @@ export const scheduleQuerySchema = z.object({
   areaCode: z.preprocess((val) => (val ? Number(val) : undefined), z.number().int().optional()),
   courseName: z.string().optional(),
   professor: z.string().optional(),
+  type: z.string().optional(),
   group: z.preprocess((val) => (val ? Number(val) : undefined), z.number().int().optional()),
   page: z.preprocess((val) => (val ? Number(val) : 1), z.number().int().min(1).default(1)),
   limit: z.preprocess((val) => (val ? Number(val) : 10), z.number().int().min(1).max(100).default(10)),

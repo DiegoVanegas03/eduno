@@ -13,6 +13,20 @@ const mongoUri = process.env.MONGO_URI || "mongodb://localhost:27017/eduno";
 const client = new MongoClient(mongoUri);
 const db = client.db();
 
+interface BetterAuthHookResponse {
+  user?: {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+    isBanned?: boolean;
+    image?: string | null;
+    [key: string]: unknown;
+  };
+  isBanned?: boolean;
+  [key: string]: unknown;
+}
+
 export const auth = betterAuth({
   // ---------- Database ----------
   database: mongodbAdapter(db, {
@@ -46,6 +60,9 @@ export const auth = betterAuth({
 
   // ---------- User Schema ----------
   user: {
+    deleteUser: {
+      enabled: true,
+    },
     additionalFields: {
       role: {
         type: "string",
@@ -95,6 +112,8 @@ export const auth = betterAuth({
       ac,
       roles,
       adminRoles: [USER_ROLES.ADMIN, USER_ROLES.MODERADOR],
+      defaultRole: USER_ROLES.ALUMNO,
+      allowUserDeletion: true,
     }),
     customSession(async ({ session, user }) => {
       // Cast para que TypeScript reconozca los campos adicionales
@@ -119,11 +138,11 @@ export const auth = betterAuth({
   // ---------- Hooks ----------
   hooks: {
     after: createAuthMiddleware(async (ctx) => {
-      const returned = ctx.context.returned;
+      const returned = ctx.context.returned as BetterAuthHookResponse | null;
       if (returned && typeof returned === "object") {
         // Bloquear acceso a usuarios baneados
-        const userObj = "user" in returned ? (returned as any).user : returned;
-        if (userObj && "isBanned" in userObj && userObj.isBanned === true) {
+        const userObj = returned.user || returned;
+        if (userObj && typeof userObj === "object" && "isBanned" in userObj && userObj.isBanned === true) {
           return ctx.json(
             {
               success: false,
@@ -135,12 +154,12 @@ export const auth = betterAuth({
           );
         }
 
-        if ("user" in returned && returned.user) {
+        if (returned.user) {
           return ctx.json({
             ...returned,
             user: {
-              ...(returned as any).user,
-              image: getProfilePictureUrl((returned as any).user.image),
+              ...returned.user,
+              image: getProfilePictureUrl(returned.user.image),
             },
           });
         }

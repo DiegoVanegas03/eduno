@@ -21,10 +21,6 @@ const professorSchema = new Schema<IProfessorDocument>(
       default: null,
       index: true,
     },
-    isVerificado: {
-      type: Boolean,
-      default: false,
-    },
     email: {
       type: String,
       default: null,
@@ -41,16 +37,6 @@ const professorSchema = new Schema<IProfessorDocument>(
       type: Number,
       default: 0,
       min: [0, "El número de reseñas no puede ser negativo"],
-    },
-    descripcionAbreviada: {
-      type: String,
-      default: "",
-      trim: true,
-    },
-    descripcionPerfil: {
-      type: String,
-      default: "",
-      trim: true,
     },
   },
   {

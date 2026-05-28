@@ -16,18 +16,13 @@ export interface ICreateProfessorDTO {
   name: string;
   email?: string;
   calificacion?: number;
-  descripcionAbreviada?: string;
-  descripcionPerfil?: string;
 }
 
 export interface IUpdateProfessorDTO {
   name?: string;
   email?: string;
   userId?: string | null;
-  isVerificado?: boolean;
   calificacion?: number;
-  descripcionAbreviada?: string;
-  descripcionPerfil?: string;
 }
 
 export interface IVerifyProfessorDTO {

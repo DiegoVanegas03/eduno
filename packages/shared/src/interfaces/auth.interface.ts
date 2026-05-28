@@ -10,3 +10,14 @@ export interface IAuthResponse {
   user: IBetterAuthUser;
   session: ISession;
 }
+
+export interface IBetterAuthSession {
+  id: string;
+  token: string;
+  userId: string;
+  expiresAt: Date | string;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  ipAddress?: string;
+  userAgent?: string;
+}

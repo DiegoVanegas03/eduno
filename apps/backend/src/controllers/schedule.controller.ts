@@ -142,8 +142,10 @@ export const scrapeAndSync = asyncHandler(
 
     // 3. Extract unique professor names and perform dynamic upsert to map them to Professor IDs
     const uniqueProfessorNames = Array.from(
-      new Set(schedulesToInsert.map((s) => s.professor))
-    ).filter((name) => !!name && name.trim() !== "" && name !== "Profesor por Asignar");
+      new Set(schedulesToInsert.map((s) => s.professor)),
+    ).filter(
+      (name) => !!name && name.trim() !== "" && name !== "--- POR DEFINIR ---",
+    );
 
     const professorMap: Record<string, any> = {};
 
@@ -159,7 +161,7 @@ export const scrapeAndSync = asyncHandler(
           });
         }
         professorMap[name] = prof._id;
-      })
+      }),
     );
 
     // Map each schedule item to its corresponding professorId reference
@@ -191,9 +193,22 @@ export const scrapeAndSync = asyncHandler(
  */
 export const listSchedules = asyncHandler(
   async (req: Request, res: Response<IPaginatedResponse<ISchedule[]>>) => {
-    const { period, areaCode, courseName, professor, group, page, limit } = req.query;
+    const {
+      period,
+      areaCode,
+      type,
+      courseName,
+      professor,
+      group,
+      page,
+      limit,
+    } = req.query;
 
     const filter: FilterQuery<IScheduleDocument> = {};
+
+    if (type && typeof type === "string") {
+      filter.type = type;
+    }
 
     if (period && typeof period === "string") {
       filter.period = period;
@@ -311,7 +326,11 @@ export const createSchedule = asyncHandler(
     const body = req.body;
 
     let professorId: any = null;
-    if (body.professor && body.professor.trim() !== "" && body.professor !== "Profesor por Asignar") {
+    if (
+      body.professor &&
+      body.professor.trim() !== "" &&
+      body.professor !== "Profesor por Asignar"
+    ) {
       let prof = await Professor.findOne({ name: body.professor.trim() });
       if (!prof) {
         prof = await Professor.create({
@@ -360,7 +379,11 @@ export const updateSchedule = asyncHandler(
 
     if (body.professor !== undefined) {
       let professorId: any = null;
-      if (body.professor && body.professor.trim() !== "" && body.professor !== "Profesor por Asignar") {
+      if (
+        body.professor &&
+        body.professor.trim() !== "" &&
+        body.professor !== "Profesor por Asignar"
+      ) {
         let prof = await Professor.findOne({ name: body.professor.trim() });
         if (!prof) {
           prof = await Professor.create({

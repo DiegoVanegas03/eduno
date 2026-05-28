@@ -2,26 +2,27 @@ import { logger } from "./logger";
 import { Request, Response } from "express";
 
 export const GlobalErrorHandler = (
-  err: any,
+  err: unknown,
   _req: Request,
   res: Response,
   _next: Function,
 ) => {
-  const status = err?.statusCode ?? err?.status ?? 500;
-  const isOperational = err instanceof AppError ? err.isOperational : false;
+  const errorObj = err as Error & { statusCode?: number; status?: number; isOperational?: boolean; body?: unknown };
+  const status = errorObj?.statusCode ?? errorObj?.status ?? 500;
+  const isOperational = err instanceof AppError ? err.isOperational : (errorObj?.isOperational ?? false);
 
-  logger.error(`[${status}] ${err?.message || "Unknown error"}`);
-  if (err?.body) logger.error(`   body   → ${JSON.stringify(err.body)}`);
-  if (err?.stack)
+  logger.error(`[${status}] ${errorObj?.message || "Unknown error"}`);
+  if (errorObj?.body) logger.error(`   body   → ${JSON.stringify(errorObj.body)}`);
+  if (errorObj?.stack)
     logger.error(
-      `   stack  → ${err.stack.split("\n").slice(0, 4).join("\n           ")}`,
+      `   stack  → ${errorObj.stack.split("\n").slice(0, 4).join("\n           ")}`,
     );
 
   // Safeguard internal server error messages from leaking in production
   const errorMsg =
     status === 500 && !isOperational
       ? "Error interno del servidor"
-      : err?.message || "Error interno del servidor";
+      : errorObj?.message || "Error interno del servidor";
 
   res.status(status).json({
     success: false,

@@ -54,6 +54,7 @@ const profesorRole = ac.newRole({
 });
 
 const alumnoRole = ac.newRole({
+  session: ["list", "read", "delete"],
   comment: ["create"],
   rating: ["create"],
   file: ["upload", "download"],

@@ -32,7 +32,7 @@
   <div class="bg-white p-6 rounded-2xl border border-gray-150 shadow-2xs space-y-4">
     <h3 class="text-xs font-extrabold text-oxford-navy-900 uppercase tracking-wider mb-2">Filtros de Búsqueda</h3>
     
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
       <!-- Period Selector -->
       <div class="flex flex-col gap-1.5">
         <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Periodo Académico</label>
@@ -54,6 +54,19 @@
         >
           <option value="">Todas las Áreas</option>
           <option *ngFor="let area of availableAreas()" [value]="area.code">{{ area.name }} (Área {{ area.code }})</option>
+        </select>
+      </div>
+
+      <!-- Course Type Selector -->
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Tipo de Clase</label>
+        <select 
+          [(ngModel)]="selectedTypeFilter"
+          class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 focus:bg-white w-full transition-all text-gray-800 font-bold cursor-pointer"
+        >
+          <option value="">Todos</option>
+          <option value="T">Teoría</option>
+          <option value="LAB">Laboratorio</option>
         </select>
       </div>
 
@@ -355,7 +368,7 @@
             class="px-3 py-2.5 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-bold cursor-pointer"
           >
             <option value="T">Teoría</option>
-            <option value="L">Laboratorio</option>
+            <option value="LAB">Laboratorio</option>
           </select>
         </div>
 
@@ -531,7 +544,7 @@
             class="px-3 py-2.5 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-bold cursor-pointer"
           >
             <option value="T">Teoría</option>
-            <option value="L">Laboratorio</option>
+            <option value="LAB">Laboratorio</option>
           </select>
         </div>
 
