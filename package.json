@@ -10,7 +10,7 @@
     "test": "turbo test",
     "frontend": "pnpm --filter @eduno/frontend start",
     "backend": "pnpm --filter @eduno/backend dev",
-    "docker:up": "docker compose up -d",
+    "docker:up": "docker compose up -d && docker compose run --rm minio_setup",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f"
   },

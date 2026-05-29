@@ -1,0 +1,193 @@
+<div class="min-h-screen bg-cerulean-50 pt-24 pb-16">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    
+    @if (profesor(); as p) {
+      <!-- Breadcrumb y navegación atrás -->
+      <app-breadcrumb [items]="[
+        { label: 'Profesores', link: '/profesores' },
+        { label: p.titulo + ' ' + p.nombre.split(' ').pop(), link: ['/profesores', p.id] },
+        { label: 'Opiniones' }
+      ]">
+        <a [routerLink]="['/profesores', p.id]" class="flex items-center gap-2 text-punch-red-500 hover:text-punch-red-600 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+          Volver al perfil
+        </a>
+      </app-breadcrumb>
+
+      <!-- Header Título -->
+      <div class="mb-8">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-oxford-navy-900 mb-2">
+          Opiniones sobre {{ p.titulo }} {{ p.nombre }}
+        </h1>
+        <p class="text-oxford-navy-600">Lee lo que opinan otros estudiantes acerca de su método de enseñanza, nivel de dificultad y consejos.</p>
+      </div>
+
+      <!-- Barra de Filtros -->
+      <div class="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-cerulean-100 mb-8 flex flex-col md:flex-row gap-4 items-end">
+        
+        <!-- Filtro: Calificación -->
+        <div class="flex-1 w-full relative">
+          <label class="block text-xs font-bold text-oxford-navy-500 uppercase tracking-wider mb-2">Calificación</label>
+          <div class="relative">
+            <select 
+              [(ngModel)]="selectedRating" 
+              class="appearance-none w-full bg-cerulean-50 border border-cerulean-100 text-oxford-navy-900 rounded-xl pl-4 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cerulean-400 cursor-pointer transition-shadow"
+            >
+              <option value="todos">Cualquier estrella</option>
+              <option value="5">5 Estrellas (Excelente)</option>
+              <option value="4">4 Estrellas (Bueno)</option>
+              <option value="3">3 Estrellas (Regular)</option>
+              <option value="2">2 Estrellas (Malo)</option>
+              <option value="1">1 Estrella (Pésimo)</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-oxford-navy-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sort By -->
+        <div class="flex-1 w-full relative">
+            <label class="block text-xs font-bold text-oxford-navy-500 uppercase tracking-wider mb-2">Ordenar por</label>
+            <div class="relative">
+              <select 
+                [(ngModel)]="sortOrder" 
+                class="appearance-none w-full bg-cerulean-50 border border-cerulean-100 text-oxford-navy-900 rounded-xl pl-4 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cerulean-400 cursor-pointer transition-shadow"
+              >
+                <option value="recientes">Más recientes</option>
+                <option value="alta">Calificación: Alta a baja</option>
+                <option value="baja">Calificación: Baja a alta</option>
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-oxford-navy-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </div>
+            </div>
+          </div>
+
+      </div>
+
+      <!-- Resumen Filtrado -->
+      <div class="mb-6 flex justify-between items-center">
+        <span class="text-sm font-bold text-oxford-navy-600 bg-white px-4 py-2 rounded-full shadow-sm border border-cerulean-50">
+          Mostrando {{ filteredResenas().length }} reseña{{ filteredResenas().length !== 1 ? 's' : '' }}
+        </span>
+      </div>
+
+      <!-- Lista de Opiniones (Grid) -->
+      @if (filteredResenas().length > 0) {
+        <div class="grid grid-cols-1 gap-6">
+          @for (resena of filteredResenas(); track resena.id; let i = $index) {
+            <app-review-card 
+              [reviewId]="resena.id"
+              [author]="resena.user?.name || 'Estudiante'"
+              [authorImage]="resena.user?.image"
+              [timeAgo]="(resena.createdAt | date:'mediumDate') || ''"
+              [rating]="resena.rating"
+              [comment]="resena.comment"
+              [subject]="resena.materiaNombre"
+              [isEdited]="resena.isEdited || false"
+              [isOwnReview]="isOwnReview(resena.userId)"
+              [likesCount]="resena.likes.length"
+              [dislikesCount]="resena.dislikes.length"
+              [hasLiked]="hasLikedReview(resena.likes)"
+              [hasDisliked]="hasDislikedReview(resena.dislikes)"
+              (onLike)="likeReview(resena.id)"
+              (onDislike)="dislikeReview(resena.id)"
+              (onDelete)="deleteReview(resena.id)"
+              (onEdit)="editReviewFromCard(resena)"
+              (onReport)="openReportModal(resena.id)">
+            </app-review-card>
+          }
+        </div>
+      } @else {
+        <!-- Estado Vacío -->
+        <div class="bg-white rounded-3xl p-12 shadow-sm border border-cerulean-100 text-center flex flex-col items-center justify-center">
+            <div class="w-20 h-20 bg-cerulean-50 rounded-full flex items-center justify-center text-cerulean-300 mb-6">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            </div>
+            <h3 class="text-xl font-bold text-oxford-navy-900 mb-2">No encontramos opiniones</h3>
+            <p class="text-oxford-navy-500 max-w-sm">No hay reseñas que coincidan con los filtros seleccionados. Intenta quitar el filtro de materia o calificación.</p>
+            
+            <button 
+              (click)="selectedMateria.set('todas'); selectedRating.set('todos'); sortOrder.set('recientes')"
+              class="mt-6 text-punch-red-500 font-bold hover:text-punch-red-600 cursor-pointer">
+              ← Limpiar filtros
+            </button>
+        </div>
+      }
+
+    } @else {
+      <!-- Placeholder de carga -->
+      <div class="text-center py-24">
+        <p class="text-oxford-navy-500 font-bold text-xl animate-pulse">Cargando opiniones...</p>
+      </div>
+    }
+
+  </div>
+</div>
+
+<!-- Modal de Reportes de Abuso -->
+@if (isReportModalOpen()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-oxford-navy-950/40 backdrop-blur-xs" (click)="closeReportModal()"></div>
+    
+    <!-- Modal Content -->
+    <div class="relative bg-white w-full max-w-md rounded-3xl p-6 shadow-xl border border-cerulean-100 animate-fade-in z-10">
+      <h3 class="text-lg font-bold text-oxford-navy-900 mb-4">Reportar opinión</h3>
+      <p class="text-xs text-oxford-navy-500 mb-6">
+        Si consideras que este comentario infringe nuestras normas comunitarias o contiene información abusiva, repórtalo para que un administrador lo revise.
+      </p>
+
+      <!-- Formulario -->
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-oxford-navy-800 mb-1.5">Motivo del reporte</label>
+          <select 
+            [value]="reportReason()" 
+            (change)="reportReason.set($any($event.target).value)"
+            class="w-full text-sm rounded-xl border border-cerulean-100 p-3 bg-white focus:outline-none focus:ring-2 focus:ring-cerulean-500 text-oxford-navy-900"
+          >
+            <option value="spam">Spam o contenido comercial</option>
+            <option value="abuse">Acoso, amenazas o comportamiento abusivo</option>
+            <option value="inappropriate_content">Contenido inapropiado u ofensivo</option>
+            <option value="copyright">Infracción de derechos de autor</option>
+            <option value="other">Otro motivo</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-oxford-navy-800 mb-1.5">Descripción detallada</label>
+          <textarea 
+            [value]="reportDescription()"
+            (input)="reportDescription.set($any($event.target).value)"
+            rows="4"
+            placeholder="Explica detalladamente por qué reportas este comentario..."
+            class="w-full text-sm rounded-xl border border-cerulean-100 p-3 bg-white focus:outline-none focus:ring-2 focus:ring-cerulean-500 text-oxford-navy-900 resize-none"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="flex justify-end gap-3 mt-6">
+        <app-button 
+          variant="ghost" 
+          size="sm" 
+          [disabled]="isSubmittingReport()" 
+          (click)="closeReportModal()"
+        >
+          Cancelar
+        </app-button>
+        
+        <app-button 
+          variant="primary" 
+          size="sm" 
+          [disabled]="isSubmittingReport()"
+          (click)="submitReport()"
+        >
+          {{ isSubmittingReport() ? 'Enviando...' : 'Reportar' }}
+        </app-button>
+      </div>
+    </div>
+  </div>
+}

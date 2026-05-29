@@ -1,0 +1,641 @@
+<div class="px-1 lg:px-4 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
+  <!-- Header Area -->
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-gray-150 shadow-xs">
+    <div>
+      <h2 class="text-xl font-extrabold text-oxford-navy-950 tracking-tight">Administración de Profesores</h2>
+      <p class="text-xs text-gray-550 mt-1 font-semibold">Gestiona el catálogo de profesores y aprueba las solicitudes de verificación de cuentas docentes.</p>
+    </div>
+    
+    <!-- Tab Navigation & Actions -->
+    <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-stretch sm:items-center">
+      <!-- Tabs Selector -->
+      <div class="inline-flex bg-gray-100 p-1 rounded-xl border border-gray-200">
+        <button 
+          (click)="changeTab('professors')"
+          [class.bg-white]="activeTab() === 'professors'"
+          [class.text-oxford-navy-950]="activeTab() === 'professors'"
+          [class.shadow-2xs]="activeTab() === 'professors'"
+          [class.font-bold]="activeTab() === 'professors'"
+          [class.text-gray-500]="activeTab() !== 'professors'"
+          class="px-4 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap"
+        >
+          Profesores
+        </button>
+        <button 
+          (click)="changeTab('requests')"
+          [class.bg-white]="activeTab() === 'requests'"
+          [class.text-oxford-navy-950]="activeTab() === 'requests'"
+          [class.shadow-2xs]="activeTab() === 'requests'"
+          [class.font-bold]="activeTab() === 'requests'"
+          [class.text-gray-500]="activeTab() !== 'requests'"
+          class="px-4 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap"
+        >
+          Solicitudes
+        </button>
+      </div>
+
+      <button 
+        *ngIf="activeTab() === 'professors'"
+        (click)="openCreateModal()"
+        class="px-4 py-2.5 bg-oxford-navy-950 hover:bg-oxford-navy-900 text-white text-xs font-bold rounded-xl transition-all cursor-pointer inline-flex items-center justify-center gap-2 shadow-md shadow-oxford-navy-950/10"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Agregar Profesor
+      </button>
+    </div>
+  </div>
+
+  <!-- TAB 1: PROFESSORS DIRECTORY -->
+  <div *ngIf="activeTab() === 'professors'" class="space-y-6">
+    <!-- Search Bar -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-150 shadow-2xs">
+      <div class="flex flex-col sm:flex-row gap-4">
+        <div class="flex-1 relative">
+          <input 
+            type="text" 
+            [(ngModel)]="searchProfessorQuery"
+            (keyup.enter)="triggerSearch()"
+            placeholder="Buscar profesor por nombre..."
+            class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 focus:bg-white w-full transition-all text-gray-800 font-semibold"
+          />
+        </div>
+        <button 
+          (click)="triggerSearch()"
+          class="px-5 py-2.5 bg-oxford-navy-950 hover:bg-oxford-navy-900 text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
+        >
+          Buscar
+        </button>
+      </div>
+    </div>
+
+    <!-- Professors Grid / Table -->
+    <div class="bg-white rounded-2xl border border-gray-150 shadow-2xs overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-gray-150 bg-gray-50/50 text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">
+              <th class="px-6 py-4">Profesor</th>
+              <th class="px-6 py-4">Correo Electrónico</th>
+              <th class="px-6 py-4 text-center">Calificación</th>
+              <th class="px-6 py-4 text-center">Reseñas</th>
+              <th class="px-6 py-4">Verificación</th>
+              <th class="px-6 py-4 text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 text-xs">
+            <!-- Loading Skeleton -->
+            <tr *ngIf="isLoadingProfessors()">
+              <td colspan="6" class="px-6 py-20 text-center text-gray-400">
+                <div class="inline-block w-6 h-6 border-3 border-gray-200 border-t-oxford-navy-950 rounded-full animate-spin"></div>
+                <p class="mt-2 text-[10px] font-bold tracking-wider text-gray-400 uppercase">Cargando Profesores...</p>
+              </td>
+            </tr>
+
+            <!-- Table Data Rows -->
+            <ng-container *ngIf="!isLoadingProfessors()">
+              <tr 
+                *ngFor="let prof of professorsList()"
+                class="hover:bg-gray-50/30 transition-colors group"
+              >
+                <td class="px-6 py-4">
+                  <div class="flex flex-col gap-0.5 max-w-xs">
+                    <span class="font-extrabold text-oxford-navy-950 text-sm leading-tight tracking-tight">{{ prof.name }}</span>
+                    <span class="text-[10px] text-gray-400 font-semibold truncate">{{ prof.descripcionAbreviada || 'Sin descripción breve asignada' }}</span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 font-bold text-gray-750">
+                  {{ prof.email || '— Sin correo vinculado' }}
+                </td>
+                <td class="px-6 py-4 text-center">
+                  <span class="px-2 py-0.5 text-xs bg-amber-50 text-amber-700 border border-amber-100 font-extrabold rounded-lg inline-flex items-center gap-1">
+                    ★ {{ prof.calificacion | number:'1.1-1' }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-center font-extrabold text-gray-600">
+                  {{ prof.numResenas }}
+                </td>
+                <td class="px-6 py-4">
+                  <span 
+                    *ngIf="prof.isVerificado"
+                    class="px-2 py-0.5 text-[9px] bg-green-50 border border-green-200 text-green-700 font-extrabold rounded-md uppercase tracking-wider inline-flex items-center gap-1"
+                  >
+                    Verificado
+                  </span>
+                  <span 
+                    *ngIf="!prof.isVerificado"
+                    class="px-2 py-0.5 text-[9px] bg-gray-50 border border-gray-200 text-gray-400 font-extrabold rounded-md uppercase tracking-wider inline-flex items-center gap-1"
+                  >
+                    Sin Vincular
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-right">
+                  <div class="flex items-center justify-end gap-1">
+                    <a 
+                      [routerLink]="['/admin/manage-professors', prof.id]"
+                      title="Ver Detalle y Horarios"
+                      class="text-gray-400 hover:text-gray-900 transition-colors p-1.5 hover:bg-gray-50 border border-transparent hover:border-gray-250 rounded-lg cursor-pointer inline-flex items-center justify-center animate-in fade-in zoom-in-95"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </a>
+                    <button 
+                      (click)="openEditModal(prof)"
+                      title="Editar Datos"
+                      class="text-gray-400 hover:text-gray-900 transition-colors p-1.5 hover:bg-gray-50 border border-transparent hover:border-gray-250 rounded-lg cursor-pointer inline-flex items-center justify-center"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                    </button>
+                    <button 
+                      (click)="deleteProfessor(prof)"
+                      title="Eliminar Registro"
+                      class="text-gray-400 hover:text-red-600 transition-colors p-1.5 hover:bg-red-50/50 border border-transparent hover:border-red-100 rounded-lg cursor-pointer inline-flex items-center justify-center"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Empty State -->
+              <tr *ngIf="professorsList().length === 0">
+                <td colspan="6" class="px-6 py-16 text-center">
+                  <div class="flex flex-col items-center justify-center max-w-sm mx-auto">
+                    <div class="p-3 bg-gray-50 border border-gray-150 text-gray-400 rounded-2xl mb-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                    </div>
+                    <h3 class="text-sm font-extrabold text-oxford-navy-950">Sin Profesores Registrados</h3>
+                    <p class="text-xs text-gray-400 font-semibold mt-1">No se encontraron profesores registrados que coincidan con la búsqueda.</p>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Footer -->
+      <div *ngIf="professorsList().length > 0" class="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 bg-gray-50/50 border-t border-gray-150">
+        <div class="text-xs text-gray-550 font-semibold">
+          Mostrando <span class="font-extrabold text-oxford-navy-950">{{ professorsList().length }}</span> de <span class="font-extrabold text-oxford-navy-950">{{ profTotalItems() }}</span> registros
+        </div>
+        
+        <div class="flex items-center bg-oxford-navy-950 p-1.5 rounded-xl shadow-sm">
+          <!-- Prev Page -->
+          <button 
+            (click)="profPrevPage()"
+            [disabled]="profCurrentPage() === 1"
+            class="w-8 h-8 flex items-center justify-center text-white/70 hover:text-white transition-all cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed disabled:pointer-events-none font-bold text-sm"
+          >
+            «
+          </button>
+
+          <!-- Page Numbers -->
+          <div class="flex items-center">
+            <ng-container *ngFor="let item of profPaginationItems()">
+              <button 
+                *ngIf="item !== '...'"
+                (click)="profGoToPage(item)"
+                [class.bg-white]="profCurrentPage() === item"
+                [class.text-oxford-navy-950]="profCurrentPage() === item"
+                [class.scale-105]="profCurrentPage() === item"
+                [class.shadow-xs]="profCurrentPage() === item"
+                [class.text-white/80]="profCurrentPage() !== item"
+                [class.hover:text-white]="profCurrentPage() !== item"
+                [class.hover:bg-white/10]="profCurrentPage() !== item"
+                class="w-8 h-8 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center justify-center mx-0.5"
+              >
+                {{ item }}
+              </button>
+              
+              <span 
+                *ngIf="item === '...'"
+                class="w-8 h-8 flex items-center justify-center text-xs font-bold text-white/40 select-none cursor-default"
+              >
+                ...
+              </span>
+            </ng-container>
+          </div>
+
+          <!-- Next Page -->
+          <button 
+            (click)="profGoToPage(profCurrentPage() + 1)"
+            [disabled]="profCurrentPage() === profTotalPages()"
+            class="w-8 h-8 flex items-center justify-center text-white/70 hover:text-white transition-all cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed disabled:pointer-events-none font-bold text-sm"
+          >
+            »
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: VERIFICATION REQUESTS -->
+  <div *ngIf="activeTab() === 'requests'" class="space-y-6">
+    <!-- Filter Status Bar -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-150 shadow-2xs flex flex-wrap gap-2.5 items-center">
+      <h3 class="text-xs font-extrabold text-oxford-navy-900 uppercase tracking-wider mr-2">Filtrar Solicitudes</h3>
+      <button 
+        (click)="changeStatusFilter('pending')"
+        [class.bg-red-50]="requestStatusFilter() === 'pending'"
+        [class.text-red-600]="requestStatusFilter() === 'pending'"
+        [class.border-red-150]="requestStatusFilter() === 'pending'"
+        [class.bg-gray-50]="requestStatusFilter() !== 'pending'"
+        [class.text-gray-500]="requestStatusFilter() !== 'pending'"
+        [class.border-gray-200]="requestStatusFilter() !== 'pending'"
+        class="px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border"
+      >
+        Pendientes
+      </button>
+      <button 
+        (click)="changeStatusFilter('approved')"
+        [class.bg-green-50]="requestStatusFilter() === 'approved'"
+        [class.text-green-600]="requestStatusFilter() === 'approved'"
+        [class.border-green-150]="requestStatusFilter() === 'approved'"
+        [class.bg-gray-50]="requestStatusFilter() !== 'approved'"
+        [class.text-gray-500]="requestStatusFilter() !== 'approved'"
+        [class.border-gray-200]="requestStatusFilter() !== 'approved'"
+        class="px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border"
+      >
+        Aprobadas
+      </button>
+      <button 
+        (click)="changeStatusFilter('rejected')"
+        [class.bg-gray-100]="requestStatusFilter() === 'rejected'"
+        [class.text-gray-700]="requestStatusFilter() === 'rejected'"
+        [class.border-gray-300]="requestStatusFilter() === 'rejected'"
+        [class.bg-gray-50]="requestStatusFilter() !== 'rejected'"
+        [class.text-gray-500]="requestStatusFilter() !== 'rejected'"
+        [class.border-gray-200]="requestStatusFilter() !== 'rejected'"
+        class="px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border"
+      >
+        Rechazadas
+      </button>
+    </div>
+
+    <!-- Requests Table -->
+    <div class="bg-white rounded-2xl border border-gray-150 shadow-2xs overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-gray-150 bg-gray-50/50 text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">
+              <th class="px-6 py-4">Usuario Solicitante</th>
+              <th class="px-6 py-4">Profesor UASLP</th>
+              <th class="px-6 py-4 text-center">Documento Adjunto</th>
+              <th class="px-6 py-4">Fecha de Solicitud</th>
+              <th class="px-6 py-4">Notas de Revisión</th>
+              <th class="px-6 py-4 text-right">Acción</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 text-xs">
+            <!-- Loading Skeleton -->
+            <tr *ngIf="isLoadingRequests()">
+              <td colspan="6" class="px-6 py-20 text-center text-gray-400">
+                <div class="inline-block w-6 h-6 border-3 border-gray-200 border-t-oxford-navy-950 rounded-full animate-spin"></div>
+                <p class="mt-2 text-[10px] font-bold tracking-wider text-gray-400 uppercase">Cargando Solicitudes...</p>
+              </td>
+            </tr>
+
+            <!-- Table Data Rows -->
+            <ng-container *ngIf="!isLoadingRequests()">
+              <tr 
+                *ngFor="let req of requestsList()"
+                class="hover:bg-gray-50/30 transition-colors group animate-in fade-in"
+              >
+                <td class="px-6 py-4">
+                  <div class="flex flex-col gap-0.5">
+                    <span class="font-extrabold text-oxford-navy-950 text-sm tracking-tight">{{ req.userName }}</span>
+                    <span class="text-[10px] text-gray-400 font-semibold">{{ req.userEmail }}</span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 font-extrabold text-gray-750 text-sm">
+                  {{ req.professorName }}
+                </td>
+                <td class="px-6 py-4 text-center">
+                  <!-- Thumbnail Document -->
+                  <button 
+                    (click)="openPreviewModal(req)"
+                    title="Ampliar Comprobante"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-550/10 border border-gray-200 hover:bg-gray-100 text-gray-700 font-extrabold rounded-lg cursor-pointer transition-all active:scale-95"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    Ver Credencial
+                  </button>
+                </td>
+                <td class="px-6 py-4 text-gray-450 font-semibold">
+                  {{ req.createdAt | date:'dd MMM yyyy, HH:mm' }}
+                </td>
+                <td class="px-6 py-4 max-w-xs truncate text-gray-500 font-semibold italic" [title]="req.notes">
+                  {{ req.notes || '— Sin notas aclaratorias' }}
+                </td>
+                <td class="px-6 py-4 text-right">
+                  <!-- Actions for pending requests -->
+                  <button 
+                    *ngIf="req.status === 'pending'"
+                    (click)="openProcessModal(req)"
+                    class="px-3.5 py-1.5 bg-red-600 hover:bg-red-700 text-white font-extrabold rounded-lg transition-all cursor-pointer active:scale-95 text-[11px]"
+                  >
+                    Revisar
+                  </button>
+                  <span 
+                    *ngIf="req.status === 'approved'"
+                    class="px-2.5 py-1 bg-green-50 text-green-700 border border-green-150 rounded-lg font-black uppercase text-[10px] tracking-wider"
+                  >
+                    Aprobada
+                  </span>
+                  <span 
+                    *ngIf="req.status === 'rejected'"
+                    class="px-2.5 py-1 bg-gray-100 text-gray-500 border border-gray-200 rounded-lg font-black uppercase text-[10px] tracking-wider"
+                  >
+                    Rechazada
+                  </span>
+                </td>
+              </tr>
+
+              <!-- Empty State Requests -->
+              <tr *ngIf="requestsList().length === 0">
+                <td colspan="6" class="px-6 py-16 text-center">
+                  <div class="flex flex-col items-center justify-center max-w-sm mx-auto">
+                    <div class="p-3 bg-gray-50 border border-gray-150 text-gray-400 rounded-2xl mb-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                    </div>
+                    <h3 class="text-sm font-extrabold text-oxford-navy-950">Sin Solicitudes Registradas</h3>
+                    <p class="text-xs text-gray-400 font-semibold mt-1">No se encontraron solicitudes de verificación en este estado.</p>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Requests Pagination Footer -->
+      <div *ngIf="requestsList().length > 0" class="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 bg-gray-50/50 border-t border-gray-150">
+        <div class="text-xs text-gray-550 font-semibold">
+          Mostrando <span class="font-extrabold text-oxford-navy-950">{{ requestsList().length }}</span> de <span class="font-extrabold text-oxford-navy-950">{{ reqTotalItems() }}</span> registros
+        </div>
+        
+        <div class="flex items-center bg-oxford-navy-950 p-1.5 rounded-xl shadow-sm">
+          <button 
+            (click)="reqPrevPage()"
+            [disabled]="reqCurrentPage() === 1"
+            class="w-8 h-8 flex items-center justify-center text-white/70 hover:text-white transition-all cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed disabled:pointer-events-none font-bold text-sm"
+          >
+            «
+          </button>
+
+          <div class="flex items-center">
+            <ng-container *ngFor="let item of reqPaginationItems()">
+              <button 
+                *ngIf="item !== '...'"
+                (click)="reqGoToPage(item)"
+                [class.bg-white]="reqCurrentPage() === item"
+                [class.text-oxford-navy-950]="reqCurrentPage() === item"
+                [class.scale-105]="reqCurrentPage() === item"
+                [class.shadow-xs]="reqCurrentPage() === item"
+                [class.text-white/80]="reqCurrentPage() !== item"
+                [class.hover:text-white]="reqCurrentPage() !== item"
+                [class.hover:bg-white/10]="reqCurrentPage() !== item"
+                class="w-8 h-8 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center justify-center mx-0.5"
+              >
+                {{ item }}
+              </button>
+              
+              <span 
+                *ngIf="item === '...'"
+                class="w-8 h-8 flex items-center justify-center text-xs font-bold text-white/40 select-none cursor-default"
+              >
+                ...
+              </span>
+            </ng-container>
+          </div>
+
+          <button 
+            (click)="reqGoToPage(reqCurrentPage() + 1)"
+            [disabled]="reqCurrentPage() === reqTotalPages()"
+            class="w-8 h-8 flex items-center justify-center text-white/70 hover:text-white transition-all cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed disabled:pointer-events-none font-bold text-sm"
+          >
+            »
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== -->
+<!-- COMPROBANTE PREVIEW GLASSMORPHIC MODAL -->
+<div 
+  *ngIf="isPreviewModalOpen()"
+  (click)="isPreviewModalOpen.set(false)"
+  class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-oxford-navy-950/70 backdrop-blur-md animate-in fade-in duration-300 cursor-zoom-out"
+>
+  <div 
+    (click)="$event.stopPropagation()"
+    class="bg-white rounded-3xl border border-gray-150 shadow-2xl w-full max-w-xl overflow-hidden cursor-default animate-in zoom-in-95 duration-200"
+  >
+    <!-- Header -->
+    <div class="p-6 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+      <div>
+        <h3 class="text-base font-extrabold text-oxford-navy-950 tracking-tight">Comprobante de Identidad Docente</h3>
+        <p class="text-xs text-gray-500 mt-0.5 font-semibold">Solicitado por {{ previewStudentName() }} para el perfil de {{ previewProfessorName() }}</p>
+      </div>
+      <button 
+        (click)="isPreviewModalOpen.set(false)"
+        class="text-gray-400 hover:text-gray-900 transition-colors p-1.5 hover:bg-gray-100 rounded-lg cursor-pointer flex items-center justify-center"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Body Preview Image -->
+    <div class="p-6 flex justify-center bg-gray-900 h-96 relative overflow-hidden flex-col items-center">
+      <img 
+        [src]="previewDocumentUrl()" 
+        alt="Talón o comprobante de profesor" 
+        class="max-w-full max-h-full object-contain rounded-xl border border-white/10 shadow-lg"
+      />
+    </div>
+
+    <!-- Footer Close Action -->
+    <div class="p-6 border-t border-gray-100 flex justify-end bg-gray-50/50">
+      <button 
+        (click)="isPreviewModalOpen.set(false)"
+        class="px-5 py-2.5 bg-oxford-navy-950 hover:bg-oxford-navy-900 text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
+      >
+        Cerrar Vista
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== -->
+<!-- PROCESS ACTION MODAL (APPROVE / REJECT WITH NOTES) -->
+<div 
+  *ngIf="isProcessModalOpen()"
+  class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-oxford-navy-950/45 backdrop-blur-xs animate-in fade-in duration-200"
+>
+  <div class="bg-white rounded-3xl border border-gray-150 shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+    <!-- Header -->
+    <div class="p-6 border-b border-gray-100 bg-gray-50/50">
+      <h3 class="text-base font-extrabold text-oxford-navy-950 tracking-tight flex items-center gap-2">
+        Revisión de Solicitud Docente
+      </h3>
+      <p class="text-xs text-gray-500 mt-1 font-semibold">Aprueba o rechaza formalmente la solicitud de {{ selectedRequestForAction()?.userName }}</p>
+    </div>
+
+    <!-- Body -->
+    <div class="p-6 space-y-4">
+      <div class="p-4 bg-gray-50 rounded-2xl border border-gray-150 space-y-2">
+        <div class="flex justify-between text-xs">
+          <span class="text-gray-400 font-bold">Solicitante:</span>
+          <span class="text-oxford-navy-950 font-extrabold">{{ selectedRequestForAction()?.userName }}</span>
+        </div>
+        <div class="flex justify-between text-xs">
+          <span class="text-gray-400 font-bold">Profesor solicitado:</span>
+          <span class="text-oxford-navy-950 font-extrabold">{{ selectedRequestForAction()?.professorName }}</span>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Notas o Justificaciones</label>
+        <textarea 
+          [(ngModel)]="actionNotes"
+          placeholder="Escribe comentarios, p. ej. 'Talón coincide plenamente' o 'La credencial no es legible/expiró'..."
+          rows="3"
+          class="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 focus:bg-white w-full transition-all text-gray-800 font-semibold"
+        ></textarea>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="p-6 border-t border-gray-100 flex justify-between gap-2.5 bg-gray-50/50">
+      <button 
+        (click)="isProcessModalOpen.set(false)"
+        class="px-4 py-2 border border-gray-200 hover:bg-gray-100 text-gray-500 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+      >
+        Cancelar
+      </button>
+      
+      <div class="flex gap-2">
+        <button 
+          (click)="submitProcessRequest('rejected')"
+          class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+        >
+          Rechazar
+        </button>
+        <button 
+          (click)="submitProcessRequest('approved')"
+          class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
+        >
+          Aprobar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== -->
+<!-- PROFESSORS CRUD MODALS (CREATE & EDIT) -->
+<div 
+  *ngIf="isCreateModalOpen() || isEditModalOpen()"
+  class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-oxford-navy-950/45 backdrop-blur-xs animate-in fade-in duration-200"
+>
+  <div class="bg-white rounded-3xl border border-gray-150 shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+    <!-- Header -->
+    <div class="p-6 border-b border-gray-100 bg-gray-50/50">
+      <h3 class="text-base font-extrabold text-oxford-navy-950 tracking-tight">
+        {{ isCreateModalOpen() ? 'Registrar Nuevo Profesor' : 'Modificar Datos de Profesor' }}
+      </h3>
+      <p class="text-xs text-gray-500 mt-1 font-semibold">Configura la ficha del perfil de profesor y su descripción pública.</p>
+    </div>
+
+    <!-- Body -->
+    <div class="p-6 max-h-[60vh] overflow-y-auto space-y-4">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Nombre Completo del Profesor</label>
+        <input 
+          type="text" 
+          [(ngModel)]="formName"
+          placeholder="Ej: DR. HERNANDEZ OVALLE..."
+          class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-semibold"
+        />
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Correo Electrónico</label>
+          <input 
+            type="email" 
+            [(ngModel)]="formEmail"
+            placeholder="Ej: profesor@uaslp.mx"
+            class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-semibold"
+          />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Calificación Promedio (0-5)</label>
+          <input 
+            type="number" 
+            [(ngModel)]="formCalificacion"
+            min="0"
+            max="5"
+            step="0.1"
+            class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-semibold"
+          />
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Descripción Abreviada</label>
+        <input 
+          type="text" 
+          [(ngModel)]="formDescAbreviada"
+          placeholder="Ej: Especialista en Cálculo / 10 años de experiencia"
+          class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-semibold"
+        />
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] font-bold text-oxford-navy-700 uppercase tracking-wide">Descripción Detallada del Perfil</label>
+        <textarea 
+          [(ngModel)]="formDescPerfil"
+          placeholder="Información adicional sobre su experiencia académica..."
+          rows="4"
+          class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gray-400 w-full font-semibold"
+        ></textarea>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="p-6 border-t border-gray-100 flex justify-end gap-2.5 bg-gray-50/50">
+      <button 
+        (click)="isCreateModalOpen.set(false); isEditModalOpen.set(false)"
+        class="px-4 py-2 border border-gray-200 hover:bg-gray-100 text-gray-500 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+      >
+        Cancelar
+      </button>
+      <button 
+        (click)="isCreateModalOpen() ? createProfessor() : saveProfessorEdit()"
+        class="px-5 py-2 bg-oxford-navy-950 hover:bg-oxford-navy-900 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
+      >
+        {{ isCreateModalOpen() ? 'Registrar Profesor' : 'Guardar Cambios' }}
+      </button>
+    </div>
+  </div>
+</div>

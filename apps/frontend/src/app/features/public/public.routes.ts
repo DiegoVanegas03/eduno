@@ -21,6 +21,16 @@ export const publicRoutes: Routes = [
       ),
   },
   {
+    path: 'servicios/croquis',
+    loadComponent: () =>
+      import('./croquis/croquis.component').then((m) => m.CroquisComponent),
+  },
+  {
+    path: 'croquis',
+    loadComponent: () =>
+      import('./croquis/croquis.component').then((m) => m.CroquisComponent),
+  },
+  {
     path: 'servicios/conecta',
     loadComponent: () =>
       import('./coming-soon/coming-soon.component').then(

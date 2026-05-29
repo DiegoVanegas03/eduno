@@ -1,11 +1,17 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap, catchError, of, finalize, map } from 'rxjs';
-import { ToastService } from '@shared/services/toast/toast.service';
-import { UserRole, IUserResponse as User, USER_ROLES } from '@eduno/shared';
+import { Observable, tap, catchError, of, finalize, map, shareReplay } from 'rxjs';
+import { toast } from 'ngx-sonner';
+import {
+  UserRole,
+  IUserResponse as User,
+  USER_ROLES,
+  IAuthResponse,
+  getInitialLetter,
+  IApiResponse,
+} from '@eduno/shared';
 import { environment } from '@env/environment';
-
 
 export { USER_ROLES };
 
@@ -15,99 +21,117 @@ export { USER_ROLES };
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
-  private toastService = inject(ToastService);
+  private toast = toast;
 
-  // Private signal for internal state
   private _currentUser = signal<User | null>(null);
+  private _currentSessionId = signal<string | null>(null);
 
-  // Exposed read-only signal
   currentUser = this._currentUser.asReadonly();
-
-  // Computed properties
+  currentSessionId = this._currentSessionId.asReadonly();
   isLoggedIn = computed(() => this._currentUser() !== null);
   userRole = computed(() => this._currentUser()?.role || null);
 
+  private initialCheck$: Observable<User | null>;
+
   constructor() {
-    // Check session on initialization
-    this.checkSession().subscribe();
+    this.initialCheck$ = this.checkSession().pipe(shareReplay(1));
+    // Trigger initial session check immediately
+    this.initialCheck$.subscribe();
   }
 
-  /**
-   * Restores user session from cookies.
-   * Calls better-auth's built-in GET /api/auth/get-session.
-   */
+  waitForAuth(): Observable<User | null> {
+    return this.initialCheck$;
+  }
+
+  updateCurrentUser(user: User): void {
+    this._currentUser.set(user);
+  }
+
   checkSession(): Observable<User | null> {
+    return this.http.get<IApiResponse<void> | IAuthResponse>('/auth/get-session').pipe(
+      tap((res) => {
+        if (res && 'session' in res) {
+          this._currentSessionId.set(res.session?.id ?? null);
+        } else if (res && 'success' in res) {
+          if (!res.success && res.message) {
+            this.toast.error(res.message);
+          }
+        }
+      }),
+      map((res) => {
+        if (!res || !('user' in res) || !res.user) return null;
+        return { ...res.user, initialLetter: getInitialLetter(res.user.name) };
+      }),
+      tap((user) => this._currentUser.set(user)),
+      catchError(() => {
+        this._currentUser.set(null);
+        this._currentSessionId.set(null);
+        return of(null);
+      }),
+    );
+  }
+
+  login(email: string, password: string): Observable<User | null> {
     return this.http
-      .get<{ session: unknown; user: User }>('/auth/get-session')
+      .post<IApiResponse<void> | IAuthResponse>('/auth/sign-in/email', { email, password })
       .pipe(
         map((res) => {
-          if (!res?.user) return null;
-          // Derive initialLetter on the client — no need for the server to send it
-          return { ...res.user, initialLetter: res.user.name.charAt(0).toUpperCase() };
+          if (!res || !('user' in res) || !res.user) return null;
+          return { ...res.user, initialLetter: getInitialLetter(res.user.name) };
         }),
-        tap((user) => this._currentUser.set(user)),
-        catchError(() => {
-          this._currentUser.set(null);
-          return of(null);
-        }),
-      );
-  }
-
-  /**
-   * Performs login and sets user state.
-   * Cookies are handled by the browser/backend.
-   */
-  login(email: string, password: string): Observable<User> {
-    return this.http
-      .post<{ user: User }>('/auth/sign-in/email', { email, password })
-      .pipe(
-        map((res) => res.user),
         tap((user) => {
-          this._currentUser.set(user);
-          this.toastService.success(`Bienvenido de nuevo, ${user.name}`);
+          if (user) {
+            this._currentUser.set(user);
+            this.toast.success(`Bienvenido de nuevo, ${user.name}`);
+          } else {
+            this.toast.error('Error al iniciar sesión');
+          }
         }),
         catchError((err) => {
-          this.toastService.error(err.error?.message || 'Error al iniciar sesión');
+          this.toast.error(err.error?.message || 'Error al iniciar sesión');
           throw err;
         }),
       );
   }
 
-  /**
-   * Performs registration and sets user state.
-   * Cookies are handled by the browser/backend.
-   */
-  register(name: string, email: string, password: string): Observable<User> {
+  register(name: string, email: string, password: string): Observable<User | null> {
     return this.http
-      .post<{ user: User }>('/auth/sign-up/email', {
-        name,
-        email,
-        password,
-      })
+      .post<IApiResponse<void> | IAuthResponse>('/auth/sign-up/email', { name, email, password })
       .pipe(
-        map((res) => res.user),
+        map((res) => {
+          if (!res || !('user' in res) || !res.user) return null;
+          return { ...res.user, initialLetter: getInitialLetter(res.user.name) };
+        }),
         tap((user) => {
-          this._currentUser.set(user);
-          this.toastService.success('Tu cuenta ha sido creada exitosamente. ¡Bienvenido!');
+          if (user) {
+            this._currentUser.set(user);
+            this.toast.success('Tu cuenta ha sido creada exitosamente. ¡Bienvenido!');
+          }
         }),
         catchError((err) => {
-          this.toastService.error(err.error?.message || 'Error al registrarse');
+          this.toast.error(err.error?.message || 'Error al registrarse');
           throw err;
         }),
       );
   }
 
-  /**
-   * Refreshes the session.
-   * with better-auth, this is handled automatically via cookies.
-   */
-  refreshToken(): Observable<any> {
-    return this.checkSession();
+  refreshToken(): Observable<User> {
+    return this.checkSession().pipe(
+      map((user) => {
+        if (!user) {
+          throw new Error('No session available');
+        }
+        return user;
+      }),
+    );
   }
 
-  /**
-   * Clears user state and notifies backend to clear cookies.
-   */
+  listAccounts(): Observable<{ provider: string; id: string; accountId: string }[]> {
+    return this.http.get<{ provider: string; id: string; accountId: string }[]>(
+      '/auth/list-accounts',
+    );
+  }
+
   logout(): void {
     this.http
       .post('/auth/sign-out', {})
@@ -115,22 +139,17 @@ export class AuthService {
         finalize(() => {
           this._currentUser.set(null);
           this.router.navigate(['/auth/login']);
-          this.toastService.info('Sesión cerrada correctamente');
+          this.toast.info('Sesión cerrada correctamente');
         }),
       )
       .subscribe();
   }
 
-  /**
-   * Redirects the user to the social login provider.
-   * better-auth handles the handshake and redirects back.
-   */
   socialLogin(provider: 'google' | 'microsoft'): void {
     const callbackUrl = window.location.origin + '/';
     window.location.href = `${environment.apiUrl}/auth/sign-in/social?provider=${provider}&callbackURL=${callbackUrl}`;
   }
 
-  // Helper role checks
   hasRole(role: UserRole): boolean {
     return this.userRole() === role;
   }

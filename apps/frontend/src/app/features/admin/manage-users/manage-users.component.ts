@@ -1,129 +1,403 @@
-import { Component } from '@angular/core';
+import { Component, signal, computed, inject, effect, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { AvatarComponent } from '@shared/components/avatar/avatar.component';
+import { AdminUsersService } from '@core/services/admin-users/admin-users.service';
+import { toast } from 'ngx-sonner';
+import { firstValueFrom } from 'rxjs';
+import { IUserResponse, UserRole, IUserDashboardStats, ICareer } from '@eduno/shared';
+import { AdminCareersService } from '@core/services/admin-careers/admin-careers.service';
 
 @Component({
   selector: 'app-manage-users',
   standalone: true,
-  imports: [],
-  template: `
-    <div class="px-2 lg:px-6">
-      <div
-        class="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm border border-cerulean-100"
-      >
-        <div>
-          <h2 class="text-2xl font-bold text-oxford-navy-900">Administrar Usuarios</h2>
-          <p class="text-sm text-gray-500 mt-1">
-            Controla los accesos y roles de toda la plataforma.
-          </p>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-2xl shadow-sm border border-cerulean-100 overflow-hidden">
-        <div class="p-4 border-b border-gray-100 flex justify-end">
-          <input
-            type="text"
-            placeholder="Buscar usuario..."
-            class="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cerulean-400 w-full md:w-64 transition-shadow"
-          />
-        </div>
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-100">
-            <thead class="bg-cerulean-50/50">
-              <tr>
-                <th
-                  scope="col"
-                  class="px-6 py-4 text-left text-xs font-bold text-oxford-navy-500 uppercase tracking-wider"
-                >
-                  Usuario
-                </th>
-                <th
-                  scope="col"
-                  class="px-6 py-4 text-left text-xs font-bold text-oxford-navy-500 uppercase tracking-wider"
-                >
-                  Rol
-                </th>
-                <th
-                  scope="col"
-                  class="px-6 py-4 text-left text-xs font-bold text-oxford-navy-500 uppercase tracking-wider"
-                >
-                  Fecha Registro
-                </th>
-                <th
-                  scope="col"
-                  class="px-6 py-4 text-right text-xs font-bold text-oxford-navy-500 uppercase tracking-wider"
-                >
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-100">
-              <tr class="hover:bg-cerulean-50/30 transition-colors">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex items-center">
-                    <div
-                      class="h-10 w-10 shrink-0 bg-linear-to-br from-cerulean-400 to-cerulean-600 rounded-full flex items-center justify-center text-white font-bold shadow-md"
-                    >
-                      JL
-                    </div>
-                    <div class="ml-4">
-                      <div class="text-sm font-semibold text-oxford-navy-900">Juan López</div>
-                      <div class="text-xs text-gray-400">juanl@example.com</div>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span
-                    class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-cerulean-100 text-cerulean-800 border border-cerulean-200"
-                    >Alumno</span
-                  >
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">01/03/2026</td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <button
-                    class="text-oxford-navy-500 hover:text-cerulean-600 mr-4 transition-colors p-2 hover:bg-cerulean-50 rounded-lg"
-                  >
-                    <span class="sr-only">Editar</span>
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                      ></path>
-                    </svg>
-                  </button>
-                  <button
-                    class="text-punch-red-400 hover:text-punch-red-600 transition-colors p-2 hover:bg-punch-red-50 rounded-lg"
-                  >
-                    <span class="sr-only">Banear</span>
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
-                      ></path>
-                    </svg>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div
-          class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between text-sm text-gray-500"
-        >
-          <span>Mostrando 1 de 1 usuarios</span>
-          <div class="flex gap-2">
-            <button class="px-3 py-1 rounded bg-white border border-gray-200 disabled:opacity-50">
-              Anterior
-            </button>
-            <button class="px-3 py-1 rounded bg-white border border-gray-200 disabled:opacity-50">
-              Siguiente
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
+  imports: [CommonModule, FormsModule, AvatarComponent, RouterLink],
+  templateUrl: './manage-users.component.html',
+  styleUrl: './manage-users.component.css',
 })
-export class ManageUsersComponent {}
+export class ManageUsersComponent implements OnInit {
+  router = inject(Router);
+  route = inject(ActivatedRoute);
+  adminUsersService = inject(AdminUsersService);
+  adminCareersService = inject(AdminCareersService);
+
+  users = signal<IUserResponse[]>([]);
+  careers = signal<ICareer[]>([]);
+  isLoading = signal<boolean>(true);
+  stats = signal<IUserDashboardStats | null>(null);
+
+  constructor() {
+    // Read and normalize initial query params from the URL on component creation
+    this.route.queryParams.subscribe((params) => {
+      if (params['search'] !== undefined) this.searchQuery.set(params['search']);
+
+      if (params['role'] !== undefined) {
+        const matchedRole = this.roleFilters.find(
+          (r) => r.toLowerCase() === params['role'].toLowerCase(),
+        );
+        this.selectedRoleFilter.set(matchedRole || 'Todos');
+      }
+
+      if (params['status'] !== undefined) {
+        const val = params['status'].toLowerCase();
+        if (val === 'activo') this.selectedStatusFilter.set('Activo');
+        else if (val === 'baneado') this.selectedStatusFilter.set('Baneado');
+        else this.selectedStatusFilter.set('Todos');
+      }
+
+      if (params['period'] !== undefined) {
+        const val = params['period'];
+        if (val === '2026' || val === '2025') this.selectedPeriodFilter.set(val as '2026' | '2025');
+        else this.selectedPeriodFilter.set('Todos');
+      }
+
+      if (params['sort'] !== undefined) {
+        const val = params['sort'].toLowerCase();
+        if (val === 'asc') this.dateSortDirection.set('asc');
+        else if (val === 'desc') this.dateSortDirection.set('desc');
+        else this.dateSortDirection.set(null);
+      }
+    });
+
+    // Reactively sync changes back to URL query parameters
+    effect(() => {
+      const search = this.searchQuery();
+      const role = this.selectedRoleFilter();
+      const status = this.selectedStatusFilter();
+      const period = this.selectedPeriodFilter();
+      const sort = this.dateSortDirection();
+
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {
+          search: search || null,
+          role: role !== 'Todos' ? role : null,
+          status: status !== 'Todos' ? status : null,
+          period: period !== 'Todos' ? period : null,
+          sort: sort || null,
+        },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    });
+  }
+
+  ngOnInit() {
+    this.loadUsersFromBackend();
+    this.loadStatsFromBackend();
+    this.loadCareers();
+  }
+
+  loadCareers() {
+    this.adminCareersService.getCareers().subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.careers.set(res.data);
+        }
+      },
+      error: (err) => {
+        console.error('Error al cargar carreras:', err);
+      },
+    });
+  }
+
+  loadUsersFromBackend() {
+    this.isLoading.set(true);
+    this.adminUsersService.getUsers().subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.users.set(res.data);
+        } else {
+          toast.error(res.message || 'Error al obtener usuarios de la base de datos.');
+        }
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error(err);
+        toast.error(err.error?.error || 'Error de conexión con el servidor al cargar usuarios.');
+        this.isLoading.set(false);
+      },
+    });
+  }
+
+  loadStatsFromBackend() {
+    this.adminUsersService.getDashboardStats().subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.stats.set(res.data);
+        }
+      },
+      error: (err) => {
+        console.error('Error al cargar estadísticas:', err);
+      },
+    });
+  }
+
+  // UI labels for roles
+  roleLabels: Record<string, string> = {
+    alumno: 'Alumno',
+    profesor: 'Profesor',
+    moderador: 'Moderador',
+    admin: 'Administrador',
+  };
+
+  roleFilters = ['Todos', 'Admin', 'Profesor', 'Alumno', 'Moderador'];
+
+  // Search & Filter Signals
+  searchQuery = signal<string>('');
+  selectedRoleFilter = signal<string>('Todos');
+  selectedStatusFilter = signal<'Todos' | 'Activo' | 'Baneado'>('Todos');
+  selectedPeriodFilter = signal<'Todos' | '2026' | '2025'>('Todos');
+  dateSortDirection = signal<'asc' | 'desc' | null>('desc');
+
+  // Computed signals for live search & filtering
+  filteredUsers = computed(() => {
+    const query = this.searchQuery().toLowerCase().trim();
+    const filter = this.selectedRoleFilter();
+    const statusFilter = this.selectedStatusFilter();
+    const periodFilter = this.selectedPeriodFilter();
+    const sortDir = this.dateSortDirection();
+
+    let result = this.users().filter((u) => {
+      const matchesSearch =
+        u.name.toLowerCase().includes(query) || u.email.toLowerCase().includes(query);
+      const matchesRole = filter === 'Todos' || u.role === filter.toLowerCase();
+      const userStatus = u.isBanned ? 'Baneado' : 'Activo';
+      const matchesStatus = statusFilter === 'Todos' || userStatus === statusFilter;
+
+      let matchesPeriod = true;
+      if (periodFilter !== 'Todos') {
+        const year = new Date(u.createdAt).toISOString().split('-')[0];
+        matchesPeriod = year === periodFilter;
+      }
+
+      return matchesSearch && matchesRole && matchesStatus && matchesPeriod;
+    });
+
+    if (sortDir) {
+      result = [...result].sort((a, b) => {
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return sortDir === 'asc' ? dateA - dateB : dateB - dateA;
+      });
+    }
+
+    return result;
+  });
+
+  toggleDateSort() {
+    const current = this.dateSortDirection();
+    if (current === 'desc') {
+      this.dateSortDirection.set('asc');
+    } else if (current === 'asc') {
+      this.dateSortDirection.set(null);
+    } else {
+      this.dateSortDirection.set('desc');
+    }
+  }
+
+  // Dynamic Metrics computed reactively via Signals (using backend stats payload)!
+  totalUsers = computed(() => this.stats()?.totalUsers ?? 0);
+  activeUsers = computed(() => this.stats()?.activeUsers ?? 0);
+  profesoresCount = computed(() => this.stats()?.profesoresCount ?? 0);
+  bannedUsers = computed(() => this.stats()?.bannedUsers ?? 0);
+  monthlyGrowth = computed(() => this.stats()?.monthlyGrowth ?? 0);
+
+  activeRatio = computed(() => {
+    const total = this.totalUsers();
+    return total > 0 ? Math.round((this.activeUsers() / total) * 100) : 0;
+  });
+  profesoresRatio = computed(() => {
+    const total = this.totalUsers();
+    return total > 0 ? Math.round((this.profesoresCount() / total) * 100) : 0;
+  });
+  bannedRatio = computed(() => {
+    const total = this.totalUsers();
+    return total > 0 ? Math.round((this.bannedUsers() / total) * 100) : 0;
+  });
+
+  // Modals visibility state
+  isEditModalOpen = signal(false);
+  isCreateModalOpen = signal(false);
+
+  // Selected User for Editing
+  selectedUser = signal<IUserResponse | null>(null);
+
+  // Edit Form Fields
+  editName = '';
+  editEmail = '';
+  editRole: UserRole = 'alumno';
+  editCareer = '';
+  editSemester = '';
+  editDescription = '';
+  editSemesterOptions: number[] = [];
+
+  // Create Form Fields
+  createName = '';
+  createEmail = '';
+  createRole: UserRole = 'alumno';
+  createPassword = '';
+  createCareer = '';
+  createSemester = '';
+  createDescription = '';
+  createSemesterOptions: number[] = [];
+
+  onEditCareerChange() {
+    const career = this.careers().find(c => c.name === this.editCareer);
+    const maxSemesters = career ? career.semesters : 10;
+    this.editSemesterOptions = Array.from({ length: maxSemesters }, (_, i) => i + 1);
+    
+    if (this.editSemester) {
+      const currentSem = parseInt(this.editSemester, 10);
+      if (!isNaN(currentSem) && currentSem > maxSemesters) {
+        this.editSemester = '';
+      }
+    }
+  }
+
+  onCreateCareerChange() {
+    const career = this.careers().find(c => c.name === this.createCareer);
+    const maxSemesters = career ? career.semesters : 10;
+    this.createSemesterOptions = Array.from({ length: maxSemesters }, (_, i) => i + 1);
+    
+    if (this.createSemester) {
+      const currentSem = parseInt(this.createSemester, 10);
+      if (!isNaN(currentSem) && currentSem > maxSemesters) {
+        this.createSemester = '';
+      }
+    }
+  }
+
+  generateRandomPassword() {
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+    let password = '';
+    for (let i = 0; i < 12; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    this.createPassword = password;
+  }
+
+  openEditModal(user: IUserResponse) {
+    this.selectedUser.set(user);
+    this.editName = user.name;
+    this.editEmail = user.email;
+    this.editRole = user.role;
+    this.editCareer = user.career || '';
+    this.editSemester = user.semester || '';
+    this.editDescription = user.description || '';
+    this.onEditCareerChange();
+    this.isEditModalOpen.set(true);
+  }
+
+  saveUserEdit() {
+    if (!this.editName.trim() || !this.editEmail.trim()) {
+      toast.error('Por favor, completa todos los campos del usuario.');
+      return;
+    }
+
+    const currentId = this.selectedUser()?.id;
+    if (!currentId) return;
+
+    toast.promise(
+      firstValueFrom(
+        this.adminUsersService.updateUser(currentId, {
+          name: this.editName,
+          email: this.editEmail,
+          role: this.editRole,
+          career: this.editCareer,
+          semester: this.editSemester,
+          description: this.editDescription,
+        }),
+      ),
+      {
+        loading: 'Actualizando usuario en el servidor...',
+        success: (res: any) => {
+          if (res.success && res.data) {
+            this.users.update((list) => list.map((u) => (u.id === currentId ? res.data : u)));
+            this.loadStatsFromBackend();
+            this.isEditModalOpen.set(false);
+            return 'Usuario actualizado correctamente';
+          }
+          throw new Error(res.message || 'Error al actualizar.');
+        },
+        error: (err: any) =>
+          err?.message || err?.error?.error || 'No se pudo actualizar el usuario.',
+      },
+    );
+  }
+
+  openCreateModal() {
+    this.createName = '';
+    this.createEmail = '';
+    this.createRole = 'alumno';
+    this.createCareer = '';
+    this.createSemester = '';
+    this.createDescription = '';
+    this.onCreateCareerChange();
+    this.generateRandomPassword();
+    this.isCreateModalOpen.set(true);
+  }
+
+  createUser() {
+    if (!this.createName.trim() || !this.createEmail.trim() || !this.createPassword.trim()) {
+      toast.error('Por favor, completa todos los campos obligatorios del usuario.');
+      return;
+    }
+
+    toast.promise(
+      firstValueFrom(
+        this.adminUsersService.createUser({
+          name: this.createName,
+          email: this.createEmail,
+          role: this.createRole,
+          password: this.createPassword,
+          career: this.createCareer,
+          semester: this.createSemester,
+          description: this.createDescription,
+        }),
+      ),
+      {
+        loading: 'Registrando usuario en el servidor...',
+        success: (res: any) => {
+          if (res.success && res.data) {
+            this.users.update((list) => [res.data, ...list]);
+            this.loadStatsFromBackend();
+            this.isCreateModalOpen.set(false);
+            return `Usuario ${res.data.name} registrado con éxito`;
+          }
+          throw new Error(res.message || 'Error al registrar.');
+        },
+        error: (err: any) => err?.message || err?.error?.error || 'No se pudo crear el usuario.',
+      },
+    );
+  }
+
+  toggleUserStatus(user: IUserResponse) {
+    toast.promise(firstValueFrom(this.adminUsersService.toggleBan(user.id)), {
+      loading: 'Actualizando acceso del usuario...',
+      success: (res: any) => {
+        if (res.success && res.data) {
+          this.users.update((list) =>
+            list.map((u) => (u.id === user.id ? { ...u, isBanned: res.data.isBanned } : u)),
+          );
+          this.loadStatsFromBackend();
+          return res.data.isBanned
+            ? `El usuario ${user.name} ha sido suspendido.`
+            : `El acceso de ${user.name} ha sido habilitado.`;
+        }
+        throw new Error(res.message || 'Error al cambiar estado.');
+      },
+      error: (err: any) => err?.message || err?.error?.error || 'Error al procesar la solicitud.',
+    });
+  }
+
+  resendVerificationMail(user: IUserResponse) {
+    toast.promise(firstValueFrom(this.adminUsersService.resendVerification(user.id)), {
+      loading: 'Reenviando correo de verificación...',
+      success: () => `Correo de verificación reenviado con éxito a ${user.email}.`,
+      error: (err: any) =>
+        err?.message || err?.error?.error || 'No se pudo reenviar el correo de verificación.',
+    });
+  }
+}

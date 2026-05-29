@@ -1,0 +1,176 @@
+<div class="px-1 lg:px-4 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
+  <!-- Header Area -->
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-gray-150 shadow-xs">
+    <div>
+      <h2 class="text-xl font-extrabold text-oxford-navy-950 tracking-tight">Moderación de Apuntes Académicos</h2>
+      <p class="text-xs text-gray-550 mt-1 font-semibold">Inspecciona los apuntes subidos por los alumnos, descárgalos para auditoría y decide su aprobación.</p>
+    </div>
+    
+    <div class="bg-cerulean-50 text-cerulean-700 border border-cerulean-100 rounded-xl px-4 py-2 flex items-center gap-2 text-xs font-bold shrink-0">
+      <svg class="w-4 h-4 shrink-0 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+      </svg>
+      <span>Centro de Control de Calidad</span>
+    </div>
+  </div>
+
+  <!-- Moderation Grid Card -->
+  <div class="bg-white rounded-2xl border border-gray-150 shadow-2xs overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-gray-150 bg-gray-50/50 text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">
+            <th class="px-6 py-4">Apunte</th>
+            <th class="px-6 py-4">Materia</th>
+            <th class="px-6 py-4">Subido por</th>
+            <th class="px-6 py-4 text-center">Tamaño</th>
+            <th class="px-6 py-4">Fecha de Carga</th>
+            <th class="px-6 py-4 text-right">Acciones de Moderación</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 text-xs">
+          <!-- Loading Skeleton -->
+          <tr *ngIf="isLoading()">
+            <td colspan="6" class="px-6 py-20 text-center text-gray-400">
+              <div class="inline-block w-6 h-6 border-3 border-gray-200 border-t-oxford-navy-950 rounded-full animate-spin"></div>
+              <p class="mt-2 text-[10px] font-bold tracking-wider text-gray-400 uppercase">Cargando cola de moderación...</p>
+            </td>
+          </tr>
+
+          <!-- Error State -->
+          <tr *ngIf="!isLoading() && errorOccurred()">
+            <td colspan="6" class="px-6 py-16 text-center">
+              <div class="flex flex-col items-center justify-center max-w-sm mx-auto gap-3">
+                <div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-red-500 border border-red-100">
+                  <svg class="w-6 h-6 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <h3 class="text-sm font-extrabold text-oxford-navy-950">Error al Cargar Apuntes</h3>
+                <p class="text-xs text-gray-400 font-semibold leading-relaxed">No pudimos obtener la cola de moderación del servidor.</p>
+                <button
+                  (click)="loadPendingFiles()"
+                  class="mt-2 px-4 py-2 bg-oxford-navy-950 hover:bg-oxford-navy-900 text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-xs active:scale-95"
+                >
+                  Reintentar Consulta
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Loaded Data Rows -->
+          <ng-container *ngIf="!isLoading() && !errorOccurred()">
+            @for (file of pendingFiles(); track file.id) {
+              <tr class="hover:bg-gray-50/30 transition-colors group">
+                <!-- Column: Apunte name & icon -->
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center bg-gray-50 border border-gray-150 text-gray-500 shrink-0 shadow-3xs group-hover:scale-105 transition-transform">
+                      @if (file.mimetype.includes('pdf')) {
+                        <svg class="w-5 h-5 text-punch-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                      } @else if (file.mimetype.includes('image')) {
+                        <svg class="w-5 h-5 text-cerulean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                      } @else {
+                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                      }
+                    </div>
+                    <span class="font-extrabold text-oxford-navy-950 text-xs tracking-tight truncate max-w-xs" [title]="file.originalName">
+                      {{ file.originalName }}
+                    </span>
+                  </div>
+                </td>
+
+                <!-- Column: Materia Badge -->
+                <td class="px-6 py-4">
+                  <span class="px-2.5 py-0.5 text-[9px] bg-cerulean-50 border border-cerulean-100 text-cerulean-700 font-extrabold rounded-md uppercase tracking-wider inline-block">
+                    {{ file.materiaId }}
+                  </span>
+                </td>
+
+                <!-- Column: Uploader Student info -->
+                <td class="px-6 py-4">
+                  <div class="flex flex-col gap-0.5 max-w-xs">
+                    <span class="font-extrabold text-oxford-navy-950 text-xs leading-none">{{ $any(file.uploaderId)?.name || 'Estudiante' }}</span>
+                    <span class="text-[10px] text-gray-400 font-semibold truncate">{{ $any(file.uploaderId)?.email }}</span>
+                  </div>
+                </td>
+
+                <!-- Column: File size (formatted) -->
+                <td class="px-6 py-4 text-center font-bold text-gray-700">
+                  {{ formatBytes(file.size) }}
+                </td>
+
+                <!-- Column: Upload Date -->
+                <td class="px-6 py-4 font-semibold text-gray-450">
+                  {{ file.uploadedAt | date:'dd MMM yyyy, HH:mm' }}
+                </td>
+
+                <!-- Column: Action Buttons -->
+                <td class="px-6 py-4 text-right">
+                  <div class="flex items-center justify-end gap-1.5">
+                    <!-- Preview Copy Button -->
+                    <button 
+                      (click)="previewFile(file)"
+                      title="Descargar copia para auditar"
+                      class="text-gray-400 hover:text-gray-900 hover:bg-gray-50 border border-transparent hover:border-gray-250 p-1.5 rounded-lg cursor-pointer inline-flex items-center justify-center transition-all active:scale-95"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </button>
+
+                    <!-- Approve Button -->
+                    <button 
+                      (click)="moderate(file, 'approved')"
+                      title="Aprobar y publicar apunte"
+                      class="text-gray-400 hover:text-green-600 hover:bg-green-50/50 border border-transparent hover:border-green-150 p-1.5 rounded-lg cursor-pointer inline-flex items-center justify-center transition-all active:scale-95"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </button>
+
+                    <!-- Reject Button -->
+                    <button 
+                      (click)="moderate(file, 'rejected')"
+                      title="Rechazar y remover apunte"
+                      class="text-gray-400 hover:text-red-600 hover:bg-red-50/50 border border-transparent hover:border-red-100 p-1.5 rounded-lg cursor-pointer inline-flex items-center justify-center transition-all active:scale-95"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+
+            <!-- Empty State Inside Table -->
+            @if (pendingFiles().length === 0) {
+              <tr>
+                <td colspan="6" class="px-6 py-16 text-center">
+                  <div class="flex flex-col items-center justify-center max-w-sm mx-auto gap-1">
+                    <div class="p-3 bg-gray-50 border border-gray-150 text-green-500 rounded-2xl mb-3 shadow-3xs">
+                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                      </svg>
+                    </div>
+                    <h3 class="text-sm font-extrabold text-oxford-navy-950">¡Cola de moderación al día!</h3>
+                    <p class="text-xs text-gray-400 font-semibold mt-1">No hay apuntes académicos pendientes de moderación en este momento.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

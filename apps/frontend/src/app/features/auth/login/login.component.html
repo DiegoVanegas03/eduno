@@ -40,25 +40,14 @@
     </div>
   </div>
 
-  <!-- Submit -->
-  <div>
-    @if (errorMessage()) {
-      <div class="mb-4 text-sm font-medium text-punch-red-600 bg-punch-red-50 p-3 rounded-lg border border-punch-red-100 flex items-center">
-        <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-        </svg>
-        {{ errorMessage() }}
-      </div>
-    }
-    <app-button variant="primary" size="lg" type="submit" class="w-full" [disabled]="isLoading()">
-      {{ isLoading() ? 'Verificando...' : 'Iniciar sesión' }}
-      <ng-container icon-right>
-        <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-        </svg>
-      </ng-container>
-    </app-button>
-  </div>
+  <app-button variant="primary" size="lg" type="submit" class="w-full" [disabled]="isLoading()">
+    {{ isLoading() ? 'Verificando...' : 'Iniciar sesión' }}
+    <ng-container icon-right>
+      <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+      </svg>
+    </ng-container>
+  </app-button>
 </form>
 
 <!-- Sign Up Prompt -->

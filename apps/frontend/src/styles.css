@@ -63,8 +63,6 @@
   --color-oxford-navy-900: #0d1726;
   --color-oxford-navy-950: #09101b;
 
-  /* Remover esto , para el toast usar colores de la linea previeamnte definidos */
-
   --color-orange-50: #fff7ed;
   --color-orange-100: #ffedd5;
   --color-orange-200: #fed7aa;
@@ -76,6 +74,18 @@
   --color-orange-800: #9a3412;
   --color-orange-900: #7c2d12;
   --color-orange-950: #431407;
+}
+
+/* ngx-sonner custom theme with app colors */
+.sonner-toast {
+  --toast-primary: var(--color-cerulean-500);
+  --toast-primary-foreground: white;
+  --toast-success: var(--color-punch-red-500);
+  --toast-success-foreground: white;
+  --toast-error: var(--color-honeydew-500);
+  --toast-error-foreground: var(--color-honeydew-900);;
+  --toast-warning: var(--color-orange-500);
+  --toast-warning-foreground: white;
 }
 
 @keyframes shimmer-gold {
@@ -104,3 +114,12 @@
   background-clip: text;
   animation: shimmer-gold 6s linear infinite;
 }
+
+/* ----
+ ANIMACIONES
+----*/
+.tracking-in-expand{-webkit-animation:tracking-in-expand .7s cubic-bezier(.215,.61,.355,1.000) both;animation:tracking-in-expand .7s cubic-bezier(.215,.61,.355,1.000) both}
+@-webkit-keyframes tracking-in-expand{0%{letter-spacing:-.5em;opacity:0}40%{opacity:.6}100%{opacity:1}}@keyframes tracking-in-expand{0%{letter-spacing:-.5em;opacity:0}40%{opacity:.6}100%{opacity:1}}
+
+.slide-in-blurred-tr{-webkit-animation:slide-in-blurred-tr .6s cubic-bezier(.23,1.000,.32,1.000) both;animation:slide-in-blurred-tr .6s cubic-bezier(.23,1.000,.32,1.000) both}
+@-webkit-keyframes slide-in-blurred-tr{0%{-webkit-transform:translate(1000px,-1000px) skew(-80deg,-10deg);transform:translate(1000px,-1000px) skew(-80deg,-10deg);-webkit-transform-origin:0 0;transform-origin:0 0;-webkit-filter:blur(40px);filter:blur(40px);opacity:0}100%{-webkit-transform:translate(0,0) skew(0deg,0deg);transform:translate(0,0) skew(0deg,0deg);-webkit-transform-origin:50% 50%;transform-origin:50% 50%;-webkit-filter:blur(0);filter:blur(0);opacity:1}}@keyframes slide-in-blurred-tr{0%{-webkit-transform:translate(1000px,-1000px) skew(-80deg,-10deg);transform:translate(1000px,-1000px) skew(-80deg,-10deg);-webkit-transform-origin:0 0;transform-origin:0 0;-webkit-filter:blur(40px);filter:blur(40px);opacity:0}100%{-webkit-transform:translate(0,0) skew(0deg,0deg);transform:translate(0,0) skew(0deg,0deg);-webkit-transform-origin:50% 50%;transform-origin:50% 50%;-webkit-filter:blur(0);filter:blur(0);opacity:1}}

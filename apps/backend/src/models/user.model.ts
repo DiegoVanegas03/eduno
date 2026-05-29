@@ -15,6 +15,10 @@ export interface IUser extends Document {
   role: UserRole;
   emailVerified: boolean;
   image?: string;
+  isBanned?: boolean;
+  career?: string;
+  semester?: string;
+  description?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -48,6 +52,22 @@ const userSchema = new Schema<IUser>(
     },
     image: {
       type: String,
+    },
+    isBanned: {
+      type: Boolean,
+      default: false,
+    },
+    career: {
+      type: String,
+      default: "",
+    },
+    semester: {
+      type: String,
+      default: "",
+    },
+    description: {
+      type: String,
+      default: "",
     },
   },
   {

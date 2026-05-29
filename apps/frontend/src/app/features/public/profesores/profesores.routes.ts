@@ -8,12 +8,12 @@ export const profesoresRoutes: Routes = [
   {
     path: ':id',
     loadComponent: () =>
-      import('./profesor-perfil/profesor-perfil.component').then((m) => m.ProfesorPerfilComponent),
+      import('../profesor-perfil/profesor-perfil.component').then((m) => m.ProfesorPerfilComponent),
   },
   {
     path: ':id/opiniones',
     loadComponent: () =>
-      import('./profesor-opiniones/profesor-opiniones.component').then(
+      import('../profesor-opiniones/profesor-opiniones.component').then(
         (m) => m.ProfesorOpinionesComponent,
       ),
   },

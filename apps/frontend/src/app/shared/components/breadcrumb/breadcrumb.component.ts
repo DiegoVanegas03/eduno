@@ -11,7 +11,10 @@ export interface BreadcrumbItem {
   standalone: true,
   imports: [RouterLink],
   template: `
-    <nav class="mb-6 flex items-center text-sm text-oxford-navy-500 font-medium justify-between">
+    <nav
+      class="flex items-center text-sm text-oxford-navy-500 font-medium justify-between"
+      [class]="cssClass()"
+    >
       <div class="flex items-center flex-wrap shrink-0">
         @for (item of items(); track item.label + $index; let last = $last) {
           @if (item.link) {
@@ -36,4 +39,5 @@ export interface BreadcrumbItem {
 })
 export class BreadcrumbComponent {
   items = input.required<BreadcrumbItem[]>();
+  cssClass = input('mb-6');
 }

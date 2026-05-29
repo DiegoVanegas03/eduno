@@ -5,17 +5,8 @@ import {
   HttpRequest,
   HttpHandlerFn,
 } from '@angular/common/http';
-import { inject } from '@angular/core';
-import {
-  catchError,
-  switchMap,
-  throwError,
-  BehaviorSubject,
-  filter,
-  take,
-  finalize,
-  Observable,
-} from 'rxjs';
+import { inject, Injector } from '@angular/core';
+import { catchError, switchMap, throwError, BehaviorSubject, filter, take, Observable } from 'rxjs';
 import { environment } from '@env/environment';
 import { AuthService } from '../services/auth/auth.service';
 
@@ -26,11 +17,15 @@ export const apiInterceptor: HttpInterceptorFn = (
   req: HttpRequest<any>,
   next: HttpHandlerFn,
 ): Observable<HttpEvent<any>> => {
-  const authService = inject(AuthService);
+  const injector = inject(Injector);
 
   // 1. Prepend Base URL
   let apiReq = req;
-  if (!req.url.startsWith('http') && !req.url.startsWith('assets')) {
+  if (req.url.startsWith('/api')) {
+    apiReq = req.clone({
+      url: req.url.replace('/api', environment.apiUrl),
+    });
+  } else if (!req.url.startsWith('http') && !req.url.startsWith('assets')) {
     apiReq = req.clone({
       url: `${environment.apiUrl}${req.url.startsWith('/') ? '' : '/'}${req.url}`,
     });
@@ -44,7 +39,8 @@ export const apiInterceptor: HttpInterceptorFn = (
   return next(apiReq).pipe(
     catchError((error: HttpErrorResponse) => {
       // 3. Handle 401 Unauthorized (Token Expired)
-      if (error.status === 401 && !apiReq.url.includes('/auth/login')) {
+      if (error.status === 401 && !apiReq.url.includes('/auth/')) {
+        const authService = injector.get(AuthService);
         return handle401Error(apiReq, next, authService);
       }
       return throwError(() => error);
